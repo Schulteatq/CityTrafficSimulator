@@ -84,7 +84,7 @@ namespace CityTrafficSimulator
 		/// <summary>
 		/// Mindest-Vorteilswert für Spurwechsel
 		/// </summary>
-		protected double lineChangeThreshold = 0.4;
+		protected double lineChangeThreshold = 0.6;
 
 		/// <summary>
 		/// maximale sichere Bremsverzögerung

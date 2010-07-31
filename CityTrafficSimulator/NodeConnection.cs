@@ -1228,8 +1228,8 @@ namespace CityTrafficSimulator
 
 				lineSegment = new LineSegment(0,
 					start.nc.lineSegment.AtTime(start.time),
-					start.nc.lineSegment.AtTime(start.time) + start.nc.lineSegment.DerivateAtTime(start.time).Normalized * (parallelDistance / 2),
-					target.nc.lineSegment.AtTime(target.time) - target.nc.lineSegment.DerivateAtTime(target.time).Normalized * (parallelDistance / 2),
+					start.nc.lineSegment.AtTime(start.time) + start.nc.lineSegment.DerivateAtTime(start.time).Normalized * (parallelDistance),
+					target.nc.lineSegment.AtTime(target.time) - target.nc.lineSegment.DerivateAtTime(target.time).Normalized * (parallelDistance),
 					target.nc.lineSegment.AtTime(target.time));
 				}
 

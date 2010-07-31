@@ -1895,7 +1895,8 @@ namespace CityTrafficSimulator.Vehicle
 							NodeConnection formerConnection = startnode.parent.node.GetNodeConnectionTo(startnode.node);
 
 							double length = formerConnection.GetLengthToLineNodeViaLineChange(endnode.node) + Constants.lineChangePenalty;
-							if (endnode.node.tLight != null)
+							// Anfangs-/ oder Endknoten des Spurwechsels ist eine Ampel => Kosten-Penalty, da hier verstärktes Verkehrsaufkommen zu erwarten ist
+							if ((endnode.node.tLight != null) || (startnode.node.tLight != null))
 								length += Constants.lineChangeBeforeTrafficLightPenalty;
 
 							toReturn.Push(new RouteSegment(formerConnection, endnode.node, true, length));
@@ -2016,7 +2017,8 @@ namespace CityTrafficSimulator.Vehicle
 								// Kostenanteil, für den Spurwechsel dazuaddieren
 								f += (lci.length < 2 * Constants.minimumLineChangeLength) ? 2 * Constants.lineChangePenalty : Constants.lineChangePenalty;
 
-								if (lci.targetNode.tLight != null)
+								// Anfangs-/ oder Endknoten des Spurwechsels ist eine Ampel => Kosten-Penalty, da hier verstärktes Verkehrsaufkommen zu erwarten ist
+								if ((lci.targetNode.tLight != null) || (currentConnection.startNode.tLight != null)) 
 									f += Constants.lineChangeBeforeTrafficLightPenalty;
 
 								f += GetMinimumEuklidDistance(successor.node, targetNodes);						// Minimumweg zum Ziel (Luftlinie)

@@ -90,7 +90,7 @@ namespace CityTrafficSimulator.Vehicle
 		/// <summary>
 		/// minimale Länge eines LineChangeIntervals, damit es für die Wegberechnung berücksichtigt wird
 		/// </summary>
-		public const double minimumLineChangeLength = 256;
+		public const double minimumLineChangeLength = 196;
 
 		}
 	}

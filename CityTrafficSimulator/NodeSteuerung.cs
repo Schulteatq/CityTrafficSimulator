@@ -692,7 +692,7 @@ namespace CityTrafficSimulator
 									double distance = (nc.lineSegment.AtPosition(currentArcPosition - delta) - nc2.lineSegment.AtTime(p.Right)).Abs;
 
 									// Einfädelpunkt:
-									double arcPositionTarget = nc2.lineSegment.TimeToArcPosition(p.Right) + 2 * distance;
+									double arcPositionTarget = nc2.lineSegment.TimeToArcPosition(p.Right) + 3 * distance;
 
 									if (arcPositionTarget <= nc2.lineSegment.length)
 										{
@@ -736,7 +736,7 @@ namespace CityTrafficSimulator
 									double distance = (nc.lineSegment.AtPosition(currentArcPosition + delta) - nc2.lineSegment.AtTime(p.Right)).Abs;
 
 									// Einfädelpunkt:
-									double arcPositionTarget = nc2.lineSegment.TimeToArcPosition(p.Right) + 2 * distance;
+									double arcPositionTarget = nc2.lineSegment.TimeToArcPosition(p.Right) + 3 * distance;
 
 									if (arcPositionTarget <= nc2.lineSegment.length)
 										{
