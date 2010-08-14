@@ -433,7 +433,7 @@ namespace CityTrafficSimulator.Vehicle
 			wunschabstand = 100;
 			double lowestAcceleration = 0;
 
-			m_Physics.multiplierDesiredVelocity = (slowDownForChangingVehicle) ? (1 - p) : 1;
+			m_Physics.multiplierDesiredVelocity = (slowDownForChangingVehicle) ? (1 - p)*(1 - p) : 1;
 
 			if (theVehicleInFrontOfMe != null)
 				{
