@@ -892,6 +892,11 @@ namespace CityTrafficSimulator
 					e.Handled = true;
 					Invalidate();
 					}
+
+				if (selectedVehicle != null)
+					{
+					selectedVehicle.currentNodeConnection.RemoveVehicle(selectedVehicle, -1);
+					}
 				break;
 
 			// LineSegment teilen
@@ -1363,7 +1368,7 @@ namespace CityTrafficSimulator
 			thinkStopwatch.Reset();
 			thinkStopwatch.Start();
 
-			double tickLength = (1.0d * timer1.Interval) / 1000.0d;
+			double tickLength = 1.0d / (double)stepsPerSecondSpinEdit.Value;
 			timelineSteuerung.Advance(tickLength);
 
 			currentTime += tickLength;
@@ -2093,6 +2098,21 @@ namespace CityTrafficSimulator
 			{
 			DaGrid.Height = (int)canvasHeigthSpinEdit.Value;
 			DaGrid.Invalidate();
+			}
+
+		private void simulationSpeedSpinEdit_ValueChanged(object sender, EventArgs e)
+			{
+			timer1.Interval = (int)(1000 / stepsPerSecondSpinEdit.Value / simulationSpeedSpinEdit.Value);
+			}
+
+		private void label11_Click(object sender, EventArgs e)
+			{
+
+			}
+
+		private void stepsPerSecondSpinEdit_ValueChanged(object sender, EventArgs e)
+			{
+			timer1.Interval = (int)(1000 / stepsPerSecondSpinEdit.Value / simulationSpeedSpinEdit.Value);
 			}
 
 		}

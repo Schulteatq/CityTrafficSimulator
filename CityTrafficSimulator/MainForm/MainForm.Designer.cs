@@ -55,7 +55,6 @@ namespace CityTrafficSimulator
 			this.timer1 = new System.Windows.Forms.Timer(this.components);
 			this.splitContainer2 = new System.Windows.Forms.SplitContainer();
 			this.splitContainer1 = new System.Windows.Forms.SplitContainer();
-			this.DaGrid = new CityTrafficSimulator.RechenkaestchenControl();
 			this.tabControl1 = new System.Windows.Forms.TabControl();
 			this.layoutTabPage = new System.Windows.Forms.TabPage();
 			this.groupBox3 = new System.Windows.Forms.GroupBox();
@@ -71,7 +70,6 @@ namespace CityTrafficSimulator
 			this.label4 = new System.Windows.Forms.Label();
 			this.nodeConnectionPrioritySpinEdit = new System.Windows.Forms.NumericUpDown();
 			this.LineNodeSetupGroupBox = new System.Windows.Forms.GroupBox();
-			this.trafficLightTreeView = new CityTrafficSimulator.Timeline.TrafficLightTreeView(this.components);
 			this.verkehrTabPage = new System.Windows.Forms.TabPage();
 			this.label6 = new System.Windows.Forms.Label();
 			this.trafficDensityMultiplierSpinEdit = new System.Windows.Forms.NumericUpDown();
@@ -112,14 +110,12 @@ namespace CityTrafficSimulator
 			this.dockToGridcheckBox = new System.Windows.Forms.CheckBox();
 			this.label2 = new System.Windows.Forms.Label();
 			this.thumbTabPage = new System.Windows.Forms.TabPage();
-			this.thumbGrid = new CityTrafficSimulator.RechenkaestchenControl();
 			this.groupBox1 = new System.Windows.Forms.GroupBox();
 			this.SpeichernButton = new System.Windows.Forms.Button();
 			this.aboutBoxButton = new System.Windows.Forms.Button();
 			this.LadenButton = new System.Windows.Forms.Button();
 			this.findLineChangePointsButton = new System.Windows.Forms.Button();
 			this.timelinePanel = new System.Windows.Forms.Panel();
-			this.timeline = new CityTrafficSimulator.TimelineControl();
 			this.lockNodesCheckBox = new System.Windows.Forms.CheckBox();
 			this.killAllVehiclesButton = new System.Windows.Forms.Button();
 			this.stepButton = new System.Windows.Forms.Button();
@@ -129,6 +125,14 @@ namespace CityTrafficSimulator
 			this.statusLabel = new System.Windows.Forms.ToolStripStatusLabel();
 			this.button1 = new System.Windows.Forms.Button();
 			this.button2 = new System.Windows.Forms.Button();
+			this.simulationSpeedSpinEdit = new System.Windows.Forms.NumericUpDown();
+			this.DaGrid = new CityTrafficSimulator.RechenkaestchenControl();
+			this.trafficLightTreeView = new CityTrafficSimulator.Timeline.TrafficLightTreeView(this.components);
+			this.thumbGrid = new CityTrafficSimulator.RechenkaestchenControl();
+			this.timeline = new CityTrafficSimulator.TimelineControl();
+			this.label11 = new System.Windows.Forms.Label();
+			this.label12 = new System.Windows.Forms.Label();
+			this.stepsPerSecondSpinEdit = new System.Windows.Forms.NumericUpDown();
 			this.splitContainer2.Panel1.SuspendLayout();
 			this.splitContainer2.Panel2.SuspendLayout();
 			this.splitContainer2.SuspendLayout();
@@ -158,6 +162,8 @@ namespace CityTrafficSimulator
 			this.groupBox1.SuspendLayout();
 			this.timelinePanel.SuspendLayout();
 			this.statusleiste.SuspendLayout();
+			((System.ComponentModel.ISupportInitialize)(this.simulationSpeedSpinEdit)).BeginInit();
+			((System.ComponentModel.ISupportInitialize)(this.stepsPerSecondSpinEdit)).BeginInit();
 			this.SuspendLayout();
 			// 
 			// timer1
@@ -201,31 +207,6 @@ namespace CityTrafficSimulator
 			this.splitContainer1.Size = new System.Drawing.Size(930, 512);
 			this.splitContainer1.SplitterDistance = 615;
 			this.splitContainer1.TabIndex = 2;
-			// 
-			// DaGrid
-			// 
-			this.DaGrid.AllowDrop = true;
-			this.DaGrid.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-			this.DaGrid.AutoValidate = System.Windows.Forms.AutoValidate.Disable;
-			this.DaGrid.BackColor = System.Drawing.SystemColors.ButtonFace;
-			this.DaGrid.CellHeight = 16;
-			this.DaGrid.CellSize = new System.Drawing.Size(16, 16);
-			this.DaGrid.CellWidth = 16;
-			this.DaGrid.Dimension = new System.Drawing.Point(64, 64);
-			this.DaGrid.DrawGrid = false;
-			this.DaGrid.Location = new System.Drawing.Point(0, 0);
-			this.DaGrid.Max_X = 64;
-			this.DaGrid.Max_Y = 64;
-			this.DaGrid.Name = "DaGrid";
-			this.DaGrid.Size = new System.Drawing.Size(12000, 10000);
-			this.DaGrid.TabIndex = 3;
-			this.DaGrid.Paint += new System.Windows.Forms.PaintEventHandler(this.DaGrid_Paint);
-			this.DaGrid.MouseMove += new System.Windows.Forms.MouseEventHandler(this.DaGrid_MouseMove);
-			this.DaGrid.Leave += new System.EventHandler(this.DaGrid_Leave);
-			this.DaGrid.MouseDown += new System.Windows.Forms.MouseEventHandler(this.DaGrid_MouseDown);
-			this.DaGrid.Enter += new System.EventHandler(this.DaGrid_Enter);
-			this.DaGrid.MouseUp += new System.Windows.Forms.MouseEventHandler(this.DaGrid_MouseUp);
-			this.DaGrid.KeyDown += new System.Windows.Forms.KeyEventHandler(this.DaGrid_KeyDown);
 			// 
 			// tabControl1
 			// 
@@ -407,15 +388,6 @@ namespace CityTrafficSimulator
 			this.LineNodeSetupGroupBox.TabIndex = 15;
 			this.LineNodeSetupGroupBox.TabStop = false;
 			this.LineNodeSetupGroupBox.Text = "Knoten LSA zuweisen";
-			// 
-			// trafficLightTreeView
-			// 
-			this.trafficLightTreeView.Location = new System.Drawing.Point(9, 19);
-			this.trafficLightTreeView.Name = "trafficLightTreeView";
-			this.trafficLightTreeView.Size = new System.Drawing.Size(265, 168);
-			this.trafficLightTreeView.steuerung = null;
-			this.trafficLightTreeView.TabIndex = 1;
-			this.trafficLightTreeView.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.trafficLightTreeView_AfterSelect);
 			// 
 			// verkehrTabPage
 			// 
@@ -952,30 +924,12 @@ namespace CityTrafficSimulator
 			this.thumbTabPage.Text = "Thumbnail";
 			this.thumbTabPage.UseVisualStyleBackColor = true;
 			// 
-			// thumbGrid
-			// 
-			this.thumbGrid.BackColor = System.Drawing.Color.White;
-			this.thumbGrid.CellHeight = 0;
-			this.thumbGrid.CellSize = new System.Drawing.Size(0, 0);
-			this.thumbGrid.CellWidth = 0;
-			this.thumbGrid.Dimension = new System.Drawing.Point(0, 0);
-			this.thumbGrid.Dock = System.Windows.Forms.DockStyle.Fill;
-			this.thumbGrid.DrawGrid = false;
-			this.thumbGrid.Location = new System.Drawing.Point(3, 3);
-			this.thumbGrid.Max_X = 0;
-			this.thumbGrid.Max_Y = 0;
-			this.thumbGrid.Name = "thumbGrid";
-			this.thumbGrid.Size = new System.Drawing.Size(297, 480);
-			this.thumbGrid.TabIndex = 0;
-			this.thumbGrid.MouseLeave += new System.EventHandler(this.thumbGrid_MouseLeave);
-			this.thumbGrid.Paint += new System.Windows.Forms.PaintEventHandler(this.thumbGrid_Paint);
-			this.thumbGrid.MouseMove += new System.Windows.Forms.MouseEventHandler(this.thumbGrid_MouseMove);
-			this.thumbGrid.MouseDown += new System.Windows.Forms.MouseEventHandler(this.thumbGrid_MouseDown);
-			this.thumbGrid.Resize += new System.EventHandler(this.thumbGrid_Resize);
-			this.thumbGrid.MouseUp += new System.Windows.Forms.MouseEventHandler(this.thumbGrid_MouseUp);
-			// 
 			// groupBox1
 			// 
+			this.groupBox1.Controls.Add(this.stepsPerSecondSpinEdit);
+			this.groupBox1.Controls.Add(this.label12);
+			this.groupBox1.Controls.Add(this.label11);
+			this.groupBox1.Controls.Add(this.simulationSpeedSpinEdit);
 			this.groupBox1.Controls.Add(this.SpeichernButton);
 			this.groupBox1.Controls.Add(this.aboutBoxButton);
 			this.groupBox1.Controls.Add(this.LadenButton);
@@ -995,9 +949,9 @@ namespace CityTrafficSimulator
 			// 
 			// SpeichernButton
 			// 
-			this.SpeichernButton.Location = new System.Drawing.Point(789, 46);
+			this.SpeichernButton.Location = new System.Drawing.Point(859, 16);
 			this.SpeichernButton.Name = "SpeichernButton";
-			this.SpeichernButton.Size = new System.Drawing.Size(135, 23);
+			this.SpeichernButton.Size = new System.Drawing.Size(65, 23);
 			this.SpeichernButton.TabIndex = 21;
 			this.SpeichernButton.Text = "Speichern";
 			this.SpeichernButton.UseVisualStyleBackColor = true;
@@ -1005,7 +959,7 @@ namespace CityTrafficSimulator
 			// 
 			// aboutBoxButton
 			// 
-			this.aboutBoxButton.Location = new System.Drawing.Point(789, 75);
+			this.aboutBoxButton.Location = new System.Drawing.Point(789, 103);
 			this.aboutBoxButton.Name = "aboutBoxButton";
 			this.aboutBoxButton.Size = new System.Drawing.Size(135, 23);
 			this.aboutBoxButton.TabIndex = 12;
@@ -1015,9 +969,9 @@ namespace CityTrafficSimulator
 			// 
 			// LadenButton
 			// 
-			this.LadenButton.Location = new System.Drawing.Point(648, 46);
+			this.LadenButton.Location = new System.Drawing.Point(789, 16);
 			this.LadenButton.Name = "LadenButton";
-			this.LadenButton.Size = new System.Drawing.Size(135, 23);
+			this.LadenButton.Size = new System.Drawing.Size(65, 23);
 			this.LadenButton.TabIndex = 20;
 			this.LadenButton.Text = "Laden";
 			this.LadenButton.UseVisualStyleBackColor = true;
@@ -1025,7 +979,7 @@ namespace CityTrafficSimulator
 			// 
 			// findLineChangePointsButton
 			// 
-			this.findLineChangePointsButton.Location = new System.Drawing.Point(648, 75);
+			this.findLineChangePointsButton.Location = new System.Drawing.Point(789, 74);
 			this.findLineChangePointsButton.Name = "findLineChangePointsButton";
 			this.findLineChangePointsButton.Size = new System.Drawing.Size(135, 23);
 			this.findLineChangePointsButton.TabIndex = 22;
@@ -1043,30 +997,10 @@ namespace CityTrafficSimulator
 			this.timelinePanel.Size = new System.Drawing.Size(553, 117);
 			this.timelinePanel.TabIndex = 14;
 			// 
-			// timeline
-			// 
-			this.timeline.Location = new System.Drawing.Point(0, 0);
-			this.timeline.Name = "timeline";
-			this.timeline.selectedEntry = null;
-			this.timeline.selectedGroup = null;
-			this.timeline.Size = new System.Drawing.Size(505, 50);
-			this.timeline.snapSize = 0.5;
-			this.timeline.steuerung = null;
-			this.timeline.TabIndex = 7;
-			this.timeline.zoom = 10;
-			this.timeline.MouseLeave += new System.EventHandler(this.timeline_MouseLeave);
-			this.timeline.SelectionChanged += new CityTrafficSimulator.TimelineControl.SelectionChangedEventHandler(this.timeline_SelectionChanged);
-			this.timeline.MouseMove += new System.Windows.Forms.MouseEventHandler(this.timeline_MouseMove);
-			this.timeline.MouseDown += new System.Windows.Forms.MouseEventHandler(this.timeline_MouseDown);
-			this.timeline.Enter += new System.EventHandler(this.timeline_Enter);
-			this.timeline.MouseUp += new System.Windows.Forms.MouseEventHandler(this.timeline_MouseUp);
-			this.timeline.EventChanged += new CityTrafficSimulator.TimelineControl.EventChangedEventHandler(this.timeline_EventChanged);
-			this.timeline.TimelineMoved += new CityTrafficSimulator.TimelineControl.TimelineMovedEventHandler(this.timeline_TimelineMoved);
-			// 
 			// lockNodesCheckBox
 			// 
 			this.lockNodesCheckBox.AutoSize = true;
-			this.lockNodesCheckBox.Location = new System.Drawing.Point(562, 50);
+			this.lockNodesCheckBox.Location = new System.Drawing.Point(562, 49);
 			this.lockNodesCheckBox.Name = "lockNodesCheckBox";
 			this.lockNodesCheckBox.Size = new System.Drawing.Size(80, 17);
 			this.lockNodesCheckBox.TabIndex = 13;
@@ -1075,7 +1009,7 @@ namespace CityTrafficSimulator
 			// 
 			// killAllVehiclesButton
 			// 
-			this.killAllVehiclesButton.Location = new System.Drawing.Point(789, 19);
+			this.killAllVehiclesButton.Location = new System.Drawing.Point(789, 45);
 			this.killAllVehiclesButton.Name = "killAllVehiclesButton";
 			this.killAllVehiclesButton.Size = new System.Drawing.Size(135, 23);
 			this.killAllVehiclesButton.TabIndex = 11;
@@ -1085,7 +1019,7 @@ namespace CityTrafficSimulator
 			// 
 			// stepButton
 			// 
-			this.stepButton.Location = new System.Drawing.Point(648, 19);
+			this.stepButton.Location = new System.Drawing.Point(648, 74);
 			this.stepButton.Name = "stepButton";
 			this.stepButton.Size = new System.Drawing.Size(135, 23);
 			this.stepButton.TabIndex = 9;
@@ -1096,7 +1030,7 @@ namespace CityTrafficSimulator
 			// timerOnCheckBox
 			// 
 			this.timerOnCheckBox.AutoSize = true;
-			this.timerOnCheckBox.Location = new System.Drawing.Point(562, 23);
+			this.timerOnCheckBox.Location = new System.Drawing.Point(562, 20);
 			this.timerOnCheckBox.Name = "timerOnCheckBox";
 			this.timerOnCheckBox.Size = new System.Drawing.Size(67, 17);
 			this.timerOnCheckBox.TabIndex = 6;
@@ -1146,6 +1080,147 @@ namespace CityTrafficSimulator
 			this.button2.TabIndex = 20;
 			this.button2.Text = "Laden";
 			this.button2.UseVisualStyleBackColor = true;
+			// 
+			// simulationSpeedSpinEdit
+			// 
+			this.simulationSpeedSpinEdit.Location = new System.Drawing.Point(737, 19);
+			this.simulationSpeedSpinEdit.Maximum = new decimal(new int[] {
+            4,
+            0,
+            0,
+            0});
+			this.simulationSpeedSpinEdit.Minimum = new decimal(new int[] {
+            1,
+            0,
+            0,
+            0});
+			this.simulationSpeedSpinEdit.Name = "simulationSpeedSpinEdit";
+			this.simulationSpeedSpinEdit.Size = new System.Drawing.Size(46, 20);
+			this.simulationSpeedSpinEdit.TabIndex = 23;
+			this.simulationSpeedSpinEdit.Value = new decimal(new int[] {
+            1,
+            0,
+            0,
+            0});
+			this.simulationSpeedSpinEdit.ValueChanged += new System.EventHandler(this.simulationSpeedSpinEdit_ValueChanged);
+			// 
+			// DaGrid
+			// 
+			this.DaGrid.AllowDrop = true;
+			this.DaGrid.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+			this.DaGrid.AutoValidate = System.Windows.Forms.AutoValidate.Disable;
+			this.DaGrid.BackColor = System.Drawing.SystemColors.ButtonFace;
+			this.DaGrid.CellHeight = 16;
+			this.DaGrid.CellSize = new System.Drawing.Size(16, 16);
+			this.DaGrid.CellWidth = 16;
+			this.DaGrid.Dimension = new System.Drawing.Point(64, 64);
+			this.DaGrid.DrawGrid = false;
+			this.DaGrid.Location = new System.Drawing.Point(0, 0);
+			this.DaGrid.Max_X = 64;
+			this.DaGrid.Max_Y = 64;
+			this.DaGrid.Name = "DaGrid";
+			this.DaGrid.Size = new System.Drawing.Size(12000, 10000);
+			this.DaGrid.TabIndex = 3;
+			this.DaGrid.Paint += new System.Windows.Forms.PaintEventHandler(this.DaGrid_Paint);
+			this.DaGrid.MouseMove += new System.Windows.Forms.MouseEventHandler(this.DaGrid_MouseMove);
+			this.DaGrid.Leave += new System.EventHandler(this.DaGrid_Leave);
+			this.DaGrid.MouseDown += new System.Windows.Forms.MouseEventHandler(this.DaGrid_MouseDown);
+			this.DaGrid.Enter += new System.EventHandler(this.DaGrid_Enter);
+			this.DaGrid.MouseUp += new System.Windows.Forms.MouseEventHandler(this.DaGrid_MouseUp);
+			this.DaGrid.KeyDown += new System.Windows.Forms.KeyEventHandler(this.DaGrid_KeyDown);
+			// 
+			// trafficLightTreeView
+			// 
+			this.trafficLightTreeView.Location = new System.Drawing.Point(9, 19);
+			this.trafficLightTreeView.Name = "trafficLightTreeView";
+			this.trafficLightTreeView.Size = new System.Drawing.Size(265, 168);
+			this.trafficLightTreeView.steuerung = null;
+			this.trafficLightTreeView.TabIndex = 1;
+			this.trafficLightTreeView.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.trafficLightTreeView_AfterSelect);
+			// 
+			// thumbGrid
+			// 
+			this.thumbGrid.BackColor = System.Drawing.Color.White;
+			this.thumbGrid.CellHeight = 0;
+			this.thumbGrid.CellSize = new System.Drawing.Size(0, 0);
+			this.thumbGrid.CellWidth = 0;
+			this.thumbGrid.Dimension = new System.Drawing.Point(0, 0);
+			this.thumbGrid.Dock = System.Windows.Forms.DockStyle.Fill;
+			this.thumbGrid.DrawGrid = false;
+			this.thumbGrid.Location = new System.Drawing.Point(3, 3);
+			this.thumbGrid.Max_X = 0;
+			this.thumbGrid.Max_Y = 0;
+			this.thumbGrid.Name = "thumbGrid";
+			this.thumbGrid.Size = new System.Drawing.Size(297, 480);
+			this.thumbGrid.TabIndex = 0;
+			this.thumbGrid.MouseLeave += new System.EventHandler(this.thumbGrid_MouseLeave);
+			this.thumbGrid.Paint += new System.Windows.Forms.PaintEventHandler(this.thumbGrid_Paint);
+			this.thumbGrid.MouseMove += new System.Windows.Forms.MouseEventHandler(this.thumbGrid_MouseMove);
+			this.thumbGrid.MouseDown += new System.Windows.Forms.MouseEventHandler(this.thumbGrid_MouseDown);
+			this.thumbGrid.Resize += new System.EventHandler(this.thumbGrid_Resize);
+			this.thumbGrid.MouseUp += new System.Windows.Forms.MouseEventHandler(this.thumbGrid_MouseUp);
+			// 
+			// timeline
+			// 
+			this.timeline.Location = new System.Drawing.Point(0, 0);
+			this.timeline.Name = "timeline";
+			this.timeline.selectedEntry = null;
+			this.timeline.selectedGroup = null;
+			this.timeline.Size = new System.Drawing.Size(505, 50);
+			this.timeline.snapSize = 0.5;
+			this.timeline.steuerung = null;
+			this.timeline.TabIndex = 7;
+			this.timeline.zoom = 10;
+			this.timeline.MouseLeave += new System.EventHandler(this.timeline_MouseLeave);
+			this.timeline.SelectionChanged += new CityTrafficSimulator.TimelineControl.SelectionChangedEventHandler(this.timeline_SelectionChanged);
+			this.timeline.MouseMove += new System.Windows.Forms.MouseEventHandler(this.timeline_MouseMove);
+			this.timeline.MouseDown += new System.Windows.Forms.MouseEventHandler(this.timeline_MouseDown);
+			this.timeline.Enter += new System.EventHandler(this.timeline_Enter);
+			this.timeline.MouseUp += new System.Windows.Forms.MouseEventHandler(this.timeline_MouseUp);
+			this.timeline.EventChanged += new CityTrafficSimulator.TimelineControl.EventChangedEventHandler(this.timeline_EventChanged);
+			this.timeline.TimelineMoved += new CityTrafficSimulator.TimelineControl.TimelineMovedEventHandler(this.timeline_TimelineMoved);
+			// 
+			// label11
+			// 
+			this.label11.AutoSize = true;
+			this.label11.Location = new System.Drawing.Point(645, 21);
+			this.label11.Name = "label11";
+			this.label11.Size = new System.Drawing.Size(88, 13);
+			this.label11.TabIndex = 24;
+			this.label11.Text = "Geschwindigkeit:";
+			this.label11.Click += new System.EventHandler(this.label11_Click);
+			// 
+			// label12
+			// 
+			this.label12.AutoSize = true;
+			this.label12.Location = new System.Drawing.Point(645, 50);
+			this.label12.Name = "label12";
+			this.label12.Size = new System.Drawing.Size(56, 13);
+			this.label12.TabIndex = 25;
+			this.label12.Text = "Schritte/s:";
+			// 
+			// stepsPerSecondSpinEdit
+			// 
+			this.stepsPerSecondSpinEdit.Location = new System.Drawing.Point(737, 48);
+			this.stepsPerSecondSpinEdit.Maximum = new decimal(new int[] {
+            30,
+            0,
+            0,
+            0});
+			this.stepsPerSecondSpinEdit.Minimum = new decimal(new int[] {
+            1,
+            0,
+            0,
+            0});
+			this.stepsPerSecondSpinEdit.Name = "stepsPerSecondSpinEdit";
+			this.stepsPerSecondSpinEdit.Size = new System.Drawing.Size(46, 20);
+			this.stepsPerSecondSpinEdit.TabIndex = 26;
+			this.stepsPerSecondSpinEdit.Value = new decimal(new int[] {
+            15,
+            0,
+            0,
+            0});
+			this.stepsPerSecondSpinEdit.ValueChanged += new System.EventHandler(this.stepsPerSecondSpinEdit_ValueChanged);
 			// 
 			// MainForm
 			// 
@@ -1197,6 +1272,8 @@ namespace CityTrafficSimulator
 			this.timelinePanel.ResumeLayout(false);
 			this.statusleiste.ResumeLayout(false);
 			this.statusleiste.PerformLayout();
+			((System.ComponentModel.ISupportInitialize)(this.simulationSpeedSpinEdit)).EndInit();
+			((System.ComponentModel.ISupportInitialize)(this.stepsPerSecondSpinEdit)).EndInit();
 			this.ResumeLayout(false);
 			this.PerformLayout();
 
@@ -1281,6 +1358,10 @@ namespace CityTrafficSimulator
 		private System.Windows.Forms.Label label9;
 		private System.Windows.Forms.NumericUpDown canvasHeigthSpinEdit;
 		private System.Windows.Forms.NumericUpDown canvasWidthSpinEdit;
+		private System.Windows.Forms.NumericUpDown simulationSpeedSpinEdit;
+		private System.Windows.Forms.Label label11;
+		private System.Windows.Forms.NumericUpDown stepsPerSecondSpinEdit;
+		private System.Windows.Forms.Label label12;
 
         }
     }
