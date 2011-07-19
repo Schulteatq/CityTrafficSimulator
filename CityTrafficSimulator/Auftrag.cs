@@ -124,8 +124,10 @@ namespace CityTrafficSimulator
 		[XmlIgnore]
 		public static int truckRatio = 15;
 
-
-        private int tickCount;
+		/// <summary>
+		/// Number of vehicles that were not created successfully
+		/// </summary>
+        private int failedCount;
 
         #region Konstruktoren
 		/// <summary>
@@ -165,30 +167,29 @@ namespace CityTrafficSimulator
 		/// <param name="currentTime">aktuelle Zeit in Sekunden nach Sekunde 0</param>
 		public void Tick(double tickLength, double currentTime)
             {
-			if (tickCount > 0)
+			if (failedCount > 0)
 				{
-				tickCount--;
+				bool success = CreateVehicle((float)currentTime);
+				if (success)
+					--failedCount;
 				}
-
-			int zufallsvariable = 0;
-			if (trafficDensityMultiplier != 0)
-				zufallsvariable = rnd.Next(tickCount, Decimal.ToInt32((decimal)m_häufigkeit / trafficDensityMultiplier));
 			else
-				zufallsvariable = 1;
-
-			if (zufallsvariable == 0)
 				{
-				CreateVehicle((float) currentTime);
-				tickCount = 5;
+				int zufallsvariable = 0;
+				if (trafficDensityMultiplier != 0)
+					zufallsvariable = rnd.Next(failedCount, Decimal.ToInt32((decimal)m_häufigkeit / trafficDensityMultiplier));
+				else
+					zufallsvariable = 1;
+
+				if (zufallsvariable == 0)
+					{
+					bool success = CreateVehicle((float)currentTime);
+					if (!success)
+						{
+						++failedCount;
+						}
+					}
 				}
-
-			/*
-
-            if (tickCount > häufigkeit)
-                {
-                CreateVehicle();
-                tickCount = 0;
-                }*/
             }
 
 
@@ -206,7 +207,8 @@ namespace CityTrafficSimulator
         /// Lässt ein Auto am startNode losfahren
         /// </summary>
 		/// <param name="currentTime">aktuelle Weltzeit</param>
-        private void CreateVehicle(float currentTime)
+		/// <returns>true, if Vehicle was successfully created - otherwise false</returns>
+		private bool CreateVehicle(float currentTime)
             {
 			IVehicle.Physics p = new IVehicle.Physics(m_wunschgeschwindigkeit, m_wunschgeschwindigkeit, 0);
 
@@ -240,8 +242,10 @@ namespace CityTrafficSimulator
 
 				IVehicle.State state = new IVehicle.State(start.nextConnections[foo], 0);
 				v.state = state;
-				start.nextConnections[foo].AddVehicle(v, endNodes);
+				return start.nextConnections[foo].AddVehicle(v, endNodes);
 				}
+
+			return false;
             }
 
 		/// <summary>

@@ -750,7 +750,8 @@ namespace CityTrafficSimulator
         /// </summary>
 		/// <param name="veh">hinzuzufügendes Vehicle</param>
 		/// <param name="targetNodes">Liste von Zielknoten</param>
-        public void AddVehicle(IVehicle veh, List<LineNode> targetNodes)
+		/// <returns>true, if Vehicle was successfully created - otherwise false</returns>
+        public bool AddVehicle(IVehicle veh, List<LineNode> targetNodes)
             {
 			// prüfen, ob die Linie nicht schon zu voll mit Autos ist
 			if (vehicles.First == null || vehicles.First.Value.currentPosition - vehicles.First.Value.length > veh.physics.velocity + veh.state.position)
@@ -758,21 +759,26 @@ namespace CityTrafficSimulator
 				vehicles.AddFirst(veh);
 				veh.listNode = vehicles.First;
 				veh.targetNodes = targetNodes;
+				return true;
 				}
-            }
+			return false;
+			}
 
 		/// <summary>
 		/// Fügt der Linie ein Auto hinzu
 		/// </summary>
 		/// <param name="veh">hinzuzufügendes Vehicle</param>
-		public void AddVehicle(IVehicle veh)
+		/// <returns>true, if Vehicle was successfully created - otherwise false</returns>
+		public bool AddVehicle(IVehicle veh)
 			{
 			// prüfen, ob die Linie nicht schon zu voll mit Autos ist
 			if (vehicles.First == null || vehicles.First.Value.currentPosition - vehicles.First.Value.length > veh.physics.velocity + veh.state.position)
 				{
 				vehicles.AddFirst(veh);
 				veh.listNode = vehicles.First;
+				return true;
 				}
+			return false;
 			}
 
 
