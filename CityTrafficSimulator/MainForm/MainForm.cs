@@ -877,25 +877,27 @@ namespace CityTrafficSimulator
 			#region Nodes bearbeiten
 			// Node löschen
 			case Keys.Delete:
-				foreach (LineNode ln in selectedLineNodes)
-					{
-					nodeSteuerung.DeleteLineNode(ln);
-					}
-				selectedLineNodes.Clear();
-				e.Handled = true;
-				Invalidate();
-
-				if (selectedNodeConnection != null)
-					{
-					nodeSteuerung.Disconnect(selectedNodeConnection.startNode, selectedNodeConnection.endNode);
-					selectedNodeConnection = null;
-					e.Handled = true;
-					Invalidate();
-					}
-
 				if (selectedVehicle != null)
 					{
 					selectedVehicle.currentNodeConnection.RemoveVehicle(selectedVehicle, -1);
+					}
+				else // do not delete nodes and connections when vehicle selected!
+					{
+					foreach (LineNode ln in selectedLineNodes)
+						{
+						nodeSteuerung.DeleteLineNode(ln);
+						}
+					selectedLineNodes.Clear();
+					e.Handled = true;
+					Invalidate();
+
+					if (selectedNodeConnection != null)
+						{
+						nodeSteuerung.Disconnect(selectedNodeConnection.startNode, selectedNodeConnection.endNode);
+						selectedNodeConnection = null;
+						e.Handled = true;
+						Invalidate();
+						}
 					}
 				break;
 
@@ -1060,8 +1062,17 @@ namespace CityTrafficSimulator
 				}
 
 			// TODO: Paint Methode entschlacken und outsourcen?
-			e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
-			e.Graphics.InterpolationMode = InterpolationMode.Bilinear;
+			switch (renderQualityComboBox.SelectedIndex)
+				{
+				case 0:
+					e.Graphics.SmoothingMode = SmoothingMode.HighQuality;
+					e.Graphics.InterpolationMode = InterpolationMode.HighQualityBicubic;
+					break;
+				case 1:
+					e.Graphics.SmoothingMode = SmoothingMode.HighSpeed;
+					e.Graphics.InterpolationMode = InterpolationMode.Low;
+					break;
+				}
 
 			renderStopwatch.Reset();
 			renderStopwatch.Start();
@@ -2105,15 +2116,11 @@ namespace CityTrafficSimulator
 			timer1.Interval = (int)(1000 / stepsPerSecondSpinEdit.Value / simulationSpeedSpinEdit.Value);
 			}
 
-		private void label11_Click(object sender, EventArgs e)
-			{
-
-			}
-
 		private void stepsPerSecondSpinEdit_ValueChanged(object sender, EventArgs e)
 			{
 			timer1.Interval = (int)(1000 / stepsPerSecondSpinEdit.Value / simulationSpeedSpinEdit.Value);
 			}
+
 
 		}
     }
