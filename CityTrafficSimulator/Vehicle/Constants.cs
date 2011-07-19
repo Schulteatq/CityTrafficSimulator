@@ -36,7 +36,7 @@ namespace CityTrafficSimulator.Vehicle
 		/// <summary>
 		/// Entfernung, die vorausgerechnet werden soll
 		/// </summary>
-		public const double lookaheadDistance = 256;
+		public const double lookaheadDistance = 768;
 
 		/// <summary>
 		/// maximale Entfernung, die ein LineChangePoint entfernt sein darf, damit er benutzt wird
