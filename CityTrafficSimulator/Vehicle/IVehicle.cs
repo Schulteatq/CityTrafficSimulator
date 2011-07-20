@@ -19,6 +19,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Text;
 using System.Drawing;
 using System.Drawing.Drawing2D;
@@ -386,7 +387,12 @@ namespace CityTrafficSimulator.Vehicle
 			double distanceToLookForTrafficLights;
 
 			// bestimme das Auto welches vor mir fährt
-			VehicleDistance theVehicleInFrontOfMe = GetNextVehicleOnMyTrack(currentNC, arcPos, lookaheadDistance);
+			VehicleDistance theVehicleInFrontOfMe = GetNextVehicleOnMyTrack();//(currentNC, arcPos, lookaheadDistance);
+
+			// The stored distance is to the front of the vehicle. All following calculations need the distance
+			// to its tail. Hence, substract the vehicle length.
+			if (theVehicleInFrontOfMe != null)
+				theVehicleInFrontOfMe.distance -= theVehicleInFrontOfMe.vehicle.length;
 
 			// bestimme alle Intersections zwischen mir und dem nächsten Auto
 			List<SpecificIntersection> interestingIntersections;
@@ -1073,137 +1079,56 @@ namespace CityTrafficSimulator.Vehicle
 		private double wunschabstand = 0;
 
 
-
-
 		/// <summary>
-		/// gibt das nächste IVehicle und den zugehörigen Abstand zurück. null, falls kein IVehicle in den nächsten distanceWithin
+		/// Returns the next vehicle on the current path and its distance.
 		/// </summary>
-		/// <param name="currentNC">NodeConnection für die die Beschleunigungswerte berechnet werden sollen</param>
-		/// <param name="arcPosition">Position auf currentNC für die die Beschleunigungswerte berechnet werden sollen</param>
-		/// <param name="distanceWithin">Entfernung in der nach Autos gesucht werden soll</param>
-		/// <returns>das Vehicle und die zugehörige Entfernung - null, falls kein solches IVehicle existiert</returns>
-		private VehicleDistance GetNextVehicleOnMyTrack(NodeConnection currentNC, double arcPosition, double distanceWithin)
+		/// <returns>The closest vehicle and its distance in front, null if no such vehicle exists.</returns>
+		private VehicleDistance GetNextVehicleOnMyTrack()
 			{
-			double arcLengthToLookForVehicles = 1.2 * currentNC.startNode.outSlope.Abs; // Suchreichweite nach Fahrzeugen auf parallelen Strecken
+			// Initialize toReturn with vehicle directly in front of me in the Vehicle list. 
+			// Hence, we do not need to search on currentNodeConnection anymore and save some time.
 			VehicleDistance toReturn = null;
-
-			// bin ich noch auf den ersten Metern der Connection wo ich auf parallele Connections achten muss?
-			if (arcPosition < arcLengthToLookForVehicles)
+			if ((listNode.Next != null) && (listNode.Next.Value.currentPosition - currentPosition - listNode.Next.Value.length < Constants.lookaheadDistance))
 				{
-				// alle zu currentNC parallelen NodeConnections anschauen
-				foreach (NodeConnection parallelNodeConnection in currentNC.startNode.nextConnections)
-					{
-					// fahren dort überhaupt Autos?
-					if (parallelNodeConnection.vehicles.Count > 0)
-						{
-						// ich schau mir gerade currentNC an (ich will auf currentNC selbst fahren - also schau ich mir in Zweifelsfall die ganze Connection an)
-						if (parallelNodeConnection == currentNC)
-							{
-							// gucken ob das erste Auto überhaupt in Suchreichweite und näher dran als ein vielleicht schon gefundenes Auto
-							if ((listNode.Next != null)
-									&& (listNode.Next.Value.currentPosition - arcPosition - listNode.Next.Value.length <= distanceWithin)
-									&& (toReturn == null || listNode.Next.Value.currentPosition - arcPosition - listNode.Next.Value.length < toReturn.distance))
-								{
-								toReturn = new VehicleDistance(listNode.Next.Value, listNode.Next.Value.currentPosition - arcPosition - listNode.Next.Value.length);
-								}
-							}
-
-						// ich schau mir eine parallele Connection an - da brauch ich nur die ersten Meter zu checken
-						else
-							{
-							IVehicle parallelVehicle = null;
-							foreach (IVehicle v in parallelNodeConnection.vehicles)
-								{
-								if (v.currentPosition > arcPosition)
-									{
-									parallelVehicle = v;
-									break;
-									}
-								if (v.currentPosition > arcLengthToLookForVehicles)
-									{
-									break;
-									}
-								}
-							// gucken ob das erste Auto überhaupt in Suchreichweite und näher dran als ein vielleicht schon gefundenes Auto
-							if ((parallelVehicle != null)
-									&& (toReturn == null || parallelVehicle.currentPosition - arcPosition - parallelVehicle.length < toReturn.distance))
-								{
-								toReturn = new VehicleDistance(parallelVehicle, parallelVehicle.currentPosition - arcPosition - parallelVehicle.length);
-								}
-							}
-						}
-					}
-
-				if (toReturn != null)
-					return toReturn;
+				toReturn = new VehicleDistance(listNode.Next.Value, listNode.Next.Value.currentPosition - currentPosition);
 				}
-			else
+			double arcLengthToLookForVehicles = 1.2 * currentNodeConnection.startNode.outSlope.Abs; // search distance on parallel connections
+
+			// the beginning of a NodeConnection may be close to other connections - search on each of them
+			if (currentPosition < arcLengthToLookForVehicles)
 				{
-				// gucken ob auf dem aktuellen LineSegment noch ein Auto vorweg fährt
-				if (listNode.Next != null)
+				foreach (NodeConnection parallelNodeConnection in currentNodeConnection.startNode.nextConnections)
 					{
-					if (listNode.Next.Value.state.position - arcPosition > distanceWithin)
+					// do not search on currentNodeConnection (already done above)
+					if (parallelNodeConnection != currentNodeConnection)
 						{
-						return null;
-						}
-					else
-						{
-						return new VehicleDistance(listNode.Next.Value, listNode.Next.Value.state.position - arcPosition - listNode.Next.Value.length);
+						VehicleDistance vd = parallelNodeConnection.GetVehicleBehindArcPosition(currentPosition, arcLengthToLookForVehicles - currentPosition);
+						toReturn = VehicleDistance.MinTail(toReturn, vd);
 						}
 					}
 				}
 
+			// OK, we've checked currentNodeConnection and all parallel starting connections far.
+			// If we have found a vehicle, this must be the closest
+			if (toReturn != null)
+				return toReturn;
 
-			// gucken, ob auf den nächsten LineSegmenten Autos in Reichweite sind
-			double alreadyCheckedDistance = GetDistanceToEndOfLineSegment(currentNC, arcPosition);
-			foreach (RouteSegment rs in WayToGo)
+			// Appearantly, we haven't yet found a vehicle, so we search all upcoming connections:
+			double remainingDistance = Constants.lookaheadDistance - currentNodeConnection.lineSegment.length + currentPosition;
+			if (remainingDistance > 0) 
 				{
-				NodeConnection nc = rs.startConnection;
-
-				// Abbruchbedingung: wenn schon genug Strecke untersucht wurde, brauchen wir nicht weiterzusuchen
-				if (alreadyCheckedDistance > distanceWithin)
-					return null;
-
-				// einige Variablen zur Verwendung
-				arcLengthToLookForVehicles = nc.startNode.outSlope.Abs; // Suchreichweite nach Fahrzeugen auf parallelen Strecken
-				toReturn = null;
-
-				// alle zu nc parallelen NodeConnections anschauen
-				foreach (NodeConnection parallelNodeConnection in nc.startNode.nextConnections)
+				foreach (NodeConnection nc in currentNodeConnection.endNode.nextConnections)
 					{
-					// fahren dort überhaupt Autos?
-					if (parallelNodeConnection.vehicles.Count > 0)
+					VehicleDistance vd = nc.GetVehicleBehindArcPosition(0, remainingDistance);
+					if (vd != null)
 						{
-						// ich schau mir gerade nc an (ich will auf nc selbst fahren - also schau ich mir in Zweifelsfall die ganze Connection an)
-						if (parallelNodeConnection == nc)
-							{
-							// gucken ob das erste Auto überhaupt in Suchreichweite und näher dran als ein vielleicht schon gefundenes Auto
-							if ((alreadyCheckedDistance + parallelNodeConnection.vehicles.First.Value.currentPosition - parallelNodeConnection.vehicles.First.Value.length <= distanceWithin)
-									&& (toReturn == null || alreadyCheckedDistance + parallelNodeConnection.vehicles.First.Value.currentPosition - parallelNodeConnection.vehicles.First.Value.length < toReturn.distance))
-								{
-								toReturn = new VehicleDistance(parallelNodeConnection.vehicles.First.Value, alreadyCheckedDistance + parallelNodeConnection.vehicles.First.Value.currentPosition - parallelNodeConnection.vehicles.First.Value.length);
-								}
-							}
-
-						// ich schau mir eine parallele Connection an - da brauch ich nur die ersten Meter zu checken
-						else
-							{
-							// gucken ob das erste Auto überhaupt in Suchreichweite und näher dran als ein vielleicht schon gefundenes Auto
-							if ((parallelNodeConnection.vehicles.First.Value.currentPosition - parallelNodeConnection.vehicles.First.Value.length < arcLengthToLookForVehicles)
-									&& (toReturn == null || alreadyCheckedDistance + parallelNodeConnection.vehicles.First.Value.currentPosition - parallelNodeConnection.vehicles.First.Value.length < toReturn.distance))
-								{
-								toReturn = new VehicleDistance(parallelNodeConnection.vehicles.First.Value, alreadyCheckedDistance + parallelNodeConnection.vehicles.First.Value.currentPosition - parallelNodeConnection.vehicles.First.Value.length);
-								}
-							}
+						vd.distance += currentNodeConnection.lineSegment.length - currentPosition;
+						toReturn = VehicleDistance.MinTail(toReturn, vd);
 						}
 					}
-
-				if (toReturn != null)
-					return toReturn;
-
-				alreadyCheckedDistance += nc.lineSegment.length;
 				}
-			return null;
+
+			return toReturn;
 			}
 
 		/// <summary>

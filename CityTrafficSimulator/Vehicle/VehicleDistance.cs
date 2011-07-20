@@ -49,5 +49,74 @@ namespace CityTrafficSimulator.Vehicle
 			this.distance = distance;
 			this.vehicle = vehicle;
 			}
+
+		/// <summary>
+		/// Returns the VehicleDistance with the smaller distance.
+		/// </summary>
+		/// <param name="lhs">Left object to compare</param>
+		/// <param name="rhs">Right object to compare</param>
+		/// <returns>The one with the smaller distance. The other if one is null.</returns>
+		public static VehicleDistance Min(VehicleDistance lhs, VehicleDistance rhs)
+			{
+			if (lhs == null)
+				return rhs;
+			if (rhs == null)
+				return lhs;
+			return (lhs.distance < rhs.distance) ? lhs : rhs;
+			}
+
+		/// <summary>
+		/// Returns the VehicleDistance with the greater distance.
+		/// </summary>
+		/// <param name="lhs">Left object to compare</param>
+		/// <param name="rhs">Right object to compare</param>
+		/// <returns>The one with the greater distance. The other if one is null.</returns>
+		public static VehicleDistance Max(VehicleDistance lhs, VehicleDistance rhs)
+			{
+			if (lhs == null)
+				return rhs;
+			if (rhs == null)
+				return lhs;
+			return (lhs.distance > rhs.distance) ? lhs : rhs;
+			}
+
+
+		/// <summary>
+		/// Returns the VehicleDistance with the smaller distance to the tail of the vehicle.
+		/// </summary>
+		/// <param name="lhs">Left object to compare</param>
+		/// <param name="rhs">Right object to compare</param>
+		/// <returns>The one with the smaller distance to the tail of the vehicle. The other if one is null.</returns>
+		public static VehicleDistance MinTail(VehicleDistance lhs, VehicleDistance rhs)
+			{
+			if (lhs == null)
+				return rhs;
+			if (rhs == null)
+				return lhs;
+			return (lhs.distance - lhs.vehicle.length < rhs.distance - rhs.vehicle.length) ? lhs : rhs;
+			}
+
+
+		/// <summary>
+		/// Checks if the distance of lhs is smaller than the distance of rhs.
+		/// </summary>
+		/// <param name="lhs">Left object to compare</param>
+		/// <param name="rhs">Right object to compare</param>
+		/// <returns>lhs.distance smaller rhs.distance</returns>
+		public static bool operator < (VehicleDistance lhs, VehicleDistance rhs)
+			{
+			return lhs.distance < rhs.distance;
+			}
+
+		/// <summary>
+		/// Checks if the distance of lhs is greater than the distance of rhs.
+		/// </summary>
+		/// <param name="lhs">Left object to compare</param>
+		/// <param name="rhs">Right object to compare</param>
+		/// <returns>lhs.distance greater rhs.distance</returns>
+		public static bool operator >(VehicleDistance lhs, VehicleDistance rhs)
+			{
+			return lhs.distance > rhs.distance;
+			}
 		}
 	}
