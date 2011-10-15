@@ -18,6 +18,7 @@
  */
 
 using System;
+using System.Diagnostics;
 using System.Collections.Generic;
 using System.Text;
 
@@ -28,7 +29,6 @@ namespace CityTrafficSimulator
 	/// <summary>
 	/// Klasse zur Kapselung eines Schnittpunktes zweier NodeConnections A und B
 	/// </summary>
-	[Serializable]
 	public class Intersection
 		{
 
@@ -157,15 +157,6 @@ namespace CityTrafficSimulator
 		#endregion
 
 		#region Konstruktoren
-
-		/// <summary>
-		/// Leerer Standardkonstruktor
-		/// (nicht verwenden - wird nur für XML Serialisierung gebraucht)
-		/// </summary>
-		public Intersection()
-			{
-
-			}
 
 		/// <summary>
 		/// Standardkonstruktor
@@ -348,6 +339,172 @@ namespace CityTrafficSimulator
 		#endregion
 
 		#region Interferenzen zwischen Fahrzeugen
+
+		/// <summary>
+		/// Original arriving- and blocking times of vehicles approaching on NodeConnection A
+		/// </summary>
+		private Dictionary<IVehicle, CrossingVehicleTimes> aCrossingVehicles = new Dictionary<IVehicle, CrossingVehicleTimes>(32);
+
+		/// <summary>
+		/// Original arriving- and blocking times of vehicles approaching on NodeConnection B
+		/// </summary>
+		private Dictionary<IVehicle, CrossingVehicleTimes> bCrossingVehicles = new Dictionary<IVehicle, CrossingVehicleTimes>(32);
+
+
+		/// <summary>
+		/// Registers that the given vehicle is going to cross this intersection via the given NodeConnection.
+		/// </summary>
+		/// <param name="v">Vehicle to cross intersection (must not be registered yet!).</param>
+		/// <param name="nc">NodeConnection the vehicle is going to use (must participate on this Intersection!).</param>
+		/// <param name="distance">Current distance of the vehicle to the Intersection</param>
+		/// <param name="currentTime">current world time.</param>
+		public void RegisterVehicle(IVehicle v, NodeConnection nc, double distance, double currentTime)
+			{
+			Debug.Assert(nc == aConnection || nc == bConnection);
+			// TODO: add some safety space before and behind
+			double blockingStartTime = currentTime + CalculateArrivingTime(v, distance - GetWaitingDistance()) - v.SafetyTime/2;
+			double blockingEndTime = currentTime + CalculateArrivingTime(v, distance + v.length + GetWaitingDistance());
+
+			if (nc == aConnection)
+				{
+				//Debug.Assert(!aCrossingVehicles.ContainsKey(v));
+				aCrossingVehicles.Add(v, new CrossingVehicleTimes(blockingStartTime, distance, new Interval<double>(blockingStartTime, blockingEndTime), false));
+				}
+			else
+				{
+				//Debug.Assert(!bCrossingVehicles.ContainsKey(v));
+				bCrossingVehicles.Add(v, new CrossingVehicleTimes(blockingStartTime, distance, new Interval<double>(blockingStartTime, blockingEndTime), false));
+				}
+			}
+
+		/// <summary>
+		/// Updates the already registered vehicle v crossing on nc. 
+		/// </summary>
+		/// <param name="v">Vehicle to update (must already be registered!).</param>
+		/// <param name="nc">NodeConnection the vehicle is going to use (must participate on this Intersection!).</param>
+		/// <param name="distance">Current distance of the vehicle to the Intersection</param>
+		/// <param name="currentTime">current world time.</param>
+		public void UpdateVehicle(IVehicle v, NodeConnection nc, double distance, double currentTime)
+			{
+			Debug.Assert(nc == aConnection || nc == bConnection);
+			// TODO: add some safety space before and behind
+			double blockingStartTime = currentTime + CalculateArrivingTime(v, distance - GetWaitingDistance()) - v.SafetyTime/2;
+			double blockingEndTime = currentTime + CalculateArrivingTime(v, distance + v.length + GetWaitingDistance());
+
+			if (nc == aConnection)
+				{
+				Debug.Assert(aCrossingVehicles.ContainsKey(v));
+				CrossingVehicleTimes cvt = aCrossingVehicles[v]; // CrossingVehicleTimes is a Value-Type!
+				cvt.remainingDistance = distance;
+				cvt.blockingTime.left = blockingStartTime;
+				cvt.blockingTime.right = blockingEndTime;
+				aCrossingVehicles[v] = cvt;
+				}
+			else
+				{
+				Debug.Assert(bCrossingVehicles.ContainsKey(v));
+				CrossingVehicleTimes cvt = bCrossingVehicles[v]; // CrossingVehicleTimes is a Value-Type!
+				cvt.remainingDistance = distance;
+				cvt.blockingTime.left = blockingStartTime;
+				cvt.blockingTime.right = blockingEndTime;
+				bCrossingVehicles[v] = cvt;
+				}
+			}
+
+		/// <summary>
+		/// Updates the already registered vehicle v crossing on nc. 
+		/// </summary>
+		/// <param name="v">Vehicle to update (must already be registered!).</param>
+		/// <param name="nc">NodeConnection the vehicle is going to use (must participate on this Intersection!).</param>
+		/// <param name="willWaitInFrontOfIntersection">Set true if vehicle will wait before intersection (and thus not cross it in the meantime).</param>
+		public void UpdateVehicle(IVehicle v, NodeConnection nc, bool willWaitInFrontOfIntersection)
+			{
+			Debug.Assert(nc == aConnection || nc == bConnection);
+
+			if (nc == aConnection)
+				{
+				Debug.Assert(aCrossingVehicles.ContainsKey(v));
+				CrossingVehicleTimes cvt = aCrossingVehicles[v]; // CrossingVehicleTimes is a Value-Type!
+				cvt.willWaitInFrontOfIntersection = willWaitInFrontOfIntersection;
+				aCrossingVehicles[v] = cvt;
+				}
+			else
+				{
+				Debug.Assert(bCrossingVehicles.ContainsKey(v));
+				CrossingVehicleTimes cvt = bCrossingVehicles[v]; // CrossingVehicleTimes is a Value-Type!
+				cvt.willWaitInFrontOfIntersection = willWaitInFrontOfIntersection;
+				bCrossingVehicles[v] = cvt;
+				}
+			}
+
+		/// <summary>
+		/// Unregisters the given vehicle from this intersection.
+		/// </summary>
+		/// <param name="v">Vehicle to unregister (must already be registered!).</param>
+		/// <param name="nc">NodeConnection the vehicle is going to use (must participate on this Intersection!).</param>
+		public void UnregisterVehicle(IVehicle v, NodeConnection nc)
+			{
+			Debug.Assert(nc == aConnection || nc == bConnection);
+
+			if (nc == aConnection)
+				{
+				Debug.Assert(aCrossingVehicles.ContainsKey(v));
+				aCrossingVehicles.Remove(v);
+				}
+			else
+				{
+				Debug.Assert(bCrossingVehicles.ContainsKey(v));
+				bCrossingVehicles.Remove(v);
+				}
+			}
+
+
+		/// <summary>
+		/// Calculates all interfering vehicles from registered vehicles.
+		/// </summary>
+		public List<CrossingVehicleTimes> CalculateInterferingVehicles(IVehicle v, NodeConnection nc)
+			{
+			Debug.Assert(nc == aConnection || nc == bConnection);
+
+			// hopefully these are references... ;)
+			List<CrossingVehicleTimes> toReturn = new List<CrossingVehicleTimes>();
+			Dictionary<IVehicle, CrossingVehicleTimes> myCrossingVehicles = (nc == aConnection ? aCrossingVehicles : bCrossingVehicles);
+			Dictionary<IVehicle, CrossingVehicleTimes> otherCrossingVehicles = (nc == aConnection ? bCrossingVehicles : aCrossingVehicles);
+			CrossingVehicleTimes myCvt = myCrossingVehicles[v];
+
+			// check each vehicle in aCrossingVehicles with each in bCrossingVehicles for interference
+			foreach (KeyValuePair<IVehicle, CrossingVehicleTimes> ocv in otherCrossingVehicles)
+				{
+				if (!ocv.Value.willWaitInFrontOfIntersection && myCvt.blockingTime.IntersectsTrue(ocv.Value.blockingTime))
+					{
+					toReturn.Add(ocv.Value);
+					}
+				}
+
+			return toReturn;
+			}
+
+		/// <summary>
+		/// Returns the CrossingVehicleTimes data of the given vehicle.
+		/// </summary>
+		/// <param name="v">Vehicle to search for (must already be registered!).</param>
+		/// <param name="nc">NodeConnection the vehicle is going to use (must participate on this Intersection!).</param>
+		/// <returns>The CrossingVehicleTimes data of the given vehicle.</returns>
+		public CrossingVehicleTimes GetCrossingVehicleTimes(IVehicle v, NodeConnection nc)
+			{
+			Debug.Assert(nc == aConnection || nc == bConnection);
+
+			if (nc == aConnection)
+				{
+				Debug.Assert(aCrossingVehicles.ContainsKey(v));
+				return aCrossingVehicles[v];
+				}
+			else
+				{
+				Debug.Assert(bCrossingVehicles.ContainsKey(v));
+				return bCrossingVehicles[v];
+				}
+			}
 
 		/// <summary>
 		/// wurde für diese Intersection schon alle interferierenden Fahrzeuge berechnet?
@@ -544,6 +701,48 @@ namespace CityTrafficSimulator
 		public static bool Equals(SpecificIntersection a, SpecificIntersection b)
 			{
 			return (a.intersection == b.intersection && a.nodeConnection == b.nodeConnection);
+			}
+		}
+
+	/// <summary>
+	/// Struct encapsulating the original arriving times and blocking times of a vehicle that is going to cross an intersection.
+	/// Vehicle, Intersection and NodeConnection must be determined by context.
+	/// </summary>
+	public struct CrossingVehicleTimes
+		{
+		/// <summary>
+		/// Time when the vehicle originally planned to arrive at the intersection.
+		/// </summary>
+		public double originalArrivingTime;
+
+		/// <summary>
+		/// Remaining distance of the vehicle to the intersection.
+		/// </summary>
+		public double remainingDistance;
+
+		/// <summary>
+		/// Time interval when the vehicle is going to block the intersection.
+		/// </summary>
+		public Interval<double> blockingTime;
+
+		/// <summary>
+		/// Flag whether vehicle will wait befor intersection or proceed crossing it.
+		/// </summary>
+		public bool willWaitInFrontOfIntersection;
+
+		/// <summary>
+		/// Constructor.
+		/// </summary>
+		/// <param name="originalArrivingTime">Time when the vehicle originally planned to arrive at the intersection.</param>
+		/// <param name="remainingDistance">Remaining distance of the vehicle to the intersection.</param>
+		/// <param name="blockingTime">Time interval when the vehicle is going to block the intersection.</param>
+		/// <param name="willWaitInFrontOfIntersection">Flag whether vehicle will wait befor intersection or proceed crossing it.</param>
+		public CrossingVehicleTimes(double originalArrivingTime, double remainingDistance, Interval<double> blockingTime, bool willWaitInFrontOfIntersection)
+			{
+			this.originalArrivingTime = originalArrivingTime;
+			this.remainingDistance = remainingDistance;
+			this.blockingTime = blockingTime;
+			this.willWaitInFrontOfIntersection = willWaitInFrontOfIntersection;
 			}
 		}
 

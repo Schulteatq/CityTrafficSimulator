@@ -120,9 +120,9 @@ namespace CityTrafficSimulator.Tools
 
 			if (lln != null)
 				{
-				if (comparer(toadd, lln.Value) == 0)
+/*				if (comparer(toadd, lln.Value) == 0)
 					return lln;
-				else
+				else*/
 					return this.AddBefore(lln, toadd);
 				}
 			else

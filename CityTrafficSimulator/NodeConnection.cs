@@ -729,6 +729,29 @@ namespace CityTrafficSimulator
 			return toReturn;
 			}
 
+		/// <summary>
+		/// Returns all intersections within the given interval. Returned List is guaranteed to be sorted in ascending order.
+		/// </summary>
+		/// <param name="interval">Arc length interval to search for.</param>
+		/// <returns>A list of all intersections within the given interval, guaranteed to be sorted in ascending order.</returns>
+		public List<SpecificIntersection> GetSortedIntersectionsWithinArcLength(Interval<double> interval)
+			{
+			// possibly redundant to the version above, but I don't want to trust the iterator.
+			List<SpecificIntersection> toReturn = new List<SpecificIntersection>();
+
+			LinkedListNode<Intersection> lln = intersections.First;
+			while (lln != null) 
+				{
+				if (interval.Contains(lln.Value.GetMyArcPosition(this)))
+					{
+					toReturn.Add(new SpecificIntersection(this, lln.Value));
+					}
+				lln = lln.Next;
+				}
+
+			return toReturn;
+			}
+
 
 		#endregion
 
@@ -886,7 +909,7 @@ namespace CityTrafficSimulator
 
 
 		/// <summary>
-		/// bestimmt das IVehicle hinter der Bogenlängenposition arcPosition und die Entfernung dorthin.
+		/// bestimmt das IVehicle hinter der Bogenlängenposition arcPosition und die Entfernung dorthin (Vorderkante).
 		/// Ist distanceWithin größer als die Entfernung zum endNode, so werden alle weiteren ausgehenden NodeConnections auch untersucht
 		/// </summary>
 		/// <param name="arcPosition">Bogenlängenposition, wo die Suche gestartet wird</param>

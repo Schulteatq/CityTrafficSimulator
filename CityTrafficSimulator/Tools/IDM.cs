@@ -56,6 +56,10 @@ namespace CityTrafficSimulator
 		/// Zeitlicher Sicherheitsabstand
 		/// </summary>
 		protected double T = 1.4;
+		/// <summary>
+		/// Zeitlicher Sicherheitsabstand
+		/// </summary>
+		public double SafetyTime { get { return T; } }
 
 		/// <summary>
 		/// maximale Beschleunigung
