@@ -208,10 +208,6 @@ namespace CityTrafficSimulator
 		/// </summary>
 		public void Dispose()
 			{
-			if (m_handler != null)
-				{
-				m_handler.RemoveHandledIntersection(this);
-				}			
 			aConnection.RemoveIntersection(this);
 			bConnection.RemoveIntersection(this);
 			}
@@ -294,46 +290,6 @@ namespace CityTrafficSimulator
 		public override string ToString()
 			{
 			return "Intersection@ " + aPosition.ToString();
-			}
-
-		#endregion
-
-		#region vierter Versuch
-
-		/// <summary>
-		/// IntersectionHandler für diese Intersection
-		/// </summary>
-		private IntersectionHandler m_handler;
-		/// <summary>
-		/// IntersectionHandler für diese Intersection
-		/// </summary>
-		public IntersectionHandler handler
-			{
-			get { return m_handler; }
-			set { m_handler = value; }
-			}
-
-		/// <summary>
-		/// registriert ein Fahrzeug an dieser Intersection
-		/// </summary>
-		/// <param name="nc"></param>
-		/// <param name="v"></param>
-		public IntersectionHandler RegisterVehicle(NodeConnection nc, IVehicle v)
-			{
-			if (nc != aConnection && nc != bConnection)
-				throw new Exception();
-
-			if (m_handler == null)
-				{
-				// erstelle neuen IntersectionHandler
-				m_handler = new IntersectionHandler(nc, this, v);
-				}
-			else
-				{
-				m_handler.RegisterVehicle(nc, this, v);
-				}
-
-			return m_handler;
 			}
 
 		#endregion
@@ -518,29 +474,6 @@ namespace CityTrafficSimulator
 			get { return m_CalculatedInterferingVehicles; }
 			}
 
-		/// <summary>
-		/// Liste aller an dieser Intersection sich behindernden Fahrzeuge
-		/// </summary>
-		private List<InterferingVehicle> m_InterferingVehicles = new List<InterferingVehicle>();
-		/// <summary>
-		/// Liste aller an dieser Intersection sich behindernden Fahrzeuge
-		/// </summary>
-		public List<InterferingVehicle> interferingVehicles
-			{
-			get { return m_InterferingVehicles; }
-			set { m_InterferingVehicles = value; }
-			}
-
-		/// <summary>
-		/// Setzt interferingVehicles zurück
-		/// </summary>
-		public void ResetInterferingVehicles()
-			{
-			interferingVehicles.Clear();
-			m_CalculatedInterferingVehicles = false;
-			}
-
-
 		private double CalculateArrivingTime(IVehicle v, double distance)
 			{
 			if (v.physics.velocity < 5)
@@ -553,112 +486,6 @@ namespace CityTrafficSimulator
 				return v.GetTimeToCoverDistance(distance, true);
 				}
 			}
-
-		/// <summary>
-		/// prüft ob die letzten Fahrzeuge vor der Intersection interferieren und speichert das in InterferingVehicle Datensätzen
-		/// </summary>
-		/// <param name="timeWithin">maximale Zeit die vorausberechnet werden soll</param>
-		public void CalculateInterferingVehicles(double timeWithin)
-			{
-			// prüfe, ob interferingVehicles schon berechnet wurde, um keine Arbeit doppelt zu machen
-			if (calculatedInterferingVehicles) 
-				return;
-
-			double firstNodeIntersectionArcPosition = aArcPosition;
-			double secondNodeIntersectionArcPosition = bArcPosition;
-
-			// prüfen, ob es überhaupt auf beiden Strecken Fahrzeuge gibt, die vor der Kreuzung sind.
-			LinkedListNode<IVehicle> firstVehicleNode = aConnection.vehicles.Last;
-			while (firstVehicleNode != null && firstVehicleNode.Value.state.position - 2 * firstVehicleNode.Value.length > firstNodeIntersectionArcPosition)
-				firstVehicleNode = firstVehicleNode.Previous;
-
-			LinkedListNode<IVehicle> secondVehicleNode = bConnection.vehicles.Last;
-			while (secondVehicleNode != null && secondVehicleNode.Value.state.position - 2 * secondVehicleNode.Value.length > secondNodeIntersectionArcPosition)
-				secondVehicleNode = secondVehicleNode.Previous;
-
-			// prüfe, ob es überhaupt interessante Autos gibt
-			while (firstVehicleNode != null && secondVehicleNode != null)
-				{
-				// berechne die Zeit, wann die Autos die Intersection erreichen
-				// Workaround: velocity + epsilon damit nicht durch 0 geteilt wird.
-				double firstTimeToReachIntersection = CalculateArrivingTime(firstVehicleNode.Value, (firstNodeIntersectionArcPosition - firstVehicleNode.Value.state.position));
-				double secondTimeToReachIntersection = CalculateArrivingTime(secondVehicleNode.Value, secondNodeIntersectionArcPosition - secondVehicleNode.Value.state.position);
-
-				// Abbruchkriterium: Die Autos erreichen die Intersection später als in timeWithin Zeit
-				if (firstTimeToReachIntersection > timeWithin || secondTimeToReachIntersection > timeWithin)
-					{
-					break;
-					}
-
-				// tausche first/secondVehicleNode falls notwendig (sollte wenn dann nur beim ersten Schleifendurchlauf passieren!)
-				if (firstTimeToReachIntersection > secondTimeToReachIntersection)
-					{
-					LinkedListNode<IVehicle> foo = firstVehicleNode;
-					firstVehicleNode = secondVehicleNode;
-					secondVehicleNode = foo;
-
-					double bar = firstTimeToReachIntersection;
-					firstTimeToReachIntersection = secondTimeToReachIntersection;
-					secondTimeToReachIntersection = bar;
-
-					bar = firstNodeIntersectionArcPosition;
-					firstNodeIntersectionArcPosition = secondNodeIntersectionArcPosition;
-					secondNodeIntersectionArcPosition = bar;
-					}
-
-				double firstTimeToLeaveIntersection = CalculateArrivingTime(firstVehicleNode.Value, firstNodeIntersectionArcPosition - firstVehicleNode.Value.state.position + (firstVehicleNode.Value.length));
-
-				if (true)//(secondTimeToReachIntersection - firstTimeToLeaveIntersection < 10)
-					{
-					// Anscheinend haben wir jetzt endlich zwei Fahrzeuge gefunden, die wir vergleichen wollen
-					// also berechnen wir mal die notwendige Verzögerung vom zweiten Fahrzeug an der Intersection:
-					double forcedAccelerationOfSecondVehicle = secondVehicleNode.Value.CalculateAcceleration(
-						secondVehicleNode.Value.physics.velocity,
-						secondVehicleNode.Value.physics.effectiveDesiredVelocity,
-						(secondNodeIntersectionArcPosition - secondVehicleNode.Value.currentPosition) - 0.5*(secondVehicleNode.Value.physics.velocity * firstTimeToLeaveIntersection),
-						secondVehicleNode.Value.physics.velocity);// - firstVehicleNode.Value.physics.velocity);
-
-					// lade bzw. speichere die originalArrivingTimes im Dictionary
-					double firstOriginalArrivingTime = 0, secondOriginalArrivingTime = 0;
-					firstVehicleNode.Value.originalArrivingTimes.TryGetValue(this, out firstOriginalArrivingTime);
-					secondVehicleNode.Value.originalArrivingTimes.TryGetValue(this, out secondOriginalArrivingTime);
-
-					// Nun können wir einen InterferingVehicles Datensatz anlegen
-					interferingVehicles.Add(
-						new InterferingVehicle(
-							secondVehicleNode.Value, 
-							firstVehicleNode.Value, 
-							this, 
-							forcedAccelerationOfSecondVehicle, 
-							firstTimeToReachIntersection, 
-							firstTimeToLeaveIntersection, 
-							secondTimeToReachIntersection,
-							firstOriginalArrivingTime,
-							secondOriginalArrivingTime
-							));
-					}
-
-				// Diese beiden Autos wurden abschließend untersucht, machen wir mit den nächsten weiter
-
-				// prüfe ob sich zwischen first- und secondVehicleNode noch ein weiteres Fahrzeug befindet
-				if (firstVehicleNode.Previous != null
-					&& (CalculateArrivingTime(firstVehicleNode.Previous.Value, (firstNodeIntersectionArcPosition - firstVehicleNode.Previous.Value.state.position)) < secondTimeToReachIntersection))
-					{
-					// dann setze firstVehicleNode einen weiter und starte die Schleife von vorn
-					firstVehicleNode = firstVehicleNode.Previous;
-					}
-				// ansonsten ist das secondVehicle das neue First, und das neue second das Fahrzeug hinter dem aktuellen firstVehicle
-				else
-					{
-					LinkedListNode<IVehicle> temp = firstVehicleNode;
-					firstVehicleNode = secondVehicleNode;
-					secondVehicleNode = temp.Previous;
-					}
-				}
-
-			m_CalculatedInterferingVehicles = true;
-			}
-
 
 		#endregion
 

@@ -978,7 +978,7 @@ namespace CityTrafficSimulator
 
 
 		/// <summary>
-		/// bestimmt das IVehicle hinter der Bogenlängenposition arcPosition und die Entfernung dorthin.
+		/// bestimmt das IVehicle vor der Bogenlängenposition arcPosition und die Entfernung dorthin.
 		/// Ist distanceWithin größer als die Entfernung zum endNode, so werden alle weiteren ausgehenden NodeConnections auch untersucht
 		/// </summary>
 		/// <param name="arcPosition">Bogenlängenposition, wo die Suche gestartet wird</param>

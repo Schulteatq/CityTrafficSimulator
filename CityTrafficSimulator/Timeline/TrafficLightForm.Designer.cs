@@ -288,7 +288,7 @@
 			this.Controls.Add(this.splitContainer1);
 			this.Controls.Add(this.statusStrip1);
 			this.Name = "TrafficLightForm";
-			this.Text = "TrafficLightForm";
+			this.Text = "Signal Light Editor";
 			this.statusStrip1.ResumeLayout(false);
 			this.statusStrip1.PerformLayout();
 			this.splitContainer1.Panel1.ResumeLayout(false);

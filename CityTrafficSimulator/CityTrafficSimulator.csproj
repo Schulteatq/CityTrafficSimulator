@@ -83,9 +83,6 @@
     </Compile>
     <Compile Include="Auftrag.cs" />
     <Compile Include="IDrawable.cs" />
-    <Compile Include="IntersectionHandler.cs">
-      <SubType>Code</SubType>
-    </Compile>
     <Compile Include="LoadingForm\LoadingForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -112,19 +109,13 @@
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="Tools\SortedLinkedList.cs" />
-    <Compile Include="Tools\TwoDLinkedList.cs" />
     <Compile Include="Vehicle\Bus.cs" />
     <Compile Include="Vehicle\Car.cs" />
-    <Compile Include="Vehicle\IThinker.cs" />
     <Compile Include="Vehicle\IVehicle.cs" />
     <Compile Include="Vehicle\Tram.cs" />
     <Compile Include="Vehicle\Truck.cs" />
     <Compile Include="Vehicle\VehicleDistanceTime.cs" />
-    <Compile Include="Vehicle\ApproachingIntersectionVehicleBehaviour.cs" />
     <Compile Include="Vehicle\Constants.cs" />
-    <Compile Include="Vehicle\FollowingVehicleBehaviour.cs" />
-    <Compile Include="Vehicle\FreeDriveVehicleBehaviour.cs" />
-    <Compile Include="Vehicle\IVehicleBehaviour.cs" />
     <Compile Include="MainForm\MainForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -134,7 +125,6 @@
     <Compile Include="MainForm\MainForm.DragnDrop.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="InterferingVehicle.cs" />
     <Compile Include="Intersection.cs" />
     <Compile Include="ISavable.cs" />
     <Compile Include="LineNode.cs" />

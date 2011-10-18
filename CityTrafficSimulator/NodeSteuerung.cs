@@ -1367,18 +1367,11 @@ namespace CityTrafficSimulator
 		/// </summary>
 		public void Tick(double tickLength, double currentTime)
 			{
-			// interferingVehicles zurücksetzen
-			foreach (Intersection i in intersections)
-				{
-				i.ResetInterferingVehicles();
-				}
-
 			// TODO: ist das hier nötig? Oder nur son Relikt aus vergangenen Zeiten
 			foreach (LineNode ln in nodes)
 				{
 				ln.Tick(tickLength, currentTime);
 				}
-
 			}
 
 		/// <summary>

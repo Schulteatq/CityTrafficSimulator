@@ -149,6 +149,8 @@ namespace CityTrafficSimulator.Vehicle
 		private void Dispose(float averageSpeed)
 			{
 			currentNodeConnection.RemoveVehicle(this, averageSpeed);
+			if (vehicleWhichSlowsDownForMe != null)
+				vehicleWhichSlowsDownForMe.slowDownForChangingVehicle = false;
 			}
 
         #endregion
@@ -229,30 +231,17 @@ namespace CityTrafficSimulator.Vehicle
 			lineChangeNeeded = false;
 			lci = null;
 			m_Physics.multiplierDesiredVelocity = 1;
+
+			// Tell other vehicle that waits for me, that I'm finished
+			if (vehicleWhichSlowsDownForMe != null)
+				{
+				vehicleWhichSlowsDownForMe.slowDownForChangingVehicle = false;
+				vehicleWhichSlowsDownForMe = null;
+				}
 			}
 
 
 		#endregion
-
-
-		/// <summary>
-		/// DEPRECATED: Verhalten dieses Fahrzeuges - war mal so ne fixe Idee zur Implementierung der Verkehrslogik, wurde dann aber irgendwann nicht weiterverfolgt.
-		/// </summary>
-		public IVehicleBehaviour behaviour = new FreeDriveVehicleBehaviour();
-
-
-		/// <summary>
-		/// Alle IntersectionHandlers, bei dem dieses Fahrzeug sich registriert hat
-		/// </summary>
-		private List<IntersectionHandler> m_registeredIntersectionHandlers = new List<IntersectionHandler>();
-		/// <summary>
-		/// Alle IntersectionHandlers, bei dem dieses Fahrzeug sich registriert hat
-		/// </summary>
-		public List<IntersectionHandler> registeredIntersectionHandlers
-			{
-			get { return m_registeredIntersectionHandlers; }
-			set { m_registeredIntersectionHandlers = value; }
-			}
 
 
 		/// <summary>
@@ -388,9 +377,11 @@ namespace CityTrafficSimulator.Vehicle
 				return 0;
 
 			double lookaheadDistance = Constants.lookaheadDistance;
+			double stopDistance = -1;
 
 			bool thinkAboutLineChange = false;
 			double lowestAcceleration = 0;
+			m_Physics.multiplierDesiredVelocity = (slowDownForChangingVehicle) ? 2 * p : 1;
 
 			#region Vehicles in front
 
@@ -403,8 +394,12 @@ namespace CityTrafficSimulator.Vehicle
 				{
 				lookaheadDistance = theVehicleInFrontOfMe.distance;
 				thinkAboutLineChange = true;
-
 				lowestAcceleration = CalculateAcceleration(physics.velocity, physics.effectiveDesiredVelocity, theVehicleInFrontOfMe.distance, physics.velocity - theVehicleInFrontOfMe.vehicle.physics.velocity);
+
+				if (theVehicleInFrontOfMe.vehicle.physics.velocity < 4 && theVehicleInFrontOfMe.vehicle.physics.acceleration < 0)
+					{
+					stopDistance = theVehicleInFrontOfMe.distance;
+					}
 				}
 			else
 				{
@@ -436,7 +431,7 @@ namespace CityTrafficSimulator.Vehicle
 
 			// gather all upcoming intersections (and update the ones we are already registered at)
 			GatherNextIntersectionsOnMyTrack(route, arcPos, registrationTarget, lookaheadDistance, currentTime);
-			double distanceToIntersection = HandleIntersections(registrationTarget);
+			double distanceToIntersection = HandleIntersections(registrationTarget, stopDistance);
 
 			// If there is an intersection where I should wait, I should do so...
 			if (distanceToIntersection > 0 && distanceToIntersection < lookaheadDistance)
@@ -479,7 +474,7 @@ namespace CityTrafficSimulator.Vehicle
 						double myArcPositionOnOtherConnection = lcp.otherStart.arcPosition + (arcPos - lcp.start.arcPosition);
 
 						// check if found LineChangePoint is not too far away to perform the line change
-						if ((myArcPositionOnOtherConnection >= 0) && (Math.Abs(arcPos - lcp.start.arcPosition) < Constants.maxDistanceToLineChangePoint / 2))
+						if ((myArcPositionOnOtherConnection >= 0) && (Math.Abs(arcPos - lcp.start.arcPosition) < Constants.maxDistanceToLineChangePoint * 0.67))
 							{
 							// Check the relation to my surrounding vehicles on the target NodeConnection
 							Pair<VehicleDistance> otherVehicles = lcp.otherStart.nc.GetVehiclesAroundArcPosition(myArcPositionOnOtherConnection, Constants.lookaheadDistance);
@@ -523,13 +518,13 @@ namespace CityTrafficSimulator.Vehicle
 										}
 									}
 								// the new vehicle behind would too close but I can accelerate and are at least as fast as him
-								else if (   otherVehicles.Left.vehicle.physics.velocity / this.physics.velocity < 1.1  // I am faster than him
+								else if (   otherVehicles.Left.vehicle.physics.velocity / this.physics.velocity < 2  // I am not significantly slower than him
 										 && lookaheadDistance > 2 * length			// no vehicle/traffic light/intersection in front
 										 && lci.endArcPos - arcPos > 2 * length		// enough space left in LineChangeInterval
 										 && lowestAcceleration >= -0.1)				// currently not braking
 									{
 									// accelerate to get in front
-									m_Physics.multiplierDesiredVelocity = 1.5;
+									m_Physics.multiplierDesiredVelocity = 1.75;
 									lowestAcceleration = CalculateAcceleration(physics.velocity, physics.effectiveDesiredVelocity, lookaheadDistance, physics.velocity);
 
 									// Tell the other vehicle that I want to change line. Probably, it will brake for me.
@@ -594,7 +589,7 @@ namespace CityTrafficSimulator.Vehicle
 					{
 					// get current LineChangePoint and check, whether it's reachable
 					NodeConnection.LineChangePoint lcp = route[0].GetPrevLineChangePoint(arcPos);
-					if ((lcp.target.nc != null) && (Math.Abs(arcPos - lcp.start.arcPosition) < Constants.maxDistanceToLineChangePoint / 2))
+					if ((lcp.target.nc != null) && (Math.Abs(arcPos - lcp.start.arcPosition) < Constants.maxDistanceToLineChangePoint * 0.67))
 						{
 						// check whether there is an alternative route that is not too costly
 						RouteToTarget alternativeRoute = CalculateShortestConenction(lcp.target.nc.endNode, targetNodes);
@@ -659,513 +654,6 @@ namespace CityTrafficSimulator.Vehicle
 
 			return lowestAcceleration;
 			}
-
-		/// <summary>
-		/// Fahrzeug berechnet neue Beschleunigungswerte
-		/// </summary>
-		/// <param name="currentNC">NodeConnection für die die Beschleunigungswerte berechnet werden sollen</param>
-		/// <param name="arcPos">Position auf currentNC für die die Beschleunigungswerte berechnet werden sollen</param>
-		/// <param name="onlySimpleCalculations">Flag, ob nur einfache Berechnungen (Vordermann, LSA, Intersections) oder komplette Berechnungen inkl. Spurwechsel etc. gemacht werden sollen</param>
-		/// <param name="tickLength">Länge eines Ticks in Sekunden</param>
-		/// <param name="currentTime">aktuelle Zeit in Sekunden nach Sekunde 0</param>
-		/// <return>berechnete Beschleunigung</return>
-		public double Think(NodeConnection currentNC, double arcPos, bool onlySimpleCalculations, double tickLength, double currentTime)
-			{
-			debugData.Remove(0, debugData.Length);
-
-			List<NodeConnection> route = new List<NodeConnection>();
-			route.Add(currentNC);
-			foreach (RouteSegment rs in WayToGo)
-				route.Add(rs.startConnection);
-
-			double lookaheadDistance = Constants.lookaheadDistance;
-			double lookaheadTime = Constants.lookaheadTime;
-
-			bool thinkAboutLineChange = false;
-			wunschabstand = 100;
-			double lowestAcceleration = 0;
-
-			// Determine the next vehicle in front.
-			VehicleDistance theVehicleInFrontOfMe = GetNextVehicleOnMyTrack(currentNC, arcPos, lookaheadDistance);
-
-			// The stored distance is to the front of the vehicle. All following calculations need the distance
-			// to its tail. Hence, substract the vehicle length.
-			if (theVehicleInFrontOfMe != null)
-				{
-				lookaheadDistance = theVehicleInFrontOfMe.distance;
-				thinkAboutLineChange = true;
-				}
-
-			#region LSA
-
-			// Check for red traffic lights on route
-			lookaheadDistance = GetDistanceToNextTrafficLightOnRoute(route, arcPos, lookaheadDistance, true);
-
-			// If the next TrafficLight is closer than the next vehicle, no free line change shall be performed
-			if (theVehicleInFrontOfMe.distance > lookaheadDistance)
-				thinkAboutLineChange = false;
-
-			lowestAcceleration = CalculateAcceleration(physics.velocity, physics.effectiveDesiredVelocity, theVehicleInFrontOfMe.distance, physics.velocity - theVehicleInFrontOfMe.vehicle.physics.velocity);
-			wunschabstand = CalculateWantedDistance(physics.velocity, physics.velocity - theVehicleInFrontOfMe.vehicle.physics.velocity);
-
-			#endregion
-
-			#region Intersections
-
-			// gather all upcoming intersections (and update the ones we are already registered at)
-			GatherNextIntersectionsOnMyTrack(route, arcPos, registeredIntersections, lookaheadDistance, currentTime);
-
-			#endregion
-
-
-			// bestimme alle Intersections zwischen mir und dem nächsten Auto
-			List<SpecificIntersection> interestingIntersections;
-			interestingIntersections = GetNextIntersectionsOnMyTrack(currentNC, arcPos, lookaheadDistance, currentTime);
-
-			List<InterferingVehicle> jammedVehicles = new List<InterferingVehicle>(); // alle durch mich evtl. ausgebremsten Fahrzeuge
-			List<InterferingVehicle> jammingVehicles = new List<InterferingVehicle>(); // alle mich evtl. ausbremsenden Fahrzeuge
-
-			// bestimme alle Autos die ich ausbremsen könnte oder die mich ausbremsen könnten
-			foreach (SpecificIntersection si in interestingIntersections)
-				{
-				si.intersection.CalculateInterferingVehicles(lookaheadTime);
-				foreach (InterferingVehicle iv in si.intersection.interferingVehicles)
-					{
-					if (iv.jammedVehicle == this)
-						{
-						jammingVehicles.Add(iv);
-						}
-					else if (iv.jammingVehicle == this)
-						{
-						jammedVehicles.Add(iv);
-						}
-					}
-				}
-
-			// Alle wichtigen Daten gesammelt, dann berechnen wir mal die Beschleunigung:
-
-			// Idee 1: berechne alle möglichen Beschleunigungswerte und wähle Minimum (dann sollte zumindest wenig schief gehen können)
-			m_Physics.multiplierDesiredVelocity = (slowDownForChangingVehicle) ? ((1 - p) * (1 - p)) : 1;
-
-			if (theVehicleInFrontOfMe != null)
-				{
-				lowestAcceleration = CalculateAcceleration(physics.velocity, physics.effectiveDesiredVelocity, theVehicleInFrontOfMe.distance, physics.velocity - theVehicleInFrontOfMe.vehicle.physics.velocity);
-				wunschabstand = CalculateWantedDistance(physics.velocity, physics.velocity - theVehicleInFrontOfMe.vehicle.physics.velocity);
-				thinkAboutLineChange = true;
-				}
-			else
-				lowestAcceleration = CalculateAcceleration(physics.velocity, physics.effectiveDesiredVelocity, lookaheadDistance, physics.velocity);
-
-
-			#region Intersectionhandling
-
-			// TODO:
-			// Algorithmus läuft gut, einzig die Berücksichtigung der An-/Abkunftszeit der Fahrzeuge an der Intersection liefert jedoch keine Ergebnisse
-			// die die Realität wirklich widerspiegeln: Es werden eindeutig die Autos bevorzugt, die schneller fahren, statt die die früher an der Kreuzung
-			// standen. Genauer: Ein Fahrzeug was einmal zum stehen gekommen ist, wartet bis das ganze Pulk der kreuzenden Fahrzeuge vorbei ist.
-			//
-			// Idee: speichere in InterferingVehicle die ursprüngliche Ankuftszeit des Fahrzeuges an der Intersection und berücksichtige diese bei der 
-			// Vorfahrtsberechnung
-			//
-			foreach (InterferingVehicle iv in jammedVehicles)
-				{
-				debugData.Append("jamming veh.: " + iv.jammedVehicle.GetHashCode().ToString() + "\n");
-				//debugData.Append(iv.timeOfJammingVehicleToReachIntersection);
-				//debugData.Append(", ");
-				//debugData.Append(iv.timeOfJammingVehicleToLeaveIntersection);
-				debugData.Append(iv.originalTimeOfJammingVehicleToReachIntersecion.ToString("###.#"));
-				debugData.Append("\n");
-				
-
-				// beide NodeConnections haben die gleiche Priorität
-				if (currentNC.priority == iv.jammedVehicle.currentNodeConnection.priority)
-					{
-					// gucken, ob ich den anderen behindere
-					// das andere Auto wäre eigentlich >10s vor mir dagewesen
-					if ((iv.originalTimeOfJammingVehicleToReachIntersecion - iv.originalTimeOfJammedVehicleToReachIntersecion >= 2)) 
-						{
-						double newWunschabstand = CalculateWantedDistance(physics.velocity, physics.velocity);
-
-						double newAcceleration = CalculateAcceleration(
-							physics.velocity,
-							physics.effectiveDesiredVelocity,
-							((currentNC == iv.intersection.aConnection) ? iv.intersection.aArcPosition : iv.intersection.bArcPosition) - arcPos - iv.jammingVehicle.length - iv.intersection.GetWaitingDistance(),
-							newWunschabstand,
-							physics.velocity);
-
-						// Minimum speichern
-						if (newAcceleration < lowestAcceleration)
-							{
-							lowestAcceleration = newAcceleration;
-							thinkAboutLineChange = false;
-							}
-
-						// Minimum speichern
-						if (newWunschabstand < wunschabstand)
-							wunschabstand = newWunschabstand;
-						}
-					}
-				// meine NodeConnection hat die höhere Priorität
-				else if (currentNC.priority > iv.jammedVehicle.currentNodeConnection.priority)
-					{
-					// ich bin vorne und zudem auch noch wichtiger - also nichts zu tun?!
-					}
-				// meine NodeConnection hat die geringere Priorität
-				else
-					{
-					// gucken, wie stark ich behindere 
-					// 10 Zeiteinheiten Sicherheitsabstand zwischen dem der mich behindert und mir
-					if (iv.timeOfJammedVehicleToReachIntersection - iv.timeOfJammingVehicleToLeaveIntersection < 8)
-						{
-						double newWunschabstand = CalculateWantedDistance(physics.velocity, physics.velocity);
-
-						double newAcceleration = CalculateAcceleration(
-							physics.velocity,
-							physics.effectiveDesiredVelocity,
-							((currentNC == iv.intersection.aConnection) ? iv.intersection.aArcPosition : iv.intersection.bArcPosition) - arcPos - iv.jammingVehicle.length - iv.intersection.GetWaitingDistance(),
-							newWunschabstand,
-							physics.velocity);
-
-						// Minimum speichern
-						if (newAcceleration < lowestAcceleration)
-							{
-							lowestAcceleration = newAcceleration;
-							thinkAboutLineChange = false;
-							}
-
-						// Minimum speichern
-						if (newWunschabstand < wunschabstand)
-							wunschabstand = newWunschabstand;
-						}
-					}
-				}
-
-			foreach (InterferingVehicle iv in jammingVehicles)
-				{
-				debugData.Append("jammed by: " + iv.jammingVehicle.GetHashCode().ToString() + "\n");
-				//debugData.Append(iv.timeOfJammedVehicleToReachIntersection);
-				//debugData.Append(", ");
-				//debugData.Append(iv.timeOfJammingVehicleToLeaveIntersection);
-				debugData.Append(iv.originalTimeOfJammedVehicleToReachIntersecion.ToString("###.#"));
-				debugData.Append("\n");
-
-				// beide NodeConnections haben die gleiche Priorität
-				if (currentNC.priority == iv.jammingVehicle.currentNodeConnection.priority)
-					{
-					// gucken, wie stark ich behindert werde
-					if ((iv.timeOfJammedVehicleToReachIntersection - iv.timeOfJammingVehicleToLeaveIntersection < 7) // entweder weniger als 10 Zeiteinheiten Sicherheitsabstand 
-						&& (iv.originalTimeOfJammingVehicleToReachIntersecion - iv.originalTimeOfJammedVehicleToReachIntersecion <= 2)) // oder das andere Auto wäre eigentlich >10s vor mir dagewesen
-						{
-						double newWunschabstand = CalculateWantedDistance(physics.velocity, physics.velocity);
-
-						double myDistanceToIntersection = ((currentNC == iv.intersection.aConnection) ? iv.intersection.aArcPosition : iv.intersection.bArcPosition) - arcPos - iv.jammingVehicle.length - iv.intersection.GetWaitingDistance();
-
-						double newAcceleration = CalculateAcceleration(
-							physics.velocity, 
-							physics.effectiveDesiredVelocity,
-							myDistanceToIntersection,
-							newWunschabstand, 
-							physics.velocity);
-
-						// Minimum speichern
-						if (newAcceleration < lowestAcceleration)
-							{
-							lowestAcceleration = newAcceleration;
-							thinkAboutLineChange = false;
-							}
-
-						// Minimum speichern
-						if (newWunschabstand < wunschabstand)
-							wunschabstand = newWunschabstand;
-						}
-					}
-				// meine NodeConnection hat die höhere Priorität
-				else if (currentNC.priority > iv.jammingVehicle.currentNodeConnection.priority)
-					{
-					// TODO: Problem: ich bin zwar eigentlich wichtiger als der Arsch der mich ausbremst, aber ich will ja auch keinen Unfall bauen...
-					//       also was ist zu tun?
-
-					// Also, wenn mir tatsächlich jemand vor die Nase fährt werd ich wohl ne Notbremsung machen:
-					// (vielleicht erkenn ich das dass ich stärker als b_save bremsen muss)
-					
-					if ((iv.timeOfJammingVehicleToReachIntersection < 3) 
-						&& (iv.timeOfJammedVehicleToReachIntersection - iv.timeOfJammingVehicleToLeaveIntersection < 3))
-						{
-						/*double newWunschabstand = CalculateWantedDistance(physics.velocity, physics.velocity);
-
-						double newAcceleration = CalculateAcceleration(
-							physics.velocity,
-							physics.desiredVelocity,
-							((currentNC == iv.intersection.aConnection) ? iv.intersection.aArcPosition : iv.intersection.bArcPosition) - arcPos - iv.jammingVehicle.length,
-							newWunschabstand,
-							physics.velocity);
-
-						// Minimum speichern
-						if (newAcceleration < lowestAcceleration)
-							lowestAcceleration = newAcceleration;
-
-						// Minimum speichern
-						if (newWunschabstand < wunschabstand)
-							wunschabstand = newWunschabstand;*/
-						}
-					}
-				// meine NodeConnection hat die geringere Priorität
-				else
-					{
-					// gucken, wie stark ich behindert werde
-					// 10 Zeiteinheiten Sicherheitsabstand zwischen dem der mich behindert und mir
-					if (iv.timeOfJammedVehicleToReachIntersection - iv.timeOfJammingVehicleToLeaveIntersection < 8)
-						{
-						double newWunschabstand = CalculateWantedDistance(physics.velocity, physics.velocity);
-
-						double newAcceleration = CalculateAcceleration(
-							physics.velocity,
-							physics.effectiveDesiredVelocity,
-							((currentNC == iv.intersection.aConnection) ? iv.intersection.aArcPosition : iv.intersection.bArcPosition) - arcPos - iv.jammingVehicle.length - iv.intersection.GetWaitingDistance(),
-							newWunschabstand,
-							physics.velocity);
-
-						// Minimum speichern
-						if (newAcceleration < lowestAcceleration)
-							{
-							lowestAcceleration = newAcceleration;
-							thinkAboutLineChange = false;
-							}
-
-						// Minimum speichern
-						if (newWunschabstand < wunschabstand)
-							wunschabstand = newWunschabstand;
-						}
-					}
-				}
-
-			#endregion
-
-			#region Spurwechsel
-
-			if (!onlySimpleCalculations)
-				{
-
-				#region zwangsweise
-
-				// unsere Route gibt uns vor hier einen Spurwechsel zu machen
-				if (lineChangeNeeded)
-					{
-					thinkAboutLineChange = false;
-					if (!currentlyChangingLine)
-						{
-						// nächsten LineChangePoint finden, der uns zum nächsten Zielknoten führt
-						NodeConnection.LineChangePoint lcp = currentNC.GetPrevLineChangePoint(arcPos);
-						if (lci.targetNode.prevConnections.Contains(lcp.target.nc))
-							{
-							if (Math.Abs(arcPos - lcp.start.arcPosition) < Constants.maxDistanceToLineChangePoint / 2)
-								{
-								double myArcPositionOnOtherConnection = lcp.otherStart.arcPosition + (arcPos - lcp.start.arcPosition);// -(lcp.myArcPosition - arcPos);
-								if (myArcPositionOnOtherConnection >= 0)
-									{
-									Pair<VehicleDistance> otherVehicles = lcp.otherStart.nc.GetVehiclesAroundArcPosition(myArcPositionOnOtherConnection, Constants.lookaheadDistance);
-
-									// neuer Vordermann wäre nicht zu nah dran
-									if (otherVehicles.Right == null || otherVehicles.Right.distance > otherVehicles.Right.vehicle.length * 1.5)// + lcp.length)
-										{
-										// neuer Hintermann wäre nicht zu nah dran
-										if (otherVehicles.Left == null || otherVehicles.Left.distance > m_Length * 1.5)
-											{
-											// meine theoretische Beschleunigung auf der anderen Spur berechnen:
-											double myAccelerationOnOtherConnection = (otherVehicles.Right != null)
-												? CalculateAcceleration(physics.velocity, physics.effectiveDesiredVelocity, otherVehicles.Right.vehicle.currentPosition - myArcPositionOnOtherConnection, physics.velocity - otherVehicles.Right.vehicle.physics.velocity)
-												: CalculateAcceleration(physics.velocity, physics.effectiveDesiredVelocity, lookaheadDistance, physics.velocity);
-
-											// die Beschleunigung meines neuen Hintermannes berechnen:
-											double forcedAccelerationOfVehicleBehindMeOnOtherConnection = (otherVehicles.Left != null)
-												? CalculateAcceleration(otherVehicles.Left.vehicle.physics.velocity, otherVehicles.Left.vehicle.physics.effectiveDesiredVelocity, otherVehicles.Left.distance, otherVehicles.Left.vehicle.physics.velocity - physics.velocity)
-												: 0;
-
-											double currentAccelerationOfVehicleBehindMeOnOtherConnection = (otherVehicles.Left != null) ? otherVehicles.Left.vehicle.physics.acceleration : 0;
-
-											// eigenes Spurwechselmodell:
-											// der neue Hintermann darf nicht mehr als bSave ausgebremst werden
-											// und und mein Spurwechsel muss hinreichend dringend werden. Je näher ich ans Ende des LineChangeIntervalls komme, desto mehr darf ich den Hintermann ausbremsen
-											if ((forcedAccelerationOfVehicleBehindMeOnOtherConnection > bSave)
-												&& (p * (arcPos - lci.startArcPos) / lci.length >= p * (currentAccelerationOfVehicleBehindMeOnOtherConnection - forcedAccelerationOfVehicleBehindMeOnOtherConnection)))
-												{
-												// wieder auf normale Wunschegschwindigkeit gehen
-												m_Physics.multiplierDesiredVelocity = 1;
-
-												// erstmal mich selbst zerstören
-												Dispose((float)((arcPos - m_arcPositionOfStartOnNodeConnection) / (10.0f * (currentTime - m_startTimeOnNodeConnection))));
-
-												// ich darf einen Linienwechsel durchführen, jetzt wirds spannend:
-												InitiateLineChange(lcp, arcPos - lcp.start.arcPosition);
-
-												lowestAcceleration = myAccelerationOnOtherConnection;
-												}
-											}
-										// wenn ich jetzt nen Spurwechsel machen würde, dann würde ich meinen neuen Hintermann ausbremsen, aber ich kann beschleunigen und fahre schon mindestens genauso schnell wie er
-										else if ((otherVehicles.Left.vehicle.physics.velocity / this.physics.velocity < 1.1) && (lowestAcceleration >= -0.1))
-											{
-											// also beschleunige ich etwas, damit ich mich vor ihn setze demnächst den Spurwechsel machen kann
-											m_Physics.multiplierDesiredVelocity = 1.5;
-											lowestAcceleration = CalculateAcceleration(physics.velocity, physics.effectiveDesiredVelocity, lookaheadDistance, physics.velocity);
-
-											// ich sage dem anderen Auto, dass ich die Spur wechseln möchte, vielleicht bremst es für mich,
-											// vorher sollte ich mich aber noch bei dem, den ich evtl. vorher ausgebremst habe abmelden:
-											if (vehicleWhichSlowsDownForMe != null)
-												vehicleWhichSlowsDownForMe.slowDownForChangingVehicle = false;
-
-											otherVehicles.Left.vehicle.slowDownForChangingVehicle = true;
-											vehicleWhichSlowsDownForMe = otherVehicles.Left.vehicle;
-											}
-										// auch das würde nichts helfen, also bremse ich etwas ab
-										else
-											{
-											// ich bremse vorsichtshalber schonmal etwas ab
-											m_Physics.multiplierDesiredVelocity = 0.75;
-
-											// ich sage dem anderen Auto, dass ich die Spur wechseln möchte, vielleicht bremst es für mich,
-											// vorher sollte ich mich aber noch bei dem, den ich evtl. vorher ausgebremst habe abmelden:
-											if (vehicleWhichSlowsDownForMe != null)
-												vehicleWhichSlowsDownForMe.slowDownForChangingVehicle = false;
-
-											otherVehicles.Left.vehicle.slowDownForChangingVehicle = true;
-											vehicleWhichSlowsDownForMe = otherVehicles.Left.vehicle;
-
-											// prüfen, wieviel Strecke es noch gibt, auf der ich die Spur wechseln kann
-											if (lci.endArcPos - arcPos < Constants.minimumLineChangeLength)
-												{
-												// die aktuelle Spurwechselmöglichkeit ist fast zu Ende, prüfen, ob es schlimm ist, wenn ich nicht jetzt sofort wechsle
-												RouteToTarget newRTT = CalculateShortestConenction(currentNC.endNode, m_TargetNodes);
-												// ich kann auch später die Spur wechseln und komme trotzdem ans Ziel (ohne allzu große Umwege zu fahren)
-												if (newRTT.SegmentCount() > 0 && newRTT.costs / m_WayToGo.costs < Constants.maxRatioForEnforcedLineChange)
-													{													
-													m_WayToGo = newRTT;
-													m_Physics.multiplierDesiredVelocity = 1;
-													lineChangeNeeded = false;
-													lci = null;
-													}
-												// nein, ich muss jetzt gleich hier die Spur wechseln, also halte zur Not an bis mich jemand reinlässt
-												else
-													{
-													lowestAcceleration = CalculateAcceleration(physics.velocity, physics.effectiveDesiredVelocity, lci.endArcPos - arcPos, physics.velocity);
-													}
-												}
-											// die aktuelle Spruchwechslmöglichkeit ist noch lang genug
-											else
-												{
-												lowestAcceleration = CalculateAcceleration(physics.velocity, physics.effectiveDesiredVelocity, lci.endArcPos - arcPos, physics.velocity);
-												}
-											}
-										}
-									// auch das würde nichts helfen, also bremse ich etwas ab
-									else
-										{
-										m_Physics.multiplierDesiredVelocity = 0.75;
-										if (lci.endArcPos - arcPos < Constants.minimumLineChangeLength)
-											{
-											// die aktuelle Spurwechselmöglichkeit ist fast zu Ende, prüfen, ob es schlimm ist, wenn ich nicht jetzt sofort wechsle
-											RouteToTarget newRTT = CalculateShortestConenction(currentNC.endNode, m_TargetNodes);
-											// ich kann auch später die Spur wechseln und komme trotzdem ans Ziel (ohne allzu große Umwege zu fahren)
-											if (newRTT.SegmentCount() > 0 && newRTT.costs/ m_WayToGo.costs < Constants.maxRatioForEnforcedLineChange)
-												{
-												m_WayToGo = newRTT;
-												m_Physics.multiplierDesiredVelocity = 1;
-												lineChangeNeeded = false;
-												lci = null;
-												}
-											else
-												{
-												lowestAcceleration = CalculateAcceleration(physics.velocity, physics.effectiveDesiredVelocity, lci.endArcPos - arcPos, physics.velocity);
-												}
-											}
-										else
-											{
-											lowestAcceleration = CalculateAcceleration(physics.velocity, physics.effectiveDesiredVelocity, lci.endArcPos - arcPos, physics.velocity);
-											}
-										}
-									}
-								}
-							}
-						}
-					}
-
-				#endregion
-
-				#region freiwillig
-				// Über Spurwechsel nachdenken
-				if (thinkAboutLineChange && !currentlyChangingLine)
-					{
-					// nächsten LineChangePoint finden
-					NodeConnection.LineChangePoint lcp = currentNC.GetPrevLineChangePoint(arcPos);
-					if (lcp.target.nc != null)
-						{
-						if (Math.Abs(arcPos - lcp.start.arcPosition) < Constants.maxDistanceToLineChangePoint / 2)
-							{
-							// prüfen, ob ich auf der anderen NodeConnection überhaupt ans Ziel komme und das in einem angemessenen Zeitraum:
-							RouteToTarget alternativeRoute = CalculateShortestConenction(lcp.target.nc.endNode, targetNodes);
-
-							if (alternativeRoute.SegmentCount() > 0 && alternativeRoute.costs / WayToGo.costs < Constants.maxRatioForVoluntaryLineChange && !alternativeRoute.Top().lineChangeNeeded)
-								{
-								double myArcPositionOnOtherConnection = lcp.otherStart.arcPosition + (arcPos - lcp.start.arcPosition);// -(lcp.myArcPosition - arcPos);
-								if (myArcPositionOnOtherConnection >= 0)
-									{
-									Pair<VehicleDistance> otherVehicles = lcp.otherStart.nc.GetVehiclesAroundArcPosition(myArcPositionOnOtherConnection, Constants.lookaheadDistance);
-
-									// neuer Vordermann wäre nicht zu nah dran
-									if (otherVehicles.Right == null || otherVehicles.Right.distance > otherVehicles.Right.vehicle.length * 2 + lcp.length)
-										{
-										// neuer Hintermann wäre nicht zu nah dran
-										if (otherVehicles.Left == null || otherVehicles.Left.distance > m_Length * 2)
-											{
-											//double myAccelerationOnOtherConnection = Think(lcp.otherStart.nc, myArcPositionOnOtherConnection, true, tickLength, currentTime);
-											// meine theoretische Beschleunigung auf der anderen Spur berechnen:
-											double myAccelerationOnOtherConnection = (otherVehicles.Right != null)
-												? CalculateAcceleration(physics.velocity, physics.effectiveDesiredVelocity, otherVehicles.Right.vehicle.currentPosition - myArcPositionOnOtherConnection, physics.velocity - otherVehicles.Right.vehicle.physics.velocity)
-												: CalculateAcceleration(physics.velocity, physics.effectiveDesiredVelocity, lookaheadDistance, physics.velocity);
-
-											// die Beschleunigung meines neuen Hintermannes berechnen:
-											double forcedAccelerationOfVehicleBehindMeOnOtherConnection = (otherVehicles.Left != null)
-												? CalculateAcceleration(otherVehicles.Left.vehicle.physics.velocity, otherVehicles.Left.vehicle.physics.effectiveDesiredVelocity, otherVehicles.Left.distance, otherVehicles.Left.vehicle.physics.velocity - physics.velocity)
-												: 0;
-
-											double currentAccelerationOfVehicleBehindMeOnOtherConnection = (otherVehicles.Left != null) ? otherVehicles.Left.vehicle.physics.acceleration : 0;
-
-											// vereinfachte Implementierung von MOBIL: http://www.vwi.tu-dresden.de/~treiber/MicroApplet/MOBIL.html
-											if (forcedAccelerationOfVehicleBehindMeOnOtherConnection > bSave)
-												{
-												if (myAccelerationOnOtherConnection - lowestAcceleration > p * (currentAccelerationOfVehicleBehindMeOnOtherConnection - forcedAccelerationOfVehicleBehindMeOnOtherConnection) + lineChangeThreshold)
-													{
-													// erstmal mich selbst zerstören
-													Dispose((float)((arcPos - m_arcPositionOfStartOnNodeConnection) / (10.0f * (currentTime - m_startTimeOnNodeConnection))));
-
-													// ich darf einen Linienwechsel durchführen, jetzt wirds spannend:
-													InitiateLineChange(lcp, arcPos - lcp.start.arcPosition);
-
-													lowestAcceleration = myAccelerationOnOtherConnection;
-													}
-												}
-											}
-										}
-									}
-								}
-							}
-						}
-					}
-
-				#endregion
-
-				}
-
-			#endregion
-
-			if (!onlySimpleCalculations)
-				{
-				Accelerate(lowestAcceleration);
-				}
-
-			return lowestAcceleration;
-			}
-
-
 
 		/// <summary>
 		/// gibt die Entfernung zum nächsten LineNode zurück
@@ -1368,12 +856,6 @@ namespace CityTrafficSimulator.Vehicle
 		private LinkedList<SpecificIntersection> temporaryRegisteredIntersections = new LinkedList<SpecificIntersection>();
 
 		/// <summary>
-		/// Merkvariable für Wunschabstand
-		/// </summary>
-		private double wunschabstand = 0;
-
-
-		/// <summary>
 		/// Returns the next vehicle on the given Nodeconnection together with the distance to its rear end.
 		/// </summary>
 		/// <param name="nc">NodeConnection where to start with search</param>
@@ -1444,7 +926,7 @@ namespace CityTrafficSimulator.Vehicle
 			// Setup some helper variables:
 			double doneDistance = -currentPosition;										// total covered distance
 			double remainingDistance = distance;										// total remaining distance to cover
-			double startPosition = currentPosition;										// start position at current NodeConnection
+			double startPosition = currentPosition - length;							// start position at current NodeConnection
 			LinkedListNode<SpecificIntersection> lln = intersectionRegistration.First;	// current already registered intersection
 
 			// search each NodeConnection
@@ -1508,8 +990,9 @@ namespace CityTrafficSimulator.Vehicle
 		/// Handles each intersection in <paramref name="intersectionRegistration"/>.
 		/// </summary>
 		/// <param name="intersectionRegistration">List of all intersections to handle.</param>
+		/// <param name="stopPoint">Distance to position where vehicle is going to stop. Setting this value to a sane value may prevent blocking of intersections.</param>
 		/// <returns>If there is an intersection where the vehicle should wait, the remaining distance to this intersection will be returned. If no such intersection exists -1 will be returned.</returns>
-		private double HandleIntersections(LinkedList<SpecificIntersection> intersectionRegistration)
+		private double HandleIntersections(LinkedList<SpecificIntersection> intersectionRegistration, double stopPoint)
 			{
 			LinkedListNode<SpecificIntersection> lln = intersectionRegistration.First;
 			while (lln != null)
@@ -1520,6 +1003,7 @@ namespace CityTrafficSimulator.Vehicle
 				// Get interfering vehicles for this intersections
 				List<CrossingVehicleTimes> cvtList = si.intersection.CalculateInterferingVehicles(this, si.nodeConnection);
 				NodeConnection otherNC = si.intersection.GetOtherNodeConnection(si.nodeConnection);
+				CrossingVehicleTimes myCvt = si.intersection.GetCrossingVehicleTimes(this, si.nodeConnection);
 
 				// If other NodeConnection is more important than mine
 				if (otherNC.priority > si.nodeConnection.priority)
@@ -1528,11 +1012,20 @@ namespace CityTrafficSimulator.Vehicle
 					// TODO:	Develop s.th. more convenient (e.g. if possible, try to accelerate a little to get through first).
 					if (cvtList.Count > 0)
 						waitInFrontOfIntersection = true;
+					// Intersection is close to stop point so that vehicle will block this intersection => wait in front
+					if ((stopPoint > 0) && (stopPoint - length - s0 < myCvt.remainingDistance))
+						{
+						waitInFrontOfIntersection = true;
+						}
 					}
 				// Both NodeConnections have the same priority
 				else if (otherNC.priority == si.nodeConnection.priority)
 					{
-					CrossingVehicleTimes myCvt = si.intersection.GetCrossingVehicleTimes(this, si.nodeConnection);
+					// Intersection is close to stop point so that vehicle will block this intersection => wait in front
+					if ((stopPoint > 0) && (stopPoint - length - s0 < myCvt.remainingDistance))
+						{
+						waitInFrontOfIntersection = true;
+						}
 
 					// check at each intersection, which vehicle was there first
 					foreach (CrossingVehicleTimes otherCvt in cvtList)
@@ -1696,62 +1189,6 @@ namespace CityTrafficSimulator.Vehicle
 						}
 					}
 				}
-
-			return toReturn;
-			}
-
-		/// <summary>
-		/// Finde alle Fahrzeuge die ich evtl. ausbremsen könnte
-		/// </summary>
-		/// <param name="currentNC">NodeConnection für die die Beschleunigungswerte berechnet werden sollen</param>
-		/// <param name="arcPos">Position auf nc für die die Beschleunigungswerte berechnet werden sollen</param>
-		/// <param name="distanceWithin">Suchentfernung</param>
-		/// <returns>Liste von JammedVehicles</returns>
-		private List<InterferingVehicle> GetJammedVehicles(NodeConnection currentNC, double arcPos, double distanceWithin)
-			{
-			List<InterferingVehicle> toReturn = new List<InterferingVehicle>();
-
-			#region erstmal alle Intersections bestimmen
-			List<Intersection> intersections = new List<Intersection>();
-
-			// kann ich die Suche auf die currentNC beschränken?
-			if (GetDistanceToEndOfLineSegment(currentNC, arcPos) > distanceWithin)
-				{
-				intersections.AddRange(currentNC.GetIntersectionsWithinTime(
-					new Interval<double>(
-						currentNC.lineSegment.PosToTime(arcPos),
-						currentNC.lineSegment.PosToTime(arcPos + distanceWithin)
-						)));
-				}
-			// ich muss noch die nächsten NodeConnections auf meinem Weg durchsuchen
-			else
-				{
-				intersections.AddRange(currentNC.GetIntersectionsWithinTime(
-					new Interval<double>(currentNC.lineSegment.PosToTime(arcPos), 1)));
-
-				double alreadyCheckedDistance = GetDistanceToEndOfLineSegment(currentNC, arcPos);
-				foreach (RouteSegment rs in WayToGo)
-					{
-					NodeConnection nc = rs.startConnection;
-
-					// Abbruchkriterium
-					if (alreadyCheckedDistance + nc.lineSegment.length > distanceWithin)
-						{
-						intersections.AddRange(currentNC.GetIntersectionsWithinTime(
-							new Interval<double>(
-								currentNC.lineSegment.PosToTime(arcPos),
-								currentNC.lineSegment.PosToTime(arcPos + distanceWithin)
-								)));
-						break;
-						}
-					else
-						{
-						intersections.AddRange(nc.GetIntersectionsWithinTime(new Interval<double>(0, 1)));
-						alreadyCheckedDistance += nc.lineSegment.length;
-						}
-					}
-				}
-			#endregion
 
 			return toReturn;
 			}
@@ -2034,13 +1471,6 @@ namespace CityTrafficSimulator.Vehicle
 				}
             }
         #endregion
-
-		// TODO: 
-		// Irgendwie scheint der Algorithmus noch nicht so zu laufen wie er soll
-		// Der Haken scheint bei der Miteinberechnung der auf den Linien vorhandenen Autos zu sein. 
-		// Kann es sein, dass, die entsprechenden Felder nicht richtig aktualisiert werden? Evtl. beim NodeConnection-Wechsel?
-		//
-		// UPDATE: liegt einfach daran, dass die Beste Route beim Start berechnet wird und dann nicht mehr aktualisiert wird.
 
 		#region A* Algorithmus
 
@@ -2498,7 +1928,7 @@ namespace CityTrafficSimulator.Vehicle
 		/// <param name="g">Die Zeichenfläche auf der gezeichnet werden soll</param>
 		public void DrawDebugData(Graphics g)
 			{
-			Pen lineToIntersectionPen = new Pen(Color.Maroon);
+			Pen lineToIntersectionPen = new Pen(Color.Maroon, 3);
 			Brush blackBrush =  new SolidBrush(Color.Black);
 			Font debugFont = new Font("Calibri", 6);
 
@@ -2510,7 +1940,10 @@ namespace CityTrafficSimulator.Vehicle
 				//g.DrawLine(lineToIntersectionPen, pair.Key.aPosition, this.state.positionAbs);
 				//g.DrawString(pair.Value.ToString(), debugFont, blackBrush, pair.Key.aPosition + 0.5 * (state.positionAbs - pair.Key.aPosition));
 				}
-
+			if (vehicleWhichSlowsDownForMe != null)
+				{
+				g.DrawLine(lineToIntersectionPen, state.positionAbs, vehicleWhichSlowsDownForMe.state.positionAbs);
+				}
 
 			foreach (NodeConnection prevNC in visitedNodeConnections)
 				{
@@ -2530,9 +1963,7 @@ namespace CityTrafficSimulator.Vehicle
 				}
 
 
-			g.DrawString(hashcode.ToString() + " @ " + currentNodeConnection.lineSegment.PosToTime(currentPosition).ToString("0.##") + "t ," + currentPosition.ToString("####") + "dm - " + physics.velocity.ToString("##.#") + "m/s\nnoch " + WayToGo.SegmentCount() + " nodes zu befahren\n" + behaviour.GetDebugString() + "\n\n" + debugData.ToString(), debugFont, blackBrush, state.positionAbs + new Vector2(0, -10));
-
-			behaviour.DrawDebugGraphics(g);
+			g.DrawString(hashcode.ToString() + " @ " + currentNodeConnection.lineSegment.PosToTime(currentPosition).ToString("0.##") + "t ," + currentPosition.ToString("####") + "dm - " + physics.velocity.ToString("##.#") + "m/s\nnoch " + WayToGo.SegmentCount() + " nodes zu befahren\n\n" + debugData.ToString(), debugFont, blackBrush, state.positionAbs + new Vector2(0, -10));
 			}
 
 		#endregion

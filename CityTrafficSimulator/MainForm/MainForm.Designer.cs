@@ -1089,7 +1089,7 @@ namespace CityTrafficSimulator
 			// lockNodesCheckBox
 			// 
 			this.lockNodesCheckBox.AutoSize = true;
-			this.lockNodesCheckBox.Location = new System.Drawing.Point(562, 49);
+			this.lockNodesCheckBox.Location = new System.Drawing.Point(555, 20);
 			this.lockNodesCheckBox.Name = "lockNodesCheckBox";
 			this.lockNodesCheckBox.Size = new System.Drawing.Size(84, 17);
 			this.lockNodesCheckBox.TabIndex = 13;
@@ -1108,7 +1108,7 @@ namespace CityTrafficSimulator
 			// 
 			// stepButton
 			// 
-			this.stepButton.Location = new System.Drawing.Point(648, 74);
+			this.stepButton.Location = new System.Drawing.Point(648, 103);
 			this.stepButton.Name = "stepButton";
 			this.stepButton.Size = new System.Drawing.Size(135, 23);
 			this.stepButton.TabIndex = 9;
@@ -1119,11 +1119,11 @@ namespace CityTrafficSimulator
 			// timerOnCheckBox
 			// 
 			this.timerOnCheckBox.AutoSize = true;
-			this.timerOnCheckBox.Location = new System.Drawing.Point(562, 20);
+			this.timerOnCheckBox.Location = new System.Drawing.Point(648, 78);
 			this.timerOnCheckBox.Name = "timerOnCheckBox";
-			this.timerOnCheckBox.Size = new System.Drawing.Size(69, 17);
+			this.timerOnCheckBox.Size = new System.Drawing.Size(110, 17);
 			this.timerOnCheckBox.TabIndex = 6;
-			this.timerOnCheckBox.Text = "Timer On";
+			this.timerOnCheckBox.Text = "Enable Simulation";
 			this.timerOnCheckBox.UseVisualStyleBackColor = true;
 			this.timerOnCheckBox.CheckedChanged += new System.EventHandler(this.timerOnCheckBox_CheckedChanged);
 			// 

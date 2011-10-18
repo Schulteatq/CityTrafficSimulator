@@ -83,7 +83,7 @@ namespace CityTrafficSimulator
 		/// <summary>
 		/// Politeness-Faktor von MOBIL
 		/// </summary>
-		protected double p = 0.25;
+		protected double p = 0.2;
 
 		/// <summary>
 		/// Mindest-Vorteilswert für Spurwechsel
