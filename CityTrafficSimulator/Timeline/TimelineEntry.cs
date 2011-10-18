@@ -92,7 +92,7 @@ namespace CityTrafficSimulator.Timeline
 		public double maxTime
 			{
 			get { return m_maxTime; }
-			set { m_maxTime = value; }
+			set { m_maxTime = value; AdaptEventsToMaxTime(); }
 			}
 
 		/// <summary>
@@ -353,6 +353,34 @@ namespace CityTrafficSimulator.Timeline
 				lln = lln.Next;
 				}
 			defaultAction();
+			}
+
+
+		/// <summary>
+		/// Updates all contained events so that they fit into the new maxTime.
+		/// </summary>
+		public void AdaptEventsToMaxTime()
+			{
+			List<TimelineEvent> eventsToDelete = new List<TimelineEvent>();
+
+			foreach (TimelineEvent te in m_events)
+				{
+				if (te.eventTime < m_maxTime && te.eventTime + te.eventLength > m_maxTime)
+					{
+					te.eventLength = m_maxTime - te.eventTime;
+					}
+				else if (te.eventTime >= m_maxTime)
+					{
+					eventsToDelete.Add(te);
+					}
+				}
+
+			foreach (TimelineEvent te in eventsToDelete)
+				{
+				m_events.Remove(te);
+				}
+
+			OnEntryChanged(new EntryChangedEventArgs(this));
 			}
 		
 		#endregion

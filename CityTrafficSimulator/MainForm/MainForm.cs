@@ -2121,6 +2121,35 @@ namespace CityTrafficSimulator
 			timer1.Interval = (int)(1000 / stepsPerSecondSpinEdit.Value / simulationSpeedSpinEdit.Value);
 			}
 
+		private void freeNodeButton_Click(object sender, EventArgs e)
+			{
+			if (m_selectedLineNodes.Count > 0)
+				{
+				// dann den ausgewählten LineNodes eine evtl. zugeordnete Ampel wegnehmen
+				foreach (LineNode ln in m_selectedLineNodes)
+					{
+					if (ln.tLight != null)
+						{
+						ln.tLight.RemoveAssignedLineNode(ln);
+						}
+					}
+
+				timeline.selectedEntry = null;
+				}
+
+			Invalidate();
+			}
+
+		private void showEditorButton_Click(object sender, EventArgs e)
+			{
+			if (trafficLightForm.IsDisposed)
+				{
+				trafficLightForm = new TrafficLightForm(timelineSteuerung);
+				}
+			trafficLightForm.Show();
+			trafficLightForm.BringToFront();
+			}
+
 
 		}
     }

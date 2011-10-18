@@ -61,7 +61,7 @@ namespace CityTrafficSimulator.Timeline
 		public double maxTime
 			{
 			get { return m_maxTime; }
-			set { m_maxTime = value; OnMaxTimeChanged(); }
+			set { m_maxTime = value; UpdateMaxTime(); OnMaxTimeChanged(); }
 			}
 
 
@@ -170,6 +170,21 @@ namespace CityTrafficSimulator.Timeline
 			OnGroupsChanged();
 			}
 
+
+		/// <summary>
+		/// Updates maxTime in all contained entries.
+		/// </summary>
+		public void UpdateMaxTime()
+			{
+			foreach (TimelineGroup tg in m_groups)
+				{
+				foreach (TimelineEntry te in tg.entries)
+					{
+					te.maxTime = m_maxTime;
+					}
+				}
+			}
+
 		#endregion
 
 		#region Zeitmanagement
@@ -245,6 +260,11 @@ namespace CityTrafficSimulator.Timeline
 
 				xw.WriteStartElement("TrafficLights");
 
+				// write cycle time
+				xw.WriteStartAttribute("cycleTime");
+				xw.WriteString(m_maxTime.ToString());
+				xw.WriteEndAttribute();
+
 				// TimelineGroups (und damit auch alles was dahinter liegt) serialisieren 
 				Type[] extraTypes = { typeof(TrafficLight) };
 				XmlSerializer xs = new XmlSerializer(typeof(TimelineGroup), extraTypes);
@@ -295,6 +315,18 @@ namespace CityTrafficSimulator.Timeline
 				saveVersion = 0;
 
 			lf.StepLowerProgress();
+
+			if (saveVersion >= 4)
+				{
+				XmlNode xnlTrafficLights = xd.SelectSingleNode("//CityTrafficSimulator/TrafficLights");
+				XmlNode cycleTimeNode = xnlTrafficLights.Attributes.GetNamedItem("cycleTime");
+				if (cycleTimeNode != null)
+					maxTime = Double.Parse(cycleTimeNode.Value);
+				}
+			else
+				{
+				maxTime = 50;
+				}
 
 			if (saveVersion >= 3)
 				{

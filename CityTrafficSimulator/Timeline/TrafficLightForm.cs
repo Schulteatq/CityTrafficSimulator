@@ -39,7 +39,9 @@ namespace CityTrafficSimulator.Timeline
 			InitializeComponent();
 			timelineControl.steuerung = steuerung;
 			steuerung.GroupsChanged += new TimelineSteuerung.GroupsChangedEventHandler(steuerung_GroupsChanged);
+			steuerung.MaxTimeChanged += new TimelineSteuerung.MaxTimeChangedEventHandler(steuerung_MaxTimeChanged);
 			timelineControl.SelectionChanged += new TimelineControl.SelectionChangedEventHandler(timelineControl_SelectionChanged);
+			cycleTimeSpinEdit.Value = (decimal)steuerung.maxTime;
 			}
 
 		void timelineControl_SelectionChanged(object sender, TimelineControl.SelectionChangedEventArgs e)
@@ -69,7 +71,13 @@ namespace CityTrafficSimulator.Timeline
 			isNotified = false;
 			}
 
-
+		void steuerung_MaxTimeChanged(object sender, EventArgs e)
+			{
+			isNotified = true;
+			cycleTimeSpinEdit.Value = (decimal)steuerung.maxTime;
+			isNotified = false;
+			}
+		
 		private void UpdateGroupComboBox()
 			{
 			groupComboBox.Items.Clear();
@@ -225,6 +233,12 @@ namespace CityTrafficSimulator.Timeline
 				default:
 					break;
 				}
+			}
+
+		private void cycleTimeSpinEdit_ValueChanged(object sender, EventArgs e)
+			{
+			if (! isNotified)
+				steuerung.maxTime = (double)cycleTimeSpinEdit.Value;
 			}
 
 		}

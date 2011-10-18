@@ -131,6 +131,8 @@ namespace CityTrafficSimulator
 			this.statusLabel = new System.Windows.Forms.ToolStripStatusLabel();
 			this.button1 = new System.Windows.Forms.Button();
 			this.button2 = new System.Windows.Forms.Button();
+			this.freeNodeButton = new System.Windows.Forms.Button();
+			this.showEditorButton = new System.Windows.Forms.Button();
 			this.DaGrid = new CityTrafficSimulator.RechenkaestchenControl();
 			this.trafficLightTreeView = new CityTrafficSimulator.Timeline.TrafficLightTreeView(this.components);
 			this.thumbGrid = new CityTrafficSimulator.RechenkaestchenControl();
@@ -242,9 +244,9 @@ namespace CityTrafficSimulator
 			this.groupBox3.Controls.Add(this.label7);
 			this.groupBox3.Controls.Add(this.titleEdit);
 			this.groupBox3.Controls.Add(this.infoEdit);
-			this.groupBox3.Location = new System.Drawing.Point(8, 301);
+			this.groupBox3.Location = new System.Drawing.Point(8, 324);
 			this.groupBox3.Name = "groupBox3";
-			this.groupBox3.Size = new System.Drawing.Size(280, 179);
+			this.groupBox3.Size = new System.Drawing.Size(280, 156);
 			this.groupBox3.TabIndex = 21;
 			this.groupBox3.TabStop = false;
 			this.groupBox3.Text = "Network Information";
@@ -273,7 +275,7 @@ namespace CityTrafficSimulator
 			this.infoEdit.Multiline = true;
 			this.infoEdit.Name = "infoEdit";
 			this.infoEdit.ScrollBars = System.Windows.Forms.ScrollBars.Horizontal;
-			this.infoEdit.Size = new System.Drawing.Size(268, 128);
+			this.infoEdit.Size = new System.Drawing.Size(268, 104);
 			this.infoEdit.TabIndex = 0;
 			this.infoEdit.Leave += new System.EventHandler(this.textBox1_Leave);
 			// 
@@ -286,9 +288,9 @@ namespace CityTrafficSimulator
 			this.NodeConnectionSetupGroupBox.Controls.Add(this.carsAllowedCheckBox);
 			this.NodeConnectionSetupGroupBox.Controls.Add(this.label4);
 			this.NodeConnectionSetupGroupBox.Controls.Add(this.nodeConnectionPrioritySpinEdit);
-			this.NodeConnectionSetupGroupBox.Location = new System.Drawing.Point(6, 205);
+			this.NodeConnectionSetupGroupBox.Location = new System.Drawing.Point(8, 228);
 			this.NodeConnectionSetupGroupBox.Name = "NodeConnectionSetupGroupBox";
-			this.NodeConnectionSetupGroupBox.Size = new System.Drawing.Size(282, 90);
+			this.NodeConnectionSetupGroupBox.Size = new System.Drawing.Size(280, 90);
 			this.NodeConnectionSetupGroupBox.TabIndex = 17;
 			this.NodeConnectionSetupGroupBox.TabStop = false;
 			this.NodeConnectionSetupGroupBox.Text = "Connection";
@@ -383,10 +385,12 @@ namespace CityTrafficSimulator
 			// 
 			// LineNodeSetupGroupBox
 			// 
+			this.LineNodeSetupGroupBox.Controls.Add(this.showEditorButton);
+			this.LineNodeSetupGroupBox.Controls.Add(this.freeNodeButton);
 			this.LineNodeSetupGroupBox.Controls.Add(this.trafficLightTreeView);
 			this.LineNodeSetupGroupBox.Location = new System.Drawing.Point(6, 6);
 			this.LineNodeSetupGroupBox.Name = "LineNodeSetupGroupBox";
-			this.LineNodeSetupGroupBox.Size = new System.Drawing.Size(282, 193);
+			this.LineNodeSetupGroupBox.Size = new System.Drawing.Size(282, 216);
 			this.LineNodeSetupGroupBox.TabIndex = 15;
 			this.LineNodeSetupGroupBox.TabStop = false;
 			this.LineNodeSetupGroupBox.Text = "Assign Signals to Nodes";
@@ -1083,7 +1087,7 @@ namespace CityTrafficSimulator
 			this.timelinePanel.Dock = System.Windows.Forms.DockStyle.Left;
 			this.timelinePanel.Location = new System.Drawing.Point(3, 16);
 			this.timelinePanel.Name = "timelinePanel";
-			this.timelinePanel.Size = new System.Drawing.Size(553, 117);
+			this.timelinePanel.Size = new System.Drawing.Size(546, 117);
 			this.timelinePanel.TabIndex = 14;
 			// 
 			// lockNodesCheckBox
@@ -1170,6 +1174,26 @@ namespace CityTrafficSimulator
 			this.button2.Text = "Laden";
 			this.button2.UseVisualStyleBackColor = true;
 			// 
+			// freeNodeButton
+			// 
+			this.freeNodeButton.Location = new System.Drawing.Point(198, 187);
+			this.freeNodeButton.Name = "freeNodeButton";
+			this.freeNodeButton.Size = new System.Drawing.Size(75, 23);
+			this.freeNodeButton.TabIndex = 2;
+			this.freeNodeButton.Text = "Free Node";
+			this.freeNodeButton.UseVisualStyleBackColor = true;
+			this.freeNodeButton.Click += new System.EventHandler(this.freeNodeButton_Click);
+			// 
+			// showEditorButton
+			// 
+			this.showEditorButton.Location = new System.Drawing.Point(117, 187);
+			this.showEditorButton.Name = "showEditorButton";
+			this.showEditorButton.Size = new System.Drawing.Size(75, 23);
+			this.showEditorButton.TabIndex = 3;
+			this.showEditorButton.Text = "Show Editor";
+			this.showEditorButton.UseVisualStyleBackColor = true;
+			this.showEditorButton.Click += new System.EventHandler(this.showEditorButton_Click);
+			// 
 			// DaGrid
 			// 
 			this.DaGrid.AllowDrop = true;
@@ -1199,7 +1223,7 @@ namespace CityTrafficSimulator
 			// 
 			this.trafficLightTreeView.Location = new System.Drawing.Point(9, 19);
 			this.trafficLightTreeView.Name = "trafficLightTreeView";
-			this.trafficLightTreeView.Size = new System.Drawing.Size(265, 168);
+			this.trafficLightTreeView.Size = new System.Drawing.Size(265, 162);
 			this.trafficLightTreeView.steuerung = null;
 			this.trafficLightTreeView.TabIndex = 1;
 			this.trafficLightTreeView.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.trafficLightTreeView_AfterSelect);
@@ -1388,6 +1412,8 @@ namespace CityTrafficSimulator
 		private System.Windows.Forms.Label label12;
 		private System.Windows.Forms.ComboBox renderQualityComboBox;
 		private System.Windows.Forms.Label label13;
+		private System.Windows.Forms.Button showEditorButton;
+		private System.Windows.Forms.Button freeNodeButton;
 
         }
     }
