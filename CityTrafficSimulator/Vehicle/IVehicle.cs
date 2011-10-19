@@ -396,7 +396,8 @@ namespace CityTrafficSimulator.Vehicle
 				thinkAboutLineChange = true;
 				lowestAcceleration = CalculateAcceleration(physics.velocity, physics.effectiveDesiredVelocity, theVehicleInFrontOfMe.distance, physics.velocity - theVehicleInFrontOfMe.vehicle.physics.velocity);
 
-				if (theVehicleInFrontOfMe.vehicle.physics.velocity < 4 && theVehicleInFrontOfMe.vehicle.physics.acceleration < 0)
+				if (    (theVehicleInFrontOfMe.vehicle.physics.velocity < 2.5)
+					 || (theVehicleInFrontOfMe.vehicle.physics.velocity < 5 && theVehicleInFrontOfMe.vehicle.physics.acceleration < 0.1))
 					{
 					stopDistance = theVehicleInFrontOfMe.distance;
 					}

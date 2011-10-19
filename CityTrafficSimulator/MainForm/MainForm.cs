@@ -354,11 +354,24 @@ namespace CityTrafficSimulator
 
 		private void thumbGrid_MouseDown(object sender, MouseEventArgs e)
 			{
-			if (thumbGridClientRect.Contains(e.Location))
+			if (!thumbGridClientRect.Contains(e.Location))
 				{
-				mouseDownPosition = new Point(thumbGridClientRect.X - e.Location.X, thumbGridClientRect.Y - e.Location.Y);
-				howToDrag = DragNDrop.MOVE_THUMB_RECT;
+				float zoom = (float)DaGrid.ClientSize.Width / thumbGrid.ClientSize.Width;
+				thumbGridClientRect.X = e.Location.X - thumbGridClientRect.Width/2;
+				thumbGridClientRect.Y = e.Location.Y - thumbGridClientRect.Height/2;
+
+				splitContainer1.Panel1.AutoScrollPosition = new Point(
+					(int)Math.Round(zoom * thumbGridClientRect.X * zoomMultipliers[zoomComboBox.SelectedIndex, 0]),
+					(int)Math.Round(zoom * thumbGridClientRect.Y * zoomMultipliers[zoomComboBox.SelectedIndex, 0]));
+
+
+				UpdateDaGridClippingRect();
+				DaGrid.Invalidate(true);
 				}
+
+			mouseDownPosition = new Point(thumbGridClientRect.X - e.Location.X, thumbGridClientRect.Y - e.Location.Y);
+			howToDrag = DragNDrop.MOVE_THUMB_RECT;
+
 			}
 
 		private void thumbGrid_MouseUp(object sender, MouseEventArgs e)
@@ -1264,43 +1277,6 @@ namespace CityTrafficSimulator
 
 
 		#region Eventhandler
-		private void IsStopcheckBox_CheckedChanged(object sender, EventArgs e)
-			{
-			/*
-			if (selectedLineNodes != null)
-				{
-				if (IsTrafficLightCheckBox.Checked)
-					{
-					foreach (LineNode ln in selectedLineNodes)
-						{
-						if (ln.tLight != null)
-							{
-							}
-						else
-							{
-							TrafficLight tl = new TrafficLight(ln);
-							tl.parentGroup = unsortedGroup;
-							timelineSteuerung.AddEntry(tl);
-							timeline.selectedEntry = tl;
-							ln.tLight = tl;
-							}
-						}
-					}
-				else
-					{
-					foreach (LineNode ln in selectedLineNodes)
-						{
-						if (ln.tLight != null)
-							{
-							timelineSteuerung.RemoveEntry(ln.tLight);
-							ln.tLight = null;
-							}
-						}
-					}
-				}
-			Invalidate();
-			 * */
-			}
 
 		#region Speichern/Laden
 		private void SpeichernButton_Click(object sender, EventArgs e)
@@ -1451,59 +1427,6 @@ namespace CityTrafficSimulator
 
 			}
 
-/*
-		private void UpdateBackgroundImage()
-			{
-			if (backgroundImage != null)
-				{
-				//				int totalWidth = (int)Math.Round(backgroundImage.Width * zoomMultipliers[zoomComboBox.SelectedIndex, 0] * ((float)backgroundImageScalingSpinEdit.Value / 100));
-				//				int totalHeight = (int)Math.Round(backgroundImage.Height * zoomMultipliers[zoomComboBox.SelectedIndex, 0] * ((float)backgroundImageScalingSpinEdit.Value / 100));
-
-				countHorizontalBackgroundImageSlices = (int)Math.Floor((float)backgroundImage.Width / 1024);
-				countVerticalBackgroundImageSlices = (int)Math.Floor((float)backgroundImage.Height / 1024);
-
-				sizeOfBackgroundImageSlice = (int)Math.Round(1024 * zoomMultipliers[zoomComboBox.SelectedIndex, 0] * (float)backgroundImageScalingSpinEdit.Value / 100);
-
-				backgroundImageSlices = new Bitmap[countVerticalBackgroundImageSlices, countHorizontalBackgroundImageSlices];
-
-				for (int spalte = 0; spalte < countHorizontalBackgroundImageSlices; spalte++)
-					{
-					for (int zeile = 0; zeile < countVerticalBackgroundImageSlices; zeile++)
-						{
-						backgroundImageSlices[zeile, spalte] = ResizeBitmap(
-							backgroundImage,
-							sizeOfBackgroundImageSlice, sizeOfBackgroundImageSlice,
-							new Rectangle(1024 * spalte, 1024 * zeile, 1024, 1024));
-						}
-					}
-				/*resampledBackgroundImage = ResizeBitmap(
-					backgroundImage,
-					,
-					);/
-				}
-			}
-
-		/// <summary>
-		/// Skaliert einen Teil der Bitmap b und gibt diesen als neue Bitmap zurück
-		/// </summary>
-		/// <param name="b">Quellbitmap</param>
-		/// <param name="newWidth">Breite der Zielbitmap</param>
-		/// <param name="newHeight">Höhe der Zielbitmap</param>
-		/// <param name="rect">zu skalierender Teil der Quellbitmap</param>
-		/// <returns></returns>
-		private Bitmap ResizeBitmap(Bitmap b, int newWidth, int newHeight, Rectangle rect)
-			{
-			using (Bitmap slice = b.Clone(rect, b.PixelFormat))
-				{
-				Bitmap result = new Bitmap(newWidth, newHeight);
-				using (Graphics g = Graphics.FromImage((Image)result))
-					{
-					g.DrawImage(slice, 0, 0, newWidth, newHeight);
-					}
-				return result;
-				}
-			}
-*/
 		private void UpdateBackgroundImage()
 			{
 			if (backgroundImage != null)
