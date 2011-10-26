@@ -154,6 +154,15 @@ namespace CityTrafficSimulator
 			get { return bConnection.lineSegment.TimeToArcPosition(bTime); }
 			}
 
+		/// <summary>
+		/// Returns whether vehicles shall avoid blocking this intersection or not.
+		/// Intersections, where both NodeConnections originate or terminate in the same LineNode may be blocked.
+		/// </summary>
+		public bool avoidBlocking
+			{
+			get { return aConnection.startNode != bConnection.startNode && aConnection.endNode != bConnection.endNode; }
+			}
+
 		#endregion
 
 		#region Konstruktoren
@@ -319,7 +328,7 @@ namespace CityTrafficSimulator
 			Debug.Assert(nc == aConnection || nc == bConnection);
 			// TODO: add some safety space before and behind
 			double blockingStartTime = currentTime + CalculateArrivingTime(v, distance - GetWaitingDistance()) - v.SafetyTime/2;
-			double blockingEndTime = currentTime + CalculateArrivingTime(v, distance + v.length + GetWaitingDistance());
+			double blockingEndTime = currentTime + CalculateArrivingTime(v, distance + v.length + GetWaitingDistance() + v.SafetyTime/2);
 
 			if (nc == aConnection)
 				{
@@ -345,7 +354,7 @@ namespace CityTrafficSimulator
 			Debug.Assert(nc == aConnection || nc == bConnection);
 			// TODO: add some safety space before and behind
 			double blockingStartTime = currentTime + CalculateArrivingTime(v, distance - GetWaitingDistance()) - v.SafetyTime/2;
-			double blockingEndTime = currentTime + CalculateArrivingTime(v, distance + v.length + GetWaitingDistance());
+			double blockingEndTime = currentTime + CalculateArrivingTime(v, distance + v.length + GetWaitingDistance()) + v.SafetyTime/2;
 
 			if (nc == aConnection)
 				{

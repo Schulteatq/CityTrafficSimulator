@@ -1163,24 +1163,22 @@ namespace CityTrafficSimulator
 				{
 				foreach (LineChangePoint lcp in m_lineChangePoints)
 					{
-					// LineChangeIntervals malen:
-					/*LineChangeInterval lci;
-					m_lineChangeIntervals.TryGetValue(lcp.target.nc.endNode.hashcode, out lci);
-
-					g.DrawLine(blackPen, lineSegment.AtPosition(lci.startArcPos), lineSegment.AtPosition(lci.endArcPos));
-					g.DrawLine(blackPen, lineSegment.AtPosition(lci.endArcPos), lci.targetNode.position);
-					g.DrawLine(blackPen, lci.targetNode.position, lineSegment.AtPosition(lci.startArcPos));
-					*/
 					// LineChangePoints malen:
 					lcp.lineSegment.Draw(g, new Pen(Color.Orange, 1));
-
-					/*				Vector2 leftVector = lineSegment.DerivateAtTime(lcp.start.time).RotatedClockwise.Normalized * lcp.parallelDistance;
-									g.DrawLine(new Pen(Color.Gray, 1), lineSegment.AtTime(lcp.start.time), lineSegment.AtTime(lcp.start.time) + lineSegment.DerivateAtTime(lcp.start.time));
-									g.DrawLine(new Pen(Color.Gray, 1), lineSegment.AtTime(lcp.start.time), lineSegment.AtTime(lcp.start.time) + leftVector);
-					*/
 					g.FillEllipse(new SolidBrush(Color.Green), new Rectangle(lineSegment.AtTime(lcp.start.time) - new Vector2(2, 2), new Size(3, 3)));
 					g.FillEllipse(new SolidBrush(Color.Orange), new Rectangle(lcp.otherStart.nc.lineSegment.AtTime(lcp.otherStart.time) - new Vector2(2, 2), new Size(3, 3)));
 					g.FillEllipse(new SolidBrush(Color.Red), new Rectangle(lcp.target.nc.lineSegment.AtTime(lcp.target.time) - new Vector2(2, 2), new Size(3, 3)));
+					}
+				}
+
+			using (Pen greenPen = new Pen(Color.Green, 3))
+				{
+				foreach (IVehicle v in vehicles)
+					{
+					if (v.state.vehicleThatLetsMeChangeLine != null)
+						{
+						g.DrawLine(greenPen, v.state.positionAbs, v.state.vehicleThatLetsMeChangeLine.state.positionAbs);
+						}
 					}
 				}
 

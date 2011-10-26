@@ -29,6 +29,16 @@ namespace CityTrafficSimulator
     public static class Math2
         {
 		/// <summary>
+		/// Calculates x^3
+		/// </summary>
+		/// <param name="x">value</param>
+		/// <returns>x^3</returns>
+		public static double Cubic(double x)
+			{
+			return x * x * x;
+			}
+
+		/// <summary>
 		/// Berechnet das Quadrat einer Zahl
 		/// </summary>
 		/// <param name="x">Zahl dessen Quadrat berechnet werden soll</param>
@@ -80,5 +90,16 @@ namespace CityTrafficSimulator
 			return Math.Log(d + Math.Sqrt(d * d - 1));
 			}
 
+		/// <summary>
+		/// Clamps value to [min, max]
+		/// </summary>
+		/// <param name="value">Value to clamp</param>
+		/// <param name="min">Minimum value to return</param>
+		/// <param name="max">Maximum value to return</param>
+		/// <returns>min(max(value, min), max)</returns>
+		public static double Clamp(double value, double min, double max)
+			{
+			return Math.Min(Math.Max(value, min), max);
+			}
         }
     }

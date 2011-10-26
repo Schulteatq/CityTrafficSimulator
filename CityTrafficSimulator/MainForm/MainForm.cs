@@ -194,14 +194,6 @@ namespace CityTrafficSimulator
 						trafficLightTreeView.Select();
 						doHandleTrafficLightTreeViewSelect = true;
 						timeline.selectedEntry = m_selectedLineNodes[0].tLight;
-						/*
-						IsTrafficLightCheckBox.Checked = true;
-						Point pos = timeline.GetClientPositionForTimelineEntry(m_selectedLineNodes[0].tLight);
-						if (-timelinePanel.AutoScrollPosition.Y > pos.Y || -timelinePanel.AutoScrollPosition.Y+timelinePanel.ClientSize.Height < pos.Y)
-							{
-							timelinePanel.AutoScrollPosition = pos;
-							}						
-						 * */
 						}
 					else
 						{

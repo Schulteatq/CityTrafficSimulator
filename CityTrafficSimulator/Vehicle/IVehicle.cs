@@ -148,9 +148,8 @@ namespace CityTrafficSimulator.Vehicle
 		/// <param name="averageSpeed">Durchschnittsgeschwindigkeit in m/s, die dieses Fahrzeug auf der NodeConnection hatte</param>
 		private void Dispose(float averageSpeed)
 			{
+			m_State.UnsetLineChangeVehicleInteraction();
 			currentNodeConnection.RemoveVehicle(this, averageSpeed);
-			if (vehicleWhichSlowsDownForMe != null)
-				vehicleWhichSlowsDownForMe.slowDownForChangingVehicle = false;
 			}
 
         #endregion
@@ -189,11 +188,7 @@ namespace CityTrafficSimulator.Vehicle
 		private void InitiateLineChange(NodeConnection.LineChangePoint lcp, double arcPositionOffset)
 			{
 			// einem evtl. ausgebremsten Fahrzeug sagen, dass es nicht mehr extra für mich abbremsen braucht
-			if (vehicleWhichSlowsDownForMe != null)
-				{
-				vehicleWhichSlowsDownForMe.slowDownForChangingVehicle = false;
-				vehicleWhichSlowsDownForMe = null;
-				}
+			m_State.UnsetLineChangeVehicleInteraction();
 
 			// sich merken, dass das IVehicle gerade am Spurwechseln ist
 			currentlyChangingLine = true;
@@ -232,12 +227,8 @@ namespace CityTrafficSimulator.Vehicle
 			lci = null;
 			m_Physics.multiplierDesiredVelocity = 1;
 
-			// Tell other vehicle that waits for me, that I'm finished
-			if (vehicleWhichSlowsDownForMe != null)
-				{
-				vehicleWhichSlowsDownForMe.slowDownForChangingVehicle = false;
-				vehicleWhichSlowsDownForMe = null;
-				}
+			// Tell other vehicle that waits for me, that I'm finished. Kinda redundant, but safe is safe.
+			m_State.UnsetLineChangeVehicleInteraction();
 			}
 
 
@@ -381,7 +372,18 @@ namespace CityTrafficSimulator.Vehicle
 
 			bool thinkAboutLineChange = false;
 			double lowestAcceleration = 0;
-			m_Physics.multiplierDesiredVelocity = (slowDownForChangingVehicle) ? 2 * p : 1;
+
+			#region LineChangeVehicleInteraction
+
+			// if necessary, wait for other vehicle to change line
+			if (m_State.letVehicleChangeLine)
+				{
+				lookaheadDistance = Math.Max(0, m_State.tailPositionOfOtherVehicle - currentPosition);
+				thinkAboutLineChange = false;
+				lowestAcceleration = CalculateAcceleration(physics.velocity, physics.effectiveDesiredVelocity, lookaheadDistance, physics.velocity);
+				}
+
+			#endregion
 
 			#region Vehicles in front
 
@@ -390,7 +392,7 @@ namespace CityTrafficSimulator.Vehicle
 
 			// The stored distance is to the front of the vehicle. All following calculations need the distance
 			// to its tail. Hence, substract the vehicle length.
-			if (theVehicleInFrontOfMe != null)
+			if (theVehicleInFrontOfMe != null && theVehicleInFrontOfMe.distance < lookaheadDistance)
 				{
 				lookaheadDistance = theVehicleInFrontOfMe.distance;
 				thinkAboutLineChange = true;
@@ -406,6 +408,7 @@ namespace CityTrafficSimulator.Vehicle
 				{
 				lowestAcceleration = CalculateAcceleration(physics.velocity, physics.effectiveDesiredVelocity, lookaheadDistance, physics.velocity);
 				}
+
 
 			#endregion
 
@@ -503,9 +506,8 @@ namespace CityTrafficSimulator.Vehicle
 									// Final check:
 									//  - The new vehicle behind must not break harder than bSave
 									//  - My line change must be sufficiently necessary. The closer I come to the end of the LineChangeInterval, the more I may thwart the vehicle behind. 
-									// TODO: double check calculations - the politeness factor seems to be canceled out...
 									if (   (forcedAccelerationOfVehicleBehindMeOnOtherConnection > bSave)
-										&& (p * (arcPos - lci.startArcPos) / lci.length >= p * (currentAccelerationOfVehicleBehindMeOnOtherConnection - forcedAccelerationOfVehicleBehindMeOnOtherConnection)))
+										&& ((arcPos - lci.startArcPos) / lci.length >= (currentAccelerationOfVehicleBehindMeOnOtherConnection - forcedAccelerationOfVehicleBehindMeOnOtherConnection)))
 										{
 										// return to normal velocity
 										m_Physics.multiplierDesiredVelocity = 1;
@@ -517,9 +519,16 @@ namespace CityTrafficSimulator.Vehicle
 										InitiateLineChange(lcp, arcPos - lcp.start.arcPosition);
 										lowestAcceleration = myAccelerationOnOtherConnection;
 										}
+									// I do not want to change line yet, but I could position myself better between the two other vehicles on the parallel line.
+									else if (true)
+										{
+										// TODO: implement
+										slowDownToBreakPoint = true;
+										}
 									}
 								// the new vehicle behind would too close but I can accelerate and are at least as fast as him
-								else if (   otherVehicles.Left.vehicle.physics.velocity / this.physics.velocity < 2  // I am not significantly slower than him
+								else if (   otherVehicles.Left.vehicle.physics.velocity / this.physics.velocity < 1.2  // I am not significantly slower than him
+										 && (otherVehicles.Right == null || otherVehicles.Right.distance > 1.5 * length) // the new vehicle in front is far enough away
 										 && lookaheadDistance > 2 * length			// no vehicle/traffic light/intersection in front
 										 && lci.endArcPos - arcPos > 2 * length		// enough space left in LineChangeInterval
 										 && lowestAcceleration >= -0.1)				// currently not braking
@@ -528,12 +537,7 @@ namespace CityTrafficSimulator.Vehicle
 									m_Physics.multiplierDesiredVelocity = 1.75;
 									lowestAcceleration = CalculateAcceleration(physics.velocity, physics.effectiveDesiredVelocity, lookaheadDistance, physics.velocity);
 
-									// Tell the other vehicle that I want to change line. Probably, it will brake for me.
-									if (vehicleWhichSlowsDownForMe != null)
-										vehicleWhichSlowsDownForMe.slowDownForChangingVehicle = false;
-
-									otherVehicles.Left.vehicle.slowDownForChangingVehicle = true;
-									vehicleWhichSlowsDownForMe = otherVehicles.Left.vehicle;
+									m_State.SetLineChangeVehicleInteraction(this, otherVehicles.Left.vehicle, lcp.otherStart.nc, myArcPositionOnOtherConnection - m_Length);
 									}
 								// There is no way to perform a line change now => slow down
 								else
@@ -550,13 +554,13 @@ namespace CityTrafficSimulator.Vehicle
 
 						if (slowDownToBreakPoint)
 							{
-							double percentOfLCIPassed = Math.Max(0.2, (lci.endArcPos - currentPosition - Constants.breakPointBeforeForcedLineChange) / (lci.length - Constants.breakPointBeforeForcedLineChange));
+							double percentOfLCILeft = Math.Max(0.2, (lci.endArcPos - currentPosition - Constants.breakPointBeforeForcedLineChange) / (lci.length - Constants.breakPointBeforeForcedLineChange));
 
 							// slow down a bit
-							m_Physics.multiplierDesiredVelocity = percentOfLCIPassed;
+							m_Physics.multiplierDesiredVelocity = Math.Max(1, 1.5 * percentOfLCILeft);
 
 							// When reaching the end of the LineChangeInterval, check whether there are other possibilities to reach the target:
-							if (percentOfLCIPassed < 0.5)
+							if (percentOfLCILeft < 0.5)
 								{
 								RouteToTarget newRTT = CalculateShortestConenction(route[0].endNode, m_TargetNodes);
 								// The alternative route does not cost too much -> choose it
@@ -567,19 +571,34 @@ namespace CityTrafficSimulator.Vehicle
 									lineChangeNeeded = false;
 									lci = null;
 									}
-								// No suitable alternative -> stop at break point
-								else
-									{
-									lowestAcceleration = CalculateAcceleration(physics.velocity, physics.effectiveDesiredVelocity, lci.endArcPos - Constants.breakPointBeforeForcedLineChange - arcPos, physics.velocity);
-									}
 								}
-							// Stop at break point
-							else
+							// Line change still necessacy => stop at break point
+							if (lineChangeNeeded)
 								{
 								lowestAcceleration = CalculateAcceleration(physics.velocity, physics.effectiveDesiredVelocity, lci.endArcPos - Constants.breakPointBeforeForcedLineChange - arcPos, physics.velocity);
+
+								if (! m_State.letVehicleChangeLine && percentOfLCILeft < 0.6)
+									{
+									Pair<VehicleDistance> vd = lcp.otherStart.nc.GetVehiclesAroundArcPosition(myArcPositionOnOtherConnection - ( (m_Length + s0)), Constants.lookaheadDistance);
+									if (vd.Left != null && vd.Left.vehicle.p >= p)
+										{
+										// tell the vehicle behind my back to wait for me
+										m_State.SetLineChangeVehicleInteraction(this, vd.Left.vehicle, lcp.otherStart.nc, myArcPositionOnOtherConnection - m_Length - vd.Left.vehicle.s0);
+
+										// In addition, I need to get behind the vehicle in front of the vehicle which waits for me. Therefore I adapt the desired velocity
+										if (vd.Right != null)
+											{
+											m_Physics.multiplierDesiredVelocity = Math2.Clamp(Math2.Cubic((vd.Right.distance - s0) / (m_Length + 4 * s0)), 0.3, 1);
+											}
+										}
+									}
 								}
 							}
 						}
+					}
+				else if (m_State.vehicleThatLetsMeChangeLine != null)
+					{
+					m_State.UnsetLineChangeVehicleInteraction();
 					}
 
 				#endregion
@@ -699,20 +718,10 @@ namespace CityTrafficSimulator.Vehicle
 					// gucken, ob es mit ner Connection weitergeht
 					if ((currentNodeConnection.endNode.nextConnections.Count != 0) && (WayToGo.SegmentCount() > 0))
 						{
-						if (lineChangeNeeded)
-							{
-							m_Physics.multiplierDesiredVelocity = 1;
-							}
-						if (vehicleWhichSlowsDownForMe != null)
-							{
-							vehicleWhichSlowsDownForMe.slowDownForChangingVehicle = false;
-							vehicleWhichSlowsDownForMe = null;
-							}
+						m_Physics.multiplierDesiredVelocity = 1;
+						m_State.UnsetLineChangeVehicleInteraction();
 
 						double startDistance = (currentPosition - currentNodeConnection.lineSegment.length);
-
-						// wenn ich an einer Intersection vorbeigefahren bin, dann sollte ich sie aus originalArrivingTimes wieder rausschmeißen
-						List<SpecificIntersection> intersectionsToRemoveFromList = currentNodeConnection.GetIntersectionsWithinArcLength(new Interval<double>(currentPosition - arcLengthToMove, currentNodeConnection.lineSegment.length));
 
 						// falls ich mehrere Connections zur Auswahl habe, berechne die mit dem kürzesten Weg
 						// (dieser könnte dich geändert haben, weil dort plötzlich mehr Autos fahren)
@@ -764,14 +773,6 @@ namespace CityTrafficSimulator.Vehicle
 
 						// Fahrzeug dort einfügen
 						newNodeConnection.AddVehicle(this);
-
-						intersectionsToRemoveFromList.AddRange(currentNodeConnection.GetIntersectionsWithinArcLength(new Interval<double>(0, currentPosition)));
-
-						// jetzt die Intersections aus originalArrivingTimes wieder rausschmeißen
-						foreach (SpecificIntersection si in intersectionsToRemoveFromList)
-							{
-							originalArrivingTimes.Remove(si.intersection);
-							}
 						}
 					else
 						{
@@ -781,12 +782,6 @@ namespace CityTrafficSimulator.Vehicle
 					}
 				else
 					{
-					// wenn ich an einer Intersection vorbeigefahren bin, dann sollte ich sie aus originalArrivingTimes wieder rausschmeißen
-					List<SpecificIntersection> intersectionsToRemoveFromList = currentNodeConnection.GetIntersectionsWithinArcLength(new Interval<double>(currentPosition - arcLengthToMove, currentPosition));
-					foreach (SpecificIntersection si in intersectionsToRemoveFromList)
-						{
-						originalArrivingTimes.Remove(si.intersection);
-						}
 					}
 				if (Double.IsNaN(currentPosition))
 					{
@@ -828,21 +823,6 @@ namespace CityTrafficSimulator.Vehicle
 
 
 		#region Bewegungsberechnungen
-
-		/// <summary>
-		/// Flag, ob dieses Auto so nett sein soll, für ein vor ihm einscherendes Fahrzeug abzubremsen
-		/// </summary>
-		private bool slowDownForChangingVehicle = false;
-
-		/// <summary>
-		/// Fahrzeug, dem ich gesagt habe für mich bitte abzubremsen (damit ich mich später wieder abmelden kann)
-		/// </summary>
-		private IVehicle vehicleWhichSlowsDownForMe = null;
-
-		/// <summary>
-		/// Dictionary mit den ursprünglichen Ankunftszeiten für Intersections
-		/// </summary>
-		public Dictionary<Intersection, double> originalArrivingTimes = new Dictionary<Intersection, double>();
 
 		/// <summary>
 		/// List of all Intersections where this vehicle has registered itsself.
@@ -923,18 +903,36 @@ namespace CityTrafficSimulator.Vehicle
 		private void GatherNextIntersectionsOnMyTrack(List<NodeConnection> route, double arcPos, LinkedList<SpecificIntersection> intersectionRegistration, double distance, double currentTime)
 			{
 			Debug.Assert(route.Count > 0);
+			List<NodeConnection> workingRoute;
+			LinkedListNode<SpecificIntersection> lln = intersectionRegistration.First;				// current already registered intersection
+			double doneDistance, remainingDistance, startPosition;
 
-			// Setup some helper variables:
-			double doneDistance = -currentPosition;										// total covered distance
-			double remainingDistance = distance;										// total remaining distance to cover
-			double startPosition = currentPosition - length;							// start position at current NodeConnection
-			LinkedListNode<SpecificIntersection> lln = intersectionRegistration.First;	// current already registered intersection
+			if (arcPos < m_Length && visitedNodeConnections.Count > 0)
+				{
+				workingRoute = new List<NodeConnection>(route.Count + 1);
+				workingRoute.Add(visitedNodeConnections.First.Value);
+				workingRoute.AddRange(route);
 
+				// Setup some helper variables:
+				doneDistance = length - currentPosition;											// total covered distance
+				remainingDistance = distance + length;												// total remaining distance to cover
+				startPosition = workingRoute[0].lineSegment.length - (length - currentPosition);	// start position at current NodeConnection
+				}
+			else
+				{
+				workingRoute = route;
+
+				// Setup some helper variables:
+				doneDistance = -currentPosition;									// total covered distance
+				remainingDistance = distance + length;								// total remaining distance to cover
+				startPosition = currentPosition - length;							// start position at current NodeConnection
+				}
+			
 			// search each NodeConnection
-			foreach (NodeConnection nc in route)
+			foreach (NodeConnection nc in workingRoute)
 				{
 				// gather all intersections on current nc
-				List<SpecificIntersection> l = nc.GetSortedIntersectionsWithinArcLength(new Interval<double>(startPosition - length, startPosition + remainingDistance));
+				List<SpecificIntersection> l = nc.GetSortedIntersectionsWithinArcLength(new Interval<double>(startPosition, startPosition + remainingDistance));
 
 				// merge found intersections with already registered ones while cleaning them up at the same time
 				foreach (SpecificIntersection si in l)
@@ -968,7 +966,7 @@ namespace CityTrafficSimulator.Vehicle
 						}
 					}
 
-				// continue with next NodeConnection on route
+				// continue with next NodeConnection on workingRoute
 				remainingDistance -= (nc.lineSegment.length - startPosition);
 				if (remainingDistance < 0)
 					break;
@@ -1000,6 +998,7 @@ namespace CityTrafficSimulator.Vehicle
 				{
 				SpecificIntersection si = lln.Value;
 				bool waitInFrontOfIntersection = false;
+				bool avoidBlocking = true;
 
 				// Get interfering vehicles for this intersections
 				List<CrossingVehicleTimes> cvtList = si.intersection.CalculateInterferingVehicles(this, si.nodeConnection);
@@ -1013,6 +1012,7 @@ namespace CityTrafficSimulator.Vehicle
 					// TODO:	Develop s.th. more convenient (e.g. if possible, try to accelerate a little to get through first).
 					if (cvtList.Count > 0)
 						waitInFrontOfIntersection = true;
+
 					// Intersection is close to stop point so that vehicle will block this intersection => wait in front
 					if ((stopPoint > 0) && (stopPoint - length - s0 < myCvt.remainingDistance))
 						{
@@ -1023,7 +1023,7 @@ namespace CityTrafficSimulator.Vehicle
 				else if (otherNC.priority == si.nodeConnection.priority)
 					{
 					// Intersection is close to stop point so that vehicle will block this intersection => wait in front
-					if ((stopPoint > 0) && (stopPoint - length - s0 < myCvt.remainingDistance))
+					if ((stopPoint > 0) && (stopPoint - length - s0 < myCvt.remainingDistance) && (si.intersection.avoidBlocking))
 						{
 						waitInFrontOfIntersection = true;
 						}
@@ -1034,7 +1034,7 @@ namespace CityTrafficSimulator.Vehicle
 						// I should wait if:
 						//  - The other vehicle originally reached the intersection before me
 						//  - TODO: I would block him significantly if I continue.
-						if (myCvt.originalArrivingTime >= otherCvt.originalArrivingTime)
+						if (myCvt.originalArrivingTime > otherCvt.originalArrivingTime)
 							{
 							waitInFrontOfIntersection = true;
 							break;
@@ -1044,35 +1044,59 @@ namespace CityTrafficSimulator.Vehicle
 				// My Nodeconnection is more important than the other one
 				else
 					{
-					// Nothing to do here yet.
+					// If the other vehicle hasn't reached the intersection yet, nothing is to do here.
 					// Above is ensured, that the other vehicle will wait (hopefully, it does... o_O)
+
+					// If otherwise the other vehicle is already blocking the intersection, I'm doing good in waiting in front of it.
+					foreach (CrossingVehicleTimes otherCvt in cvtList)
+						{
+						if (otherCvt.remainingDistance < 0)
+							{
+							waitInFrontOfIntersection = true;
+							avoidBlocking = false;
+							break;
+							}
+						}
 					}
 
 				if (waitInFrontOfIntersection)
 					{
-					// first go backwards: If I wait before an intersection I might block other intersections before.
-					// This is usually not wanted, therefore go backwards and wait in front of the first intersection 
-					// where I won't block any other.
-					double distanceToLookBack = si.intersection.GetCrossingVehicleTimes(this, si.nodeConnection).remainingDistance - m_Length;
-					while (lln.Previous != null)
+					if (avoidBlocking)
 						{
-						double remainingDistanceToPrevIntersection = lln.Previous.Value.intersection.GetCrossingVehicleTimes(this, lln.Previous.Value.nodeConnection).remainingDistance;
+						// first go backwards: If I wait before an intersection I might block other intersections before.
+						// This is usually not wanted, therefore go backwards and wait in front of the first intersection 
+						// where I won't block any other.
+						double distanceToLookBack = si.intersection.GetCrossingVehicleTimes(this, si.nodeConnection).remainingDistance - m_Length - s0;
+						while (lln.Previous != null)
+							{
+							double remainingDistanceToPrevIntersection = lln.Previous.Value.intersection.GetCrossingVehicleTimes(this, lln.Previous.Value.nodeConnection).remainingDistance;
 
-						// check whether intersection will be blocked
-						if (remainingDistanceToPrevIntersection > 0 && remainingDistanceToPrevIntersection + lln.Previous.Value.intersection.GetWaitingDistance() > distanceToLookBack)
-							{
-							// will be blocked, wait in front of it and continue looking backwards
-							distanceToLookBack = remainingDistanceToPrevIntersection - m_Length;
-							lln = lln.Previous;
+							// check whether intersection will be blocked
+							if (remainingDistanceToPrevIntersection > 0 && remainingDistanceToPrevIntersection + lln.Previous.Value.intersection.GetWaitingDistance() > distanceToLookBack)
+								{
+								// intersection will be blocked and both NodeConnections from the intersection do not originate from the same node 
+								// => wait in front of it and continue looking backwards
+								if (lln.Previous.Value.intersection.avoidBlocking)
+									{
+									distanceToLookBack = remainingDistanceToPrevIntersection - m_Length - s0;
+									lln = lln.Previous;
+									}
+								// intersection will be blocked but both NodeConnections from the intersectino originate from the same LineNode
+								else
+									{
+									// this intersection may be blocked => nothing to do here
+									lln = lln.Previous;
+									}
+								}
+							else
+								{
+								// will not be blocked => no further search necessary
+								break;
+								}
 							}
-						else
-							{
-							// will not be blocked => no further search necessary
-							break;
-							}
+
+						si = lln.Value; // si is a Value-Type (copy)*/
 						}
-
-					si = lln.Value; // si is a Value-Type (copy)*/
 
 					// Update this and all following intersections, that I won't cross in the near future.
 					while (lln != null)
@@ -1089,111 +1113,6 @@ namespace CityTrafficSimulator.Vehicle
 
 			return -1;
 			}
-
-		/// <summary>
-		/// liefert alle Intersections innerhalb der nächsten distanceWithin auf meinem Weg zurück.
-		/// Untersucht nicht nur die aktuelle NodeConnection sondern falls nötig auch die folgenden
-		/// </summary>
-		/// <param name="currentNC">NodeConnection für die die Beschleunigungswerte berechnet werden sollen</param>
-		/// <param name="arcPos">Position auf nc für die die Beschleunigungswerte berechnet werden sollen</param>
-		/// <param name="distanceWithin">Suchentfernung</param>
-		/// <param name="currentTime">aktuelle Zeit in Sekunden nach Sekunde 0 (wird für originalArrivingTime-Berechnung benötigt)</param>
-		/// <returns>Eine Liste aller Intersections zwischen arcPos und arcPos+distanceWithin</returns>
-		private List<SpecificIntersection> GetNextIntersectionsOnMyTrack(NodeConnection currentNC, double arcPos, double distanceWithin, double currentTime)
-			{
-			List<SpecificIntersection> toReturn = new List<SpecificIntersection>();
-
-			// muss ich nur auf der currentNC suchen?
-			if (distanceWithin <= GetDistanceToEndOfLineSegment(currentNC, arcPos))
-				{
-				List<SpecificIntersection> intersectionsToAdd = currentNC.GetIntersectionsWithinArcLength(new Interval<double>(arcPos, arcPos + distanceWithin));
-				foreach (SpecificIntersection si in intersectionsToAdd)
-					{
-					toReturn.Add(si);
-
-					// originalArrivingTimes berechnen, falls das noch nicht geschehen ist
-					if (! originalArrivingTimes.ContainsKey(si.intersection))
-						{
-						if (physics.velocity < 4)
-							originalArrivingTimes.Add(si.intersection, currentTime + GetTimeToCoverDistance(si.intersection.GetMyArcPosition(currentNC) - arcPos, false));
-						else
-							originalArrivingTimes.Add(si.intersection, currentTime + GetTimeToCoverDistance(si.intersection.GetMyArcPosition(currentNC) - arcPos, true));
-						}
-					}
-				}
-			// ich muss auch auf den folgenden NodeConnections suchen
-			else
-				{
-				// erstmal alle Intersections auf dieser NodeConnection speichern
-				double alreadyCheckedDistance = GetDistanceToEndOfLineSegment(currentNC, arcPos);
-
-				List<SpecificIntersection> intersectionsToAdd = currentNC.GetIntersectionsWithinArcLength(new Interval<double>(arcPos, currentNC.lineSegment.length));
-				foreach (SpecificIntersection si in intersectionsToAdd)
-					{
-					toReturn.Add(si);
-
-					// originalArrivingTimes berechnen, falls das noch nicht geschehen ist
-					if (!originalArrivingTimes.ContainsKey(si.intersection))
-						{
-						if (physics.velocity < 4)
-							originalArrivingTimes.Add(si.intersection, currentTime + GetTimeToCoverDistance(si.intersection.GetMyArcPosition(currentNC) - arcPos, false));
-						else
-							originalArrivingTimes.Add(si.intersection, currentTime + GetTimeToCoverDistance(si.intersection.GetMyArcPosition(currentNC) - arcPos, true));
-						}
-					}
-				
-
-				// nun die Intersections auf den folgenden NodeConnections
-				foreach (RouteSegment rs in WayToGo)
-					{
-					NodeConnection nc = rs.startConnection;
-
-					// Abbruchbedingung: das LineSegment ist länger als die Rest-Suchentfernung
-					if (nc.lineSegment.length > distanceWithin-alreadyCheckedDistance)
-						{
-						intersectionsToAdd = nc.GetIntersectionsWithinArcLength(new Interval<double>(0, distanceWithin - alreadyCheckedDistance));
-						foreach (SpecificIntersection si in intersectionsToAdd)
-							{
-							toReturn.Add(si);
-
-							// originalArrivingTimes berechnen, falls das noch nicht geschehen ist
-							if (!originalArrivingTimes.ContainsKey(si.intersection))
-								{
-								if (physics.velocity < 4)
-									originalArrivingTimes.Add(si.intersection, currentTime + GetTimeToCoverDistance(si.intersection.GetMyArcPosition(nc) + alreadyCheckedDistance, false));
-								else
-									originalArrivingTimes.Add(si.intersection, currentTime + GetTimeToCoverDistance(si.intersection.GetMyArcPosition(nc) + alreadyCheckedDistance, true));
-								}
-							}
-				
-						break;
-						}
-					// ich muss noch mehr suchen - also alle Intersections reinballern und die nächste Nodeconnection nehmen
-					else
-						{
-						foreach (Intersection i in nc.intersections)
-							{
-							SpecificIntersection si = new SpecificIntersection(nc, i);
-							toReturn.Add(si);
-
-							// originalArrivingTimes berechnen, falls das noch nicht geschehen ist
-							if (!originalArrivingTimes.ContainsKey(si.intersection))
-								{
-								if (physics.velocity < 4)
-									originalArrivingTimes.Add(si.intersection, currentTime + GetTimeToCoverDistance(si.intersection.GetMyArcPosition(nc) + alreadyCheckedDistance, false));
-								else
-									originalArrivingTimes.Add(si.intersection, currentTime + GetTimeToCoverDistance(si.intersection.GetMyArcPosition(nc) + alreadyCheckedDistance, true));
-								}
-							}
-
-						alreadyCheckedDistance += nc.lineSegment.length;
-						}
-					}
-				}
-
-			return toReturn;
-			}
-
 
 		/// <summary>
 		/// Berechnet die benötigte Zeit um sich um distance Entfernung zu bewegen
@@ -1389,6 +1308,10 @@ namespace CityTrafficSimulator.Vehicle
                 m_Position = p;
                 m_PositionAbs = null;
                 m_Orientation = null;
+				m_letVehicleChangeLine = false;
+				m_tailPositionOfOtherVehicle = 0;
+				m_vehicleThatLetsMeChangeLine = null;
+				m_vehicleToChangeLine = null;
                 }
 
 			/// <summary>
@@ -1404,7 +1327,11 @@ namespace CityTrafficSimulator.Vehicle
 				double t = currentNodeConnection.lineSegment.PosToTime(p);
 				m_PositionAbs = currentNodeConnection.lineSegment.AtTime(t);
 				m_Orientation = currentNodeConnection.lineSegment.DerivateAtTime(t);
-                }
+				m_letVehicleChangeLine = false;
+				m_tailPositionOfOtherVehicle = 0;
+				m_vehicleThatLetsMeChangeLine = null;
+				m_vehicleToChangeLine = null;
+				}
 
             /// <summary>
             /// die Line, auf der sich das Fahrzeug gerade befindet
@@ -1470,7 +1397,119 @@ namespace CityTrafficSimulator.Vehicle
 						);
 					}
 				}
-            }
+
+			#region LineChangeVehicleInteraction
+
+			/// <summary>
+			/// Flag whether I shall wait behind the other vehicle to let him change line
+			/// </summary>
+			private bool m_letVehicleChangeLine;
+			/// <summary>
+			/// Flag whether I shall wait behind the other vehicle to let him change line
+			/// </summary>
+			public bool letVehicleChangeLine
+				{
+				get { return m_letVehicleChangeLine; }
+				}
+
+			/// <summary>
+			/// Arc position of other vehicle projected on my NodeConnection (I should not go beyond this point if I want to let him in).
+			/// </summary>
+			private double m_tailPositionOfOtherVehicle;
+			/// <summary>
+			/// Arc position of other vehicle projected on my NodeConnection (I should not go beyond this point if I want to let him in).
+			/// </summary>
+			public double tailPositionOfOtherVehicle
+				{
+				get { return m_tailPositionOfOtherVehicle; }
+				set { m_tailPositionOfOtherVehicle = value; }
+				}
+
+			/// <summary>
+			/// Used by the line changing vehicle: Reference to vehicle, that waits for me to change line.
+			/// </summary>
+			private IVehicle m_vehicleThatLetsMeChangeLine;
+			/// <summary>
+			/// Used by the line changing vehicle: Reference to vehicle, that waits for me to change line.
+			/// </summary>
+			public IVehicle vehicleThatLetsMeChangeLine
+				{
+				get { return m_vehicleThatLetsMeChangeLine; }
+				}
+
+			/// <summary>
+			/// Used by the waiting vehicle: Reference to the vehicle, that wants to change line
+			/// </summary>
+			private IVehicle m_vehicleToChangeLine;
+			/// <summary>
+			/// Used by the waiting vehicle: Reference to the vehicle, that wants to change line
+			/// </summary>
+			public IVehicle vehicleToChangeLine
+				{
+				get { return m_vehicleToChangeLine; }
+				}
+
+
+			/// <summary>
+			/// Resets the LineChangeVehicleInteraction: If another vehicle is waiting for me to change line, it will not continue to do so.
+			/// </summary>
+			public void UnsetLineChangeVehicleInteraction()
+				{
+				if (m_vehicleThatLetsMeChangeLine != null)
+					{
+					m_vehicleThatLetsMeChangeLine.m_State.m_letVehicleChangeLine = false;
+					m_vehicleThatLetsMeChangeLine.m_State.m_vehicleToChangeLine = null;
+					}
+					
+				m_vehicleThatLetsMeChangeLine = null;
+				}
+
+			/// <summary>
+			/// Sets the LineChangeVehicleInteraction: otherVehicle will be told to wait for me to change line. Therefore, it will try to keep behind myTailPositionOnTargetConnection.
+			/// </summary>
+			/// <param name="lineChangingVehicle">vehicle, that wants to change line</param>
+			/// <param name="otherVehicle">vehicle on the target connection, that will wait for me to change line</param>
+			/// <param name="targetConnection">Target NodeConnection</param>
+			/// <param name="myTailPositionOnTargetConnection">My projected tail position on targetConnection. otherVehicle will try to keep behind this arc position.</param>
+			public void SetLineChangeVehicleInteraction(IVehicle lineChangingVehicle, IVehicle otherVehicle, NodeConnection targetConnection, double myTailPositionOnTargetConnection)
+				{
+				UnsetLineChangeVehicleInteraction();
+
+				if (otherVehicle.currentNodeConnection == targetConnection && myTailPositionOnTargetConnection >= 0)
+					{
+					// Make sure that no two LineChangeVehicleInteractions cross each other:
+					// Therefore, we here check die vehicles on the two NodeConnections of the LineChangePoint. This simplifies the algorithm and should be enough here.
+					LinkedListNode<IVehicle> myNode = lineChangingVehicle.listNode.Previous;
+					while (myNode != null)
+						{
+						// we have found a vehicle (call it vehicle B) behind me waiting for another vehicle (call it vehicle C) changing line
+						if (myNode.Value.m_State.letVehicleChangeLine)
+							{
+							// check whether vehicle C is in front of the vehicle, that will wait for me
+							if (myNode.Value.m_State.vehicleToChangeLine.currentPosition > otherVehicle.currentPosition)
+								{
+								// We have found two LineChangeVehicleInteraction crossing each other. To solve the problem, simply let vehicle C wait for me.
+								otherVehicle = myNode.Value.m_State.vehicleToChangeLine;
+								break;
+								}
+							}
+						myNode = myNode.Previous;
+						}
+
+					m_vehicleThatLetsMeChangeLine = otherVehicle;
+					otherVehicle.m_State.m_letVehicleChangeLine = true;
+					otherVehicle.m_State.m_tailPositionOfOtherVehicle = myTailPositionOnTargetConnection;
+					otherVehicle.m_State.m_vehicleToChangeLine = lineChangingVehicle;
+					}
+				else
+					{
+					// TODO: think about s.th. clever to do in this case. :)
+					}
+				}
+
+
+			#endregion
+			}
         #endregion
 
 		#region A* Algorithmus
@@ -1936,14 +1975,9 @@ namespace CityTrafficSimulator.Vehicle
 			Pen prevNodeConnectionsPen = new Pen(Color.Red, 3);
 			Pen nextNodeConnectionsPen = new Pen(Color.Green, 3);
 
-			foreach (KeyValuePair<Intersection, double> pair in originalArrivingTimes)
+			foreach (SpecificIntersection si in registeredIntersections)
 				{
-				//g.DrawLine(lineToIntersectionPen, pair.Key.aPosition, this.state.positionAbs);
-				//g.DrawString(pair.Value.ToString(), debugFont, blackBrush, pair.Key.aPosition + 0.5 * (state.positionAbs - pair.Key.aPosition));
-				}
-			if (vehicleWhichSlowsDownForMe != null)
-				{
-				g.DrawLine(lineToIntersectionPen, state.positionAbs, vehicleWhichSlowsDownForMe.state.positionAbs);
+				g.DrawLine(lineToIntersectionPen, state.positionAbs, si.intersection.aPosition);
 				}
 
 			foreach (NodeConnection prevNC in visitedNodeConnections)
@@ -1964,9 +1998,11 @@ namespace CityTrafficSimulator.Vehicle
 				}
 
 
-			g.DrawString(hashcode.ToString() + " @ " + currentNodeConnection.lineSegment.PosToTime(currentPosition).ToString("0.##") + "t ," + currentPosition.ToString("####") + "dm - " + physics.velocity.ToString("##.#") + "m/s\nnoch " + WayToGo.SegmentCount() + " nodes zu befahren\n\n" + debugData.ToString(), debugFont, blackBrush, state.positionAbs + new Vector2(0, -10));
+			g.DrawString(hashcode.ToString() + " @ " + currentNodeConnection.lineSegment.PosToTime(currentPosition).ToString("0.##") + "t ," + currentPosition.ToString("####") + "dm - " + physics.velocity.ToString("##.#") + "m/s - Mult.: " + physics.multiplierDesiredVelocity.ToString("#.##") + "\nnoch " + WayToGo.SegmentCount() + " nodes zu befahren\n\n" + debugData.ToString(), debugFont, blackBrush, state.positionAbs + new Vector2(0, -10));
 			}
 
 		#endregion
+
+
 		}
     }
