@@ -29,8 +29,7 @@ namespace CityTrafficSimulator
 		/// lässt die Zeit um einen Tick voranschreiten
 		/// </summary>
 		/// <param name="tickLength">Länge eines Ticks in Sekunden (berechnet sich mit 1/#Ticks pro Sekunde)</param>
-		/// <param name="currentWorldTime">aktuelle Zeit in Sekunden nach Sekunde 0</param>
-        void Tick(double tickLength, double currentWorldTime);
+        void Tick(double tickLength);
 
 		/// <summary>
 		/// sagt dem Objekt Bescheid, dass der Tick vorbei ist.

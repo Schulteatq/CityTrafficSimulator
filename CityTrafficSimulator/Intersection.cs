@@ -440,7 +440,8 @@ namespace CityTrafficSimulator
 			// check each vehicle in aCrossingVehicles with each in bCrossingVehicles for interference
 			foreach (KeyValuePair<IVehicle, CrossingVehicleTimes> ocv in otherCrossingVehicles)
 				{
-				if (!ocv.Value.willWaitInFrontOfIntersection && myCvt.blockingTime.IntersectsTrue(ocv.Value.blockingTime))
+				if (   (!ocv.Value.willWaitInFrontOfIntersection || ocv.Value.remainingDistance < 0)
+					&& myCvt.blockingTime.IntersectsTrue(ocv.Value.blockingTime))
 					{
 					toReturn.Add(ocv.Value);
 					}

@@ -82,6 +82,7 @@
       <DependentUpon>AboutBox.cs</DependentUpon>
     </Compile>
     <Compile Include="Auftrag.cs" />
+    <Compile Include="GlobalTime.cs" />
     <Compile Include="IDrawable.cs" />
     <Compile Include="LoadingForm\LoadingForm.cs">
       <SubType>Form</SubType>

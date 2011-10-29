@@ -29,12 +29,8 @@ namespace CityTrafficSimulator.Vehicle
         {
 		private static Random rnd = new Random();
 
-        public Car(IVehicle.Physics p, float currentTime)
+        public Car(IVehicle.Physics p)
             {
-			m_startTime = currentTime;
-			m_startTimeOnNodeConnection = currentTime;
-
-			
 			length = rnd.Next(28, 45);
 
 			m_Physics = p;

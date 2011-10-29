@@ -19,6 +19,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Text;
 using System.Xml.Serialization;
 using System.Drawing;
@@ -772,38 +773,17 @@ namespace CityTrafficSimulator
         /// Fügt der Linie ein Auto hinzu und sorgt dafür
         /// </summary>
 		/// <param name="veh">hinzuzufügendes Vehicle</param>
-		/// <param name="targetNodes">Liste von Zielknoten</param>
 		/// <returns>true, if Vehicle was successfully created - otherwise false</returns>
-        public bool AddVehicle(IVehicle veh, List<LineNode> targetNodes)
+        public bool AddVehicle(IVehicle veh)
             {
 			// prüfen, ob die Linie nicht schon zu voll mit Autos ist
 			if (vehicles.First == null || vehicles.First.Value.currentPosition - vehicles.First.Value.length > veh.physics.velocity + veh.state.position)
 				{
-				vehicles.AddFirst(veh);
-				veh.listNode = vehicles.First;
-				veh.targetNodes = targetNodes;
+				AddVehicleAt(veh, 0);
 				return true;
 				}
 			return false;
 			}
-
-		/// <summary>
-		/// Fügt der Linie ein Auto hinzu
-		/// </summary>
-		/// <param name="veh">hinzuzufügendes Vehicle</param>
-		/// <returns>true, if Vehicle was successfully created - otherwise false</returns>
-		public bool AddVehicle(IVehicle veh)
-			{
-			// prüfen, ob die Linie nicht schon zu voll mit Autos ist
-			if (vehicles.First == null || vehicles.First.Value.currentPosition - vehicles.First.Value.length > veh.physics.velocity + veh.state.position)
-				{
-				vehicles.AddFirst(veh);
-				veh.listNode = vehicles.First;
-				return true;
-				}
-			return false;
-			}
-
 
 		/// <summary>
 		/// fügt das IVehicle v an der Position arcPosition ein und sorgt dabei für eine weiterhin korrekte Verkettung von m_vehicles
@@ -825,6 +805,8 @@ namespace CityTrafficSimulator
 				{
 				v.listNode = vehicles.AddLast(v);
 				}
+
+			v.VehicleLeftNodeConnection += new IVehicle.VehicleLeftNodeConnectionEventHandler(Handler_VehicleLeftNodeConnection);
 			}
 
 
@@ -832,20 +814,11 @@ namespace CityTrafficSimulator
 		/// Meldet das IVehicle v von dieser NodeConnection ab. (Effektiv wird dieses Auto erst am Ende des Ticks entfernt)
 		/// </summary>
 		/// <param name="v">zu entfernendes Auto</param>
-		/// <param name="averageSpeed">Durchschnittsgeschwindigkeit in m/s, die das Fahrzeug v auf der NodeConnection verbracht hat</param>
-		public void RemoveVehicle(IVehicle v, float averageSpeed)
+		public void RemoveVehicle(IVehicle v)
 			{
 			if (! vehicles.Contains(v))
 				{
 				throw new Exception("Vehicle " + v + " nicht auf dieser NodeConnection!");
-				}
-
-			if (averageSpeed >= 0)
-				{
-				m_countOfVehicles++;
-				m_sumOfAverageSpeeds += averageSpeed;
-				if (m_visualizeAverageSpeed)
-					UpdatePen();
 				}
 
 			vehiclesToRemove.Add(v);
@@ -858,6 +831,7 @@ namespace CityTrafficSimulator
 			{
 			foreach (IVehicle v in vehiclesToRemove)
 				{
+				v.VehicleLeftNodeConnection -= Handler_VehicleLeftNodeConnection;
 				vehicles.Remove(v);
 				}
 			vehiclesToRemove.Clear();
@@ -1053,12 +1027,28 @@ namespace CityTrafficSimulator
 		/// <returns>Ein Paar von IVehicles: Left ist das davor, Right das dahinter</returns>
 		public Pair<VehicleDistance> GetVehiclesAroundArcPosition(double arcPosition, double distanceWithin)
 			{
-			//return new Pair<VehicleDistance>(null, null);
 			return new Pair<VehicleDistance>(GetVehicleBeforeArcPosition(arcPosition, distanceWithin), GetVehicleBehindArcPosition(arcPosition, distanceWithin));
 			}
 
 
 		
+		#endregion
+
+		#region Event handler
+
+		void Handler_VehicleLeftNodeConnection(object sender, IVehicle.VehicleLeftNodeConnectionEventArgs e)
+			{
+			float averageSpeed = (float)((e.partsUsed.right - e.partsUsed.left) / (10 * (e.timeInterval.right - e.timeInterval.left)));
+			if (averageSpeed > 0)
+				{
+				m_countOfVehicles++;
+				m_sumOfAverageSpeeds += averageSpeed;
+				if (m_visualizeAverageSpeed)
+					UpdatePen();
+				}
+			}
+
+
 		#endregion
 
 		#region Statistiken

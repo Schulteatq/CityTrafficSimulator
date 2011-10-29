@@ -59,44 +59,52 @@ namespace CityTrafficSimulator.Vehicle
 		#region Statistiken
 
 		/// <summary>
-		/// absolute Startzeit des Fahrzeuges
+		/// Vehicle statistics record
 		/// </summary>
-		protected float m_startTime = 0;
-		/// <summary>
-		/// absolute Startzeit des Fahrzeuges
-		/// </summary>
-		public float startTime
+		public struct Statistics
 			{
-			get { return m_startTime; }
+			/// <summary>
+			/// world time when vehicle was created
+			/// </summary>
+			public double startTime;
+
+			/// <summary>
+			/// Total milage in network (arc length as unit)
+			/// </summary>
+			public double totalMilage;
+
+			/// <summary>
+			/// Number of used NodeConnections
+			/// </summary>
+			public int numNodeConnections;
+
+			/// <summary>
+			/// Number of performed line changes
+			/// </summary>
+			public int numLineChanges;
+
+			/// <summary>
+			/// absolute Startzeit des Fahrzeuges auf der aktuellen NodeConnection
+			/// </summary>
+			public double startTimeOnNodeConnection;
+
+			/// <summary>
+			/// Bogenlängenposition, bei der dieses Auto auf dieser Linie gestartet ist
+			/// </summary>
+			public double arcPositionOfStartOnNodeConnection;
 			}
 
-
 		/// <summary>
-		/// absolute Startzeit des Fahrzeuges auf der aktuellen NodeConnection
+		/// Statistics record of this vehicle
 		/// </summary>
-		protected float m_startTimeOnNodeConnection;
+		protected IVehicle.Statistics m_statistics = new IVehicle.Statistics();
 		/// <summary>
-		/// absolute Startzeit des Fahrzeuges auf der aktuellen NodeConnection
+		/// Statistics record of this vehicle
 		/// </summary>
-		public float startTimeOnNodeConnection
+		public IVehicle.Statistics statistics
 			{
-			get { return m_startTimeOnNodeConnection; }
+			get { return m_statistics; }
 			}
-
-
-		/// <summary>
-		/// Bogenlängenposition, bei der dieses Auto auf dieser Linie gestartet ist
-		/// </summary>
-		protected double m_arcPositionOfStartOnNodeConnection;
-		/// <summary>
-		/// Bogenlängenposition, bei der dieses Auto auf dieser Linie gestartet ist
-		/// </summary>
-		public double arcPositionOfStartOnNodeConnection
-			{
-			get { return m_arcPositionOfStartOnNodeConnection; }
-			}
-
-
 
 		#endregion
 
@@ -136,6 +144,8 @@ namespace CityTrafficSimulator.Vehicle
 		public IVehicle()
 			{
 			hashcode = hashcodeIndex++;
+			m_statistics.startTime = GlobalTime.Instance.currentTime;
+			m_statistics.startTimeOnNodeConnection = GlobalTime.Instance.currentTime;
 			}
 
 		#endregion
@@ -143,13 +153,51 @@ namespace CityTrafficSimulator.Vehicle
 		#region Selbstzerstörung
 
 		/// <summary>
-		/// Bereitet das IVehicle auf die Selbstzerstörung vor und meldet sich an allen beteiligten NodeConnections ab
+		/// To be called when this vehicle shall be removed from the current NodeConnection
 		/// </summary>
-		/// <param name="averageSpeed">Durchschnittsgeschwindigkeit in m/s, die dieses Fahrzeug auf der NodeConnection hatte</param>
-		private void Dispose(float averageSpeed)
+		/// <param name="logConnectionStatistics">Flag, whether NodeConnection statistics shall be logged</param>
+		/// <param name="nextConnection">NodeConnection where to respawn vehicle - set to null if vehicle shall not respawn</param>
+		/// <param name="nextArcPosition">arc position on nextConnection where vehicle shall respawn</param>
+		private void RemoveFromCurrentNodeConnection(bool logConnectionStatistics, NodeConnection nextConnection, double nextArcPosition)
 			{
 			m_State.UnsetLineChangeVehicleInteraction();
-			currentNodeConnection.RemoveVehicle(this, averageSpeed);
+
+			if (logConnectionStatistics)
+				{
+				OnVehicleLeftNodeConnection(new VehicleLeftNodeConnectionEventArgs(new Interval<double>(statistics.arcPositionOfStartOnNodeConnection, currentPosition), new Interval<double>(statistics.startTimeOnNodeConnection, GlobalTime.Instance.currentTime)));
+				}
+			currentNodeConnection.RemoveVehicle(this);
+			
+			if (nextConnection != null)
+				{
+				double pos = Math.Min(nextConnection.lineSegment.length, nextArcPosition);
+				if (pos < nextArcPosition)
+					{
+					pos = pos;
+					}
+
+				// set new state
+				m_State = new State(nextConnection, pos);
+
+				// update statistics
+				m_statistics.totalMilage += currentPosition - statistics.arcPositionOfStartOnNodeConnection;
+				m_statistics.numNodeConnections++;
+				m_statistics.arcPositionOfStartOnNodeConnection = pos;
+				m_statistics.startTimeOnNodeConnection = GlobalTime.Instance.currentTime;
+
+				// add vehicle to new node connection
+				nextConnection.AddVehicleAt(this, pos);
+				}
+			else
+				{
+				// evoke VehicleDied event
+				OnVehicleDied(new VehicleDiedEventArgs(
+					targetNodes.Contains(currentNodeConnection.endNode),
+					statistics.totalMilage,
+					GlobalTime.Instance.currentTime - statistics.startTime,
+					statistics.numNodeConnections,
+					statistics.numLineChanges));
+				}
 			}
 
         #endregion
@@ -204,10 +252,10 @@ namespace CityTrafficSimulator.Vehicle
 				}
 
 			// Neuen State schonmal auf die ZielNodeConnection setzen (currentNodeConnection, currentPosition)
-			m_State = new State(lcp.otherStart.nc, lcp.otherStart.arcPosition + arcPositionOffset*ratioProjectionOnTargetConnectionvsLCPLength);
-			lcp.otherStart.nc.AddVehicleAt(this, lcp.otherStart.arcPosition);
+			RemoveFromCurrentNodeConnection(true, lcp.otherStart.nc, lcp.otherStart.arcPosition + arcPositionOffset * ratioProjectionOnTargetConnectionvsLCPLength);
 			m_WayToGo = CalculateShortestConenction(currentNodeConnection.endNode, targetNodes);
 
+			m_statistics.numLineChanges++;
 			lineChangeNeeded = false;
 			lci = null;
 			}
@@ -340,17 +388,16 @@ namespace CityTrafficSimulator.Vehicle
 		/// Fahrzeug berechnet neue Beschleunigungswerte für die aktuelle Position auf der auktuellen NodeConnection 
 		/// </summary>
 		/// <param name="tickLength">Länge eines Ticks in Sekunden</param>
-		/// <param name="currentTime">aktuelle Zeit in Sekunden nach Sekunde 0</param>
-		public void Think(double tickLength, double currentTime)
+		public void Think(double tickLength)
 			{
 			List<NodeConnection> route = new List<NodeConnection>();
 			route.Add(currentNodeConnection);
 			foreach (RouteSegment rs in WayToGo)
 				route.Add(rs.startConnection);
 
-			double acceleration = Think(route, currentPosition, false, tickLength, currentTime);
+			double acceleration = Think(route, currentPosition, false, tickLength);
 			Accelerate(acceleration);
-			//Think(currentNodeConnection, currentPosition, false, tickLength, currentTime);
+			//Think(currentNodeConnection, currentPosition, false, tickLength);
 			}
 
 		/// <summary>
@@ -360,9 +407,8 @@ namespace CityTrafficSimulator.Vehicle
 		/// <param name="arcPos">Current arc position of the vehicle on the first NodeConnection on <paramref name="route"/>.</param>
 		/// <param name="onlySimpleCalculations">Perform only simple calculations (e.g. no free line changes).</param>
 		/// <param name="tickLength">Length of a tick in seconds.</param>
-		/// <param name="currentTime">Current world time.</param>
 		/// <returns></returns>
-		public double Think(List<NodeConnection> route, double arcPos, bool onlySimpleCalculations, double tickLength, double currentTime)
+		public double Think(List<NodeConnection> route, double arcPos, bool onlySimpleCalculations, double tickLength)
 			{
 			if (route.Count == 0)
 				return 0;
@@ -434,7 +480,7 @@ namespace CityTrafficSimulator.Vehicle
 			LinkedList<SpecificIntersection> registrationTarget = (onlySimpleCalculations ? temporaryRegisteredIntersections : registeredIntersections);
 
 			// gather all upcoming intersections (and update the ones we are already registered at)
-			GatherNextIntersectionsOnMyTrack(route, arcPos, registrationTarget, lookaheadDistance, currentTime);
+			GatherNextIntersectionsOnMyTrack(route, arcPos, registrationTarget, lookaheadDistance);
 			double distanceToIntersection = HandleIntersections(registrationTarget, stopDistance);
 
 			// If there is an intersection where I should wait, I should do so...
@@ -511,9 +557,6 @@ namespace CityTrafficSimulator.Vehicle
 										{
 										// return to normal velocity
 										m_Physics.multiplierDesiredVelocity = 1;
-
-										// dispose on current NodeConnection
-										Dispose((float)((arcPos - m_arcPositionOfStartOnNodeConnection) / (10.0f * (currentTime - m_startTimeOnNodeConnection))));
 
 										// initiate the line change
 										InitiateLineChange(lcp, arcPos - lcp.start.arcPosition);
@@ -651,9 +694,6 @@ namespace CityTrafficSimulator.Vehicle
 											{
 											if (myAccelerationOnOtherConnection - lowestAcceleration > p * (currentAccelerationOfVehicleBehindMeOnOtherConnection - forcedAccelerationOfVehicleBehindMeOnOtherConnection) + lineChangeThreshold)
 												{
-												// dispose on current NodeConnection
-												Dispose((float)((arcPos - m_arcPositionOfStartOnNodeConnection) / (10.0f * (currentTime - m_startTimeOnNodeConnection))));
-
 												// initiate the line change
 												InitiateLineChange(lcp, arcPos - lcp.start.arcPosition);
 												lowestAcceleration = myAccelerationOnOtherConnection;
@@ -688,8 +728,7 @@ namespace CityTrafficSimulator.Vehicle
         /// Bewegt das Auto
         /// </summary>
 		/// <param name="tickLength">Länge eines Ticks in Sekunden (berechnet sich mit 1/#Ticks pro Sekunde)</param>
-		/// <param name="currentTime">aktuelle Zeit in Sekunden nach Sekunde 0</param>
-		public void Move(double tickLength, float currentTime)
+		public void Move(double tickLength)
             {
 			if (!alreadyMoved)
 				{
@@ -730,62 +769,55 @@ namespace CityTrafficSimulator.Vehicle
 							m_WayToGo = CalculateShortestConenction(currentNodeConnection.endNode, targetNodes);
 							if (m_WayToGo.SegmentCount() == 0 || m_WayToGo.Top() == null)
 								{
-								Dispose(-1);
+								RemoveFromCurrentNodeConnection(true, null, 0);
 								return;
 								}
 							}
 
 						visitedNodeConnections.AddFirst(currentNodeConnection);
 
-						// Auto auf der alten Linie zerstören
-						Dispose((float) (currentPosition - m_arcPositionOfStartOnNodeConnection) / (10.0f * (currentTime - m_startTimeOnNodeConnection)));
-
 						// nächsten Wegpunkt extrahieren
 						RouteSegment rs = WayToGo.Pop();
 
 						if (rs == null)
 							{
-							Dispose(-1);
+							RemoveFromCurrentNodeConnection(true, null, 0);
 							return;
-							}
-
-						// ist ein Spurwechsel nötig, so die entsprechenden Felder füllen
-						if (rs.lineChangeNeeded)
-							{
-							lineChangeNeeded = true;
-							rs.startConnection.lineChangeIntervals.TryGetValue(rs.nextNode.hashcode, out lci);
 							}
 						else
 							{
-							lineChangeNeeded = false;
-							lci = null;
+							// ist ein Spurwechsel nötig, so die entsprechenden Felder füllen
+							if (rs.lineChangeNeeded)
+								{
+								lineChangeNeeded = true;
+								rs.startConnection.lineChangeIntervals.TryGetValue(rs.nextNode.hashcode, out lci);
+								}
+							else
+								{
+								lineChangeNeeded = false;
+								lci = null;
+								}
+
+							LinkedListNode<IVehicle> lln = rs.startConnection.GetVehicleListNodeBehindArcPosition(startDistance);
+							if (lln == null || lln.Value.currentPosition - lln.Value.length >= startDistance)
+								{
+								RemoveFromCurrentNodeConnection(true, rs.startConnection, startDistance);
+								}
+							else
+								{
+								RemoveFromCurrentNodeConnection(true, null, 0);
+								}
 							}
-
-						// neue NodeConnection setzen
-						NodeConnection newNodeConnection = rs.startConnection; //currentNodeConnection.endNode.GetNodeConnectionTo(nextLineNode);
-						
-						// Neuen State setzen (currentNodeConnection, currentPosition)
-						m_State = new State(newNodeConnection, startDistance);
-
-						// Statistiken neu setzen
-						m_arcPositionOfStartOnNodeConnection = startDistance;
-						m_startTimeOnNodeConnection = currentTime;
-
-						// Fahrzeug dort einfügen
-						newNodeConnection.AddVehicle(this);
 						}
 					else
 						{
 						// Ende der Fahnenstange, also selbstzerstören
-						Dispose((float)(currentPosition - m_arcPositionOfStartOnNodeConnection) / (10.0f * (currentTime - m_startTimeOnNodeConnection)));
+						RemoveFromCurrentNodeConnection(true, null, 0);
 						}
 					}
-				else
+				else if (Double.IsNaN(currentPosition))
 					{
-					}
-				if (Double.IsNaN(currentPosition))
-					{
-					Dispose(-1);
+					RemoveFromCurrentNodeConnection(false, null, 0);
 					}
 
 				// Der Spurwechsel ist fertig, dann sollte ich diesen auch abschließen:
@@ -793,8 +825,8 @@ namespace CityTrafficSimulator.Vehicle
 					{
 					FinishLineChange(currentPositionOnLineChangePoint - currentLineChangePoint.lineSegment.length);
 
-					m_startTimeOnNodeConnection = (float)currentTime;
-					m_arcPositionOfStartOnNodeConnection = m_State.position;
+					m_statistics.startTimeOnNodeConnection = GlobalTime.Instance.currentTime;
+					m_statistics.arcPositionOfStartOnNodeConnection = m_State.position;
 					}
 
 
@@ -848,7 +880,7 @@ namespace CityTrafficSimulator.Vehicle
 			VehicleDistance toReturn = null;
 
 			// the beginning of a NodeConnection may be close to other connections - search on each of them
-			double arcLengthToLookForParallelVehicles = 1.2 * nc.startNode.outSlope.Abs; // search distance on parallel connections
+			double arcLengthToLookForParallelVehicles = 1.0 * nc.startNode.outSlope.Abs; // search distance on parallel connections
 			foreach (NodeConnection parallelNodeConnection in nc.startNode.nextConnections)
 				{
 				VehicleDistance vd = parallelNodeConnection.GetVehicleBehindArcPosition(arcPos, distance);
@@ -856,7 +888,8 @@ namespace CityTrafficSimulator.Vehicle
 					{
 					vd.distance -= vd.vehicle.length;
 
-					if ((toReturn == null || vd.distance < toReturn.distance) && (parallelNodeConnection == nc || arcPos < arcLengthToLookForParallelVehicles))
+					if (   (toReturn == null || vd.distance < toReturn.distance) 
+						&& (parallelNodeConnection == nc || (arcPos < arcLengthToLookForParallelVehicles && vd.distance < arcLengthToLookForParallelVehicles)))
 						{
 						toReturn = vd;
 						}
@@ -899,8 +932,7 @@ namespace CityTrafficSimulator.Vehicle
 		/// <param name="arcPos">Current arc position of the vehicle on the first NodeConnection on <paramref name="route"/>.</param>
 		/// <param name="intersectionRegistration">Target list to store all intersections where the vehicle is registered. CAUTION: Will be modified!</param>
 		/// <param name="distance">Distance to cover during search.</param>
-		/// <param name="currentTime">Current world time.</param>
-		private void GatherNextIntersectionsOnMyTrack(List<NodeConnection> route, double arcPos, LinkedList<SpecificIntersection> intersectionRegistration, double distance, double currentTime)
+		private void GatherNextIntersectionsOnMyTrack(List<NodeConnection> route, double arcPos, LinkedList<SpecificIntersection> intersectionRegistration, double distance)
 			{
 			Debug.Assert(route.Count > 0);
 			List<NodeConnection> workingRoute;
@@ -914,7 +946,7 @@ namespace CityTrafficSimulator.Vehicle
 				workingRoute.AddRange(route);
 
 				// Setup some helper variables:
-				doneDistance = length - currentPosition;											// total covered distance
+				doneDistance = -workingRoute[0].lineSegment.length - currentPosition;				// total covered distance
 				remainingDistance = distance + length;												// total remaining distance to cover
 				startPosition = workingRoute[0].lineSegment.length - (length - currentPosition);	// start position at current NodeConnection
 				}
@@ -951,14 +983,14 @@ namespace CityTrafficSimulator.Vehicle
 					// the current intersection is already registered - update needed
 					if (lln != null)
 						{
-						si.intersection.UpdateVehicle(this, si.nodeConnection, myDistance, currentTime);
+						si.intersection.UpdateVehicle(this, si.nodeConnection, myDistance, GlobalTime.Instance.currentTime);
 						lln.Value = new SpecificIntersection(si.nodeConnection, si.intersection);
 						lln = lln.Next;
 						}
 					// the current intersection is not yet registered - do it now
 					else
 						{
-						si.intersection.RegisterVehicle(this, si.nodeConnection, myDistance, currentTime);
+						si.intersection.RegisterVehicle(this, si.nodeConnection, myDistance, GlobalTime.Instance.currentTime);
 						if (lln != null)
 							intersectionRegistration.AddBefore(lln, new SpecificIntersection(si.nodeConnection, si.intersection));
 						else
@@ -1014,7 +1046,7 @@ namespace CityTrafficSimulator.Vehicle
 						waitInFrontOfIntersection = true;
 
 					// Intersection is close to stop point so that vehicle will block this intersection => wait in front
-					if ((stopPoint > 0) && (stopPoint - length - s0 < myCvt.remainingDistance))
+					if ((stopPoint > 0) && (stopPoint - length - s0 < myCvt.remainingDistance) && (si.intersection.avoidBlocking))
 						{
 						waitInFrontOfIntersection = true;
 						}
@@ -1034,7 +1066,7 @@ namespace CityTrafficSimulator.Vehicle
 						// I should wait if:
 						//  - The other vehicle originally reached the intersection before me
 						//  - TODO: I would block him significantly if I continue.
-						if (myCvt.originalArrivingTime > otherCvt.originalArrivingTime)
+						if (myCvt.originalArrivingTime > otherCvt.originalArrivingTime || otherCvt.remainingDistance < 0)
 							{
 							waitInFrontOfIntersection = true;
 							break;
@@ -1178,7 +1210,7 @@ namespace CityTrafficSimulator.Vehicle
 				m_WayToGo = CalculateShortestConenction(currentNodeConnection.endNode, m_TargetNodes);
 				if (m_WayToGo.SegmentCount() == 0)
 					{
-					Dispose(-1);
+					RemoveFromCurrentNodeConnection(false, null, 0);
 					}
 				}
 			}
@@ -1251,9 +1283,6 @@ namespace CityTrafficSimulator.Vehicle
 				multiplierDesiredVelocity = 1;
                 }
 
-
-
-
 			/// <summary>
 			/// gewünschte Gecshwindigkeit des Autos 
 			/// </summary>
@@ -1268,7 +1297,6 @@ namespace CityTrafficSimulator.Vehicle
 				get { return desiredVelocity * multiplierDesiredVelocity; }
 				}
 			
-
             /// <summary>
             /// Geschwindigkeit des Fahrzeuges
             /// (sehr wahrscheinlich gemessen in Änderung der Position/Tick)
@@ -2003,6 +2031,141 @@ namespace CityTrafficSimulator.Vehicle
 
 		#endregion
 
+		#region Events
+
+		#region VehicleLeftNodeConnection event
+
+		/// <summary>
+		/// EventArgs for a VehicleLeftNodeConnection event
+		/// </summary>
+		public class VehicleLeftNodeConnectionEventArgs : EventArgs
+			{
+			/// <summary>
+			/// used parts of the NodeConnection (arc length)
+			/// </summary>
+			public Interval<double> partsUsed;
+
+			/// <summary>
+			/// start and end time on the NodeConnection
+			/// </summary>
+			public Interval<double> timeInterval;
+
+			/// <summary>
+			/// Creates new VehicleLeftNodeConnectionEventArgs
+			/// </summary>
+			/// <param name="partsUsed">used parts of the NodeConnection (arc length)</param>
+			/// <param name="timeInterval">start and end time on the NodeConnection</param>
+			public VehicleLeftNodeConnectionEventArgs(Interval<double> partsUsed, Interval<double> timeInterval)
+				{
+				this.partsUsed = partsUsed;
+				this.timeInterval = timeInterval;
+				}
+			}
+
+		/// <summary>
+		/// Delegate for the VehicleLeftNodeConnection-EventHandler, which is called when vehicle has left a NodeConnection
+		/// </summary>
+		/// <param name="sender">Sneder of the event</param>
+		/// <param name="e">Event parameter</param>
+		public delegate void VehicleLeftNodeConnectionEventHandler(object sender, VehicleLeftNodeConnectionEventArgs e);
+
+		/// <summary>
+		/// The VehicleLeftNodeConnection event occurs when vehicle has left a NodeConnection
+		/// </summary>
+		public event VehicleLeftNodeConnectionEventHandler VehicleLeftNodeConnection;
+
+		/// <summary>
+		/// Helper method to initiate the VehicleLeftNodeConnection event
+		/// </summary>
+		/// <param name="e">Eventparameter</param>
+		protected void OnVehicleLeftNodeConnection(VehicleLeftNodeConnectionEventArgs e)
+			{
+			if (VehicleLeftNodeConnection != null)
+				{
+				VehicleLeftNodeConnection(this, e);
+				}
+			}
+
+		#endregion
+
+		#region VehicleDied event
+
+		/// <summary>
+		/// EventArgs for a VehicleDied event
+		/// </summary>
+		public class VehicleDiedEventArgs : EventArgs
+			{
+			/// <summary>
+			/// Flag, whether the vehicle reached its destination or not
+			/// </summary>
+			public bool reachedDestination;
+
+			/// <summary>
+			/// Total milage in network (arc length as unit)
+			/// </summary>
+			public double milage;
+
+			/// <summary>
+			/// Total time in network
+			/// </summary>
+			public double totalTimeInNetwork;
+
+			/// <summary>
+			/// Number of used NodeConnections
+			/// </summary>
+			public int numNodeConnections;
+
+			/// <summary>
+			/// Number of performed line changes
+			/// </summary>
+			public int numLineChanges;
+
+			/// <summary>
+			/// Creates new VehicleDiedEventArgs
+			/// </summary>
+			/// <param name="reachedDestination">Flag, whether the vehicle reached its destination or not</param>
+			/// <param name="milage">Total milage in network (arc length as unit)</param>
+			/// <param name="totalTimeInNetwork">Total time in network</param>
+			/// <param name="numNodeConnections">Number of used NodeConnections</param>
+			/// <param name="numLineChanges">Number of performed line changes</param>
+			public VehicleDiedEventArgs(bool reachedDestination, double milage, double totalTimeInNetwork, int numNodeConnections, int numLineChanges)
+				{
+				this.reachedDestination = reachedDestination;
+				this.milage = milage;
+				this.totalTimeInNetwork = totalTimeInNetwork;
+				this.numNodeConnections = numNodeConnections;
+				this.numLineChanges = numLineChanges;
+				}
+
+			}
+
+		/// <summary>
+		/// Delegate for the VehicleDied-EventHandler, which is called when a vehicle dies and won't be spawed somewhere else
+		/// </summary>
+		/// <param name="sender">Sneder of the event</param>
+		/// <param name="e">Event parameter</param>
+		public delegate void VehicleDiedEventHandler(object sender, VehicleDiedEventArgs e);
+
+		/// <summary>
+		/// The VehicleDied event occurs when a vehicle dies and won't be spawed somewhere else
+		/// </summary>
+		public event VehicleDiedEventHandler VehicleDied;
+
+		/// <summary>
+		/// Helper method to initialte the VehicleDied event
+		/// </summary>
+		/// <param name="e">Eventparameter</param>
+		protected void OnVehicleDied(VehicleDiedEventArgs e)
+			{
+			if (VehicleDied != null)
+				{
+				VehicleDied(this, e);
+				}
+			}
+
+		#endregion
+
+		#endregion
 
 		}
     }

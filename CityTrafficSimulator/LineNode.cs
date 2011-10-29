@@ -315,14 +315,13 @@ namespace CityTrafficSimulator
 		/// lässt die Zeit um einen Tick voranschreiten. Reicht Tick() an alle IVehicles auf allen ausgehenden NodeConnections weiter.
 		/// </summary>
 		/// <param name="tickLength">Länge eines Ticks in Sekunden (berechnet sich mit 1/#Ticks pro Sekunde)</param>
-		/// <param name="currentTime">aktuelle Zeit in Sekunden nach Sekunde 0</param>
-		public void Tick(double tickLength, double currentTime)
+		public void Tick(double tickLength)
             {
             foreach (NodeConnection nc in this.m_nextConnections)
                 {
                 foreach (IVehicle v in nc.vehicles)
                     {
-                    v.Think(tickLength, currentTime);
+                    v.Think(tickLength);
                     }
                 }
 			foreach (NodeConnection nc in this.m_nextConnections)
@@ -331,7 +330,7 @@ namespace CityTrafficSimulator
 
 				foreach (IVehicle v in nc.vehicles)
 					{
-					v.Move(tickLength, (float) currentTime);
+					v.Move(tickLength);
 					}
 
 				nc.RemoveAllVehiclesInRemoveList();

@@ -229,8 +229,9 @@ namespace CityTrafficSimulator
 
 				IVehicle.State state = new IVehicle.State(startNode.nextConnections[foo], 0);
 				v.state = state;
+				v.targetNodes = targetNodes;
 				
-				startNode.nextConnections[foo].AddVehicle(v, targetNodes);
+				startNode.nextConnections[foo].AddVehicle(v);
 
 				rnd = null;
 				}
@@ -1365,12 +1366,11 @@ namespace CityTrafficSimulator
 		/// <summary>
 		/// sagt allen verwalteten Objekten Bescheid, dass sie ticken dürfen *g*
 		/// </summary>
-		public void Tick(double tickLength, double currentTime)
+		public void Tick(double tickLength)
 			{
-			// TODO: ist das hier nötig? Oder nur son Relikt aus vergangenen Zeiten
 			foreach (LineNode ln in nodes)
 				{
-				ln.Tick(tickLength, currentTime);
+				ln.Tick(tickLength);
 				}
 			}
 

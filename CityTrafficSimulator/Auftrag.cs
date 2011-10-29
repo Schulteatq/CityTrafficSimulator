@@ -122,7 +122,7 @@ namespace CityTrafficSimulator
 		/// Anteil LKW in %
 		/// </summary>
 		[XmlIgnore]
-		public static int truckRatio = 15;
+		public static int truckRatio = 8;
 
 		/// <summary>
 		/// Number of vehicles that were not created successfully
@@ -164,12 +164,11 @@ namespace CityTrafficSimulator
 		/// lässt die Zeit um einen Tick voranschreiten
 		/// </summary>
 		/// <param name="tickLength">Länge eines Ticks in Sekunden (berechnet sich mit 1/#Ticks pro Sekunde)</param>
-		/// <param name="currentTime">aktuelle Zeit in Sekunden nach Sekunde 0</param>
-		public void Tick(double tickLength, double currentTime)
+		public void Tick(double tickLength)
             {
 			if (failedCount > 0)
 				{
-				bool success = CreateVehicle((float)currentTime);
+				bool success = CreateVehicle();
 				if (success)
 					--failedCount;
 				}
@@ -183,7 +182,7 @@ namespace CityTrafficSimulator
 
 				if (zufallsvariable == 0)
 					{
-					bool success = CreateVehicle((float)currentTime);
+					bool success = CreateVehicle();
 					if (!success)
 						{
 						++failedCount;
@@ -206,9 +205,8 @@ namespace CityTrafficSimulator
         /// <summary>
         /// Lässt ein Auto am startNode losfahren
         /// </summary>
-		/// <param name="currentTime">aktuelle Weltzeit</param>
 		/// <returns>true, if Vehicle was successfully created - otherwise false</returns>
-		private bool CreateVehicle(float currentTime)
+		private bool CreateVehicle()
             {
 			IVehicle.Physics p = new IVehicle.Physics(m_wunschgeschwindigkeit, m_wunschgeschwindigkeit, 0);
 
@@ -218,18 +216,18 @@ namespace CityTrafficSimulator
 				case IVehicle.VehicleTypes.CAR:
 					if (rnd.Next(100) < truckRatio)
 						{
-						v = new Truck(p, currentTime);
+						v = new Truck(p);
 						}
 					else
 						{
-						v = new Car(p, currentTime);
+						v = new Car(p);
 						}					
 					break;
 				case IVehicle.VehicleTypes.TRAM:
-					v = new Tram(p, currentTime);
+					v = new Tram(p);
 					break;
 				case IVehicle.VehicleTypes.BUS:
-					v = new Bus(p, currentTime);
+					v = new Bus(p);
 					break;
 				}
 
@@ -242,7 +240,8 @@ namespace CityTrafficSimulator
 
 				IVehicle.State state = new IVehicle.State(start.nextConnections[foo], 0);
 				v.state = state;
-				return start.nextConnections[foo].AddVehicle(v, endNodes);
+				v.targetNodes = endNodes;
+				return start.nextConnections[foo].AddVehicle(v);
 				}
 
 			return false;

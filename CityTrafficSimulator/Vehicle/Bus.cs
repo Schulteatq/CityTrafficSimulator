@@ -29,11 +29,8 @@ namespace CityTrafficSimulator.Vehicle
 		{
 		private static Random rnd = new Random();
 
-		public Bus(IVehicle.Physics p, float currentTime)
+		public Bus(IVehicle.Physics p)
 			{
-			m_startTime = currentTime;
-			m_startTimeOnNodeConnection = currentTime;
-
 			length = (rnd.Next(2) == 0) ? 120 : 180;
 
 			m_Physics = p;

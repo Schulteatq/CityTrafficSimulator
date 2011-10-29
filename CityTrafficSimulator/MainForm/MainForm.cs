@@ -54,12 +54,8 @@ namespace CityTrafficSimulator
 			}
 		#endregion
 
-
 		#region Variablen / Properties
 		private Random rnd = new Random();
-
-		private double currentTime = 0;
-
 
 		/// <summary>
 		/// Flag, ob gerade OnEventChanged() gefeuert wurde
@@ -884,7 +880,7 @@ namespace CityTrafficSimulator
 			case Keys.Delete:
 				if (selectedVehicle != null)
 					{
-					selectedVehicle.currentNodeConnection.RemoveVehicle(selectedVehicle, -1);
+					selectedVehicle.currentNodeConnection.RemoveVehicle(selectedVehicle);
 					}
 				else // do not delete nodes and connections when vehicle selected!
 					{
@@ -1350,15 +1346,15 @@ namespace CityTrafficSimulator
 			double tickLength = 1.0d / (double)stepsPerSecondSpinEdit.Value;
 			timelineSteuerung.Advance(tickLength);
 
-			currentTime += tickLength;
+			GlobalTime.Instance.Advance(tickLength);
 
 			//tickCount++;
 
-			nodeSteuerung.Tick(tickLength, currentTime);
+			nodeSteuerung.Tick(tickLength);
 
 			foreach (Auftrag a in AufträgeCheckBox.Items)
 				{
-				a.Tick(tickLength, currentTime);
+				a.Tick(tickLength);
 				}
 				
 			nodeSteuerung.Reset();
@@ -1382,7 +1378,7 @@ namespace CityTrafficSimulator
 			if (fromLineNodes.Count > 0 && toLineNodes.Count > 0)
 				{
 				IVehicle.Physics p = new IVehicle.Physics((double)v0Edit.Value, 0, 0);
-				Car t = new Car(p, (float)currentTime);
+				Car t = new Car(p);
 
 				nodeSteuerung.AddVehicle(t, fromLineNodes[rnd.Next(fromLineNodes.Count)], toLineNodes);
 				Invalidate();
@@ -1554,7 +1550,7 @@ namespace CityTrafficSimulator
 				{
 				foreach (IVehicle v in nc.vehicles)
 					{
-					nc.RemoveVehicle(v, -1);
+					nc.RemoveVehicle(v);
 					}
 
 				nc.RemoveAllVehiclesInRemoveList();
@@ -1725,7 +1721,7 @@ namespace CityTrafficSimulator
 			if (fromLineNodes.Count > 0 && toLineNodes.Count > 0)
 				{
 				IVehicle.Physics p = new IVehicle.Physics((double)v0Edit.Value, 0, 0);
-				Tram t = new Tram(p, (float)currentTime);
+				Tram t = new Tram(p);
 
 				nodeSteuerung.AddVehicle(t, fromLineNodes[rnd.Next(fromLineNodes.Count)], toLineNodes);
 				Invalidate();
@@ -1756,7 +1752,7 @@ namespace CityTrafficSimulator
 			if (fromLineNodes.Count > 0 && toLineNodes.Count > 0)
 				{
 				IVehicle.Physics p = new IVehicle.Physics((double)v0Edit.Value, 0, 0);
-				Bus t = new Bus(p, (float)currentTime);
+				Bus t = new Bus(p);
 
 				nodeSteuerung.AddVehicle(t, fromLineNodes[rnd.Next(fromLineNodes.Count)], toLineNodes);
 				Invalidate();

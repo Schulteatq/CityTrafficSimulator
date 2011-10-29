@@ -31,12 +31,8 @@ namespace CityTrafficSimulator.Vehicle
 
 		private GraphicsPath[] wagons = new GraphicsPath[5];
 
-		public Tram(IVehicle.Physics p, float currentTime)
+		public Tram(IVehicle.Physics p)
 			{
-			m_startTime = currentTime;
-			m_startTimeOnNodeConnection = currentTime;
-
-
 			length = (rnd.Next(2) == 0) ? 250 : 400;
 
 			m_Physics = p;

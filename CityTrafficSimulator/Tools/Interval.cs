@@ -19,6 +19,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Text;
 
 namespace CityTrafficSimulator
@@ -44,7 +45,7 @@ namespace CityTrafficSimulator
 		/// <param name="Ende">rechte Intervallgrenze</param>
         public Interval(T Start, T Ende)
             {
-            this.left = Start;
+	        this.left = Start;
             this.right = Ende;
             }
 
