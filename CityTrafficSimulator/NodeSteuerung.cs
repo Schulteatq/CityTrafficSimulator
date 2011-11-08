@@ -416,6 +416,19 @@ namespace CityTrafficSimulator
 			return toReturn;
 			}
 
+		/// <summary>
+		/// Returns the maximum bounds of all LineNodes
+		/// </summary>
+		/// <returns></returns>
+		public Vector2 GetBounds()
+			{
+			Vector2 toReturn = new Vector2(0, 0);
+			foreach (LineNode ln in nodes)
+				{
+				toReturn.Nibble(ln.position);
+				}
+			return toReturn;
+			}
 
 		#endregion
 
@@ -999,96 +1012,159 @@ namespace CityTrafficSimulator
 
 		#endregion
 
-		#region Sonstige Methoden
+		#region Network rendering methods
 
 		/// <summary>
-		/// Sorgt dafür dass alle verwalteten Objekte gezeichnet werden
+		/// Network rendering options
 		/// </summary>
-		/// <param name="g">Zeichenfläche auf der gezeichnet werden soll</param>
-		/// <param name="clippingRange">Clippingbereich in Weltkoordinaten</param>
-		/// <param name="doClipping">führe Clipping durch</param>
-		/// <param name="drawVehicles">Zeichne Autos</param>
-		/// <param name="drawNodesAndConnections">zeichne LineNodes und NodeConnections</param>
-		/// <param name="debug">Zeichne Debuginformationen</param>
-		public void Draw(Graphics g, Rectangle clippingRange, bool doClipping, bool drawVehicles, bool drawNodesAndConnections, bool debug)
+		public class RenderOptions
 			{
-			using (Pen BlackPen = new Pen(Color.Black, 1.0F))
+			/// <summary>
+			/// Render LineNodes
+			/// </summary>
+			public bool renderLineNodes = true;
+
+			/// <summary>
+			/// Render NodeConnections
+			/// </summary>
+			public bool renderNodeConnections = true;
+
+			/// <summary>
+			/// Render Vehicles
+			/// </summary>
+			public bool renderVehicles = true;
+
+			/// <summary>
+			/// Perform clipping
+			/// </summary>
+			public bool performClipping = false;
+
+			/// <summary>
+			/// Clipping range in world coordinates
+			/// </summary>
+			public Rectangle clippingRect = new Rectangle();
+
+			/// <summary>
+			/// Render intersections
+			/// </summary>
+			public bool renderIntersections = false;
+
+			/// <summary>
+			/// Render LineChangePoints
+			/// </summary>
+			public bool renderLineChangePoints = false;
+
+			/// <summary>
+			/// Render debug data of LineNodes
+			/// </summary>
+			public bool renderLineNodeDebugData = false;
+
+			/// <summary>
+			/// Render debug data of NodeConnections
+			/// </summary>
+			public bool renderNodeConnectionDebugData = false;
+
+			/// <summary>
+			/// Render debug data of Vehicles
+			/// </summary>
+			public bool renderVehicleDebugData = false;
+			}
+
+		/// <summary>
+		/// Performs the network rendering on given graphics canvas.
+		/// Controller classes may be null if corresponding flags in options are set to false.
+		/// </summary>
+		/// <param name="g">Render canvas</param>
+		/// <param name="options">Network rendering options</param>
+		public void RenderNetwork(Graphics g, RenderOptions options)
+			{
+			if (options.renderNodeConnections)
 				{
-				int clippedNcs = 0;
-
-				// NodeConnections malen:
-				if (drawNodesAndConnections)
-					foreach (NodeConnection nc in connections)
+				foreach (NodeConnection nc in connections)
 					{
-					if (! doClipping || nc.lineSegment.boundingRectangle.IntersectsWith(clippingRange))
-						{
+					if (!options.performClipping || nc.lineSegment.boundingRectangle.IntersectsWith(options.clippingRect))
 						nc.Draw(g);
-						}
-					else
-						clippedNcs++;
 					}
+				}
 
-				// LineNodes malen
-				if (nodes.Count != 0)
+			if (options.renderLineNodes)
+				{
+				foreach (LineNode ln in nodes)
 					{
-					// Node Verbindungen + Autos zeichnen
-					foreach (LineNode aNode in nodes)
-						{
-						if (drawNodesAndConnections)
-							{
-							aNode.Draw(g);
-							}
+					if (!options.performClipping || ln.positionRect.IntersectsWith(options.clippingRect))
+						ln.Draw(g);
+					}
+				}
 
-						if (drawVehicles)
+			if (options.renderVehicles)
+				{
+				foreach (NodeConnection nc in connections)
+					{
+					if (!options.performClipping || nc.lineSegment.boundingRectangle.IntersectsWith(options.clippingRect))
+						{
+						foreach (IVehicle v in nc.vehicles)
 							{
-							foreach (NodeConnection nc in aNode.nextConnections)
-								{
-								foreach (IVehicle v in nc.vehicles)
-									{
-									v.Draw(g);
-									}
-								}
+							v.Draw(g);
 							}
 						}
 					}
+				}
 
-				if (debug)
+			if (options.renderIntersections)
+				{
+				using (Pen redPen = new Pen(Color.Red, 1.0f))
 					{
-					// Node Verbindungen + Autos zeichnen
-					foreach (LineNode aNode in nodes)
+					foreach (Intersection i in intersections)
 						{
-						aNode.DrawDebugData(g);
-						}
-					foreach (NodeConnection nc in connections)
-						{
-						nc.DrawDebugData(g);
-						}
-					}
+						g.DrawLine(redPen, i.aPosition, i.bPosition);
 
-				// Intersections malen
-				if (debug)
-					{
-					using (Pen iPen = new Pen(Color.Red, 1.0f))
-						{
-						g.DrawString("Clipped NodeConnections: " + clippedNcs, new Font("Arial", 10), new SolidBrush(Color.Black), new PointF(clippingRange.X + 10, clippingRange.Y + 24));
-
-						foreach (Intersection i in intersections)
-							{
-							g.DrawLine(iPen, i.aPosition, i.bPosition);
-
-							//g.DrawString(i.GetOriginalArrivingTimesCount().ToString(), new Font("Arial", 7), new SolidBrush(Color.Black), i.aPosition + new Vector2(10.0, 0.0));
-							double streckungsfaktor = i.GetWaitingDistance();
-
-							PointF[] surroundingPoints = new PointF[4]
+						double streckungsfaktor = i.GetWaitingDistance();
+						PointF[] surroundingPoints = new PointF[4]
 								{
 									i.aPosition + i.aConnection.lineSegment.DerivateAtTime(i.aTime).Normalized * streckungsfaktor,
 									i.bPosition + i.bConnection.lineSegment.DerivateAtTime(i.bTime).Normalized * streckungsfaktor,
 									i.aPosition + i.aConnection.lineSegment.DerivateAtTime(i.aTime).Normalized * streckungsfaktor * -1,
 									i.bPosition + i.bConnection.lineSegment.DerivateAtTime(i.bTime).Normalized * streckungsfaktor * -1
 								};
+						g.DrawPolygon(redPen, surroundingPoints);
+						}
+					}
+				}
 
-							g.DrawPolygon(iPen, surroundingPoints);
+			if (options.renderLineChangePoints)
+				{
+				foreach (NodeConnection nc in connections)
+					{
+					if (!options.performClipping || nc.lineSegment.boundingRectangle.IntersectsWith(options.clippingRect))
+						nc.DrawLineChangePoints(g);
+					}
+				}
 
+			if (options.renderLineNodeDebugData)
+				{
+				foreach (LineNode ln in nodes)
+					{
+					if (!options.performClipping || ln.positionRect.IntersectsWith(options.clippingRect))
+						ln.DrawDebugData(g);
+					}
+				}
+
+			if (options.renderVehicleDebugData)
+				{
+				foreach (NodeConnection nc in connections)
+					{
+					if (!options.performClipping || nc.lineSegment.boundingRectangle.IntersectsWith(options.clippingRect))
+						{
+						using (Pen greenPen = new Pen(Color.Green, 3))
+							{
+							foreach (IVehicle v in nc.vehicles)
+								{
+								v.DrawDebugData(g);
+								if (v.state.vehicleThatLetsMeChangeLine != null)
+									{
+									g.DrawLine(greenPen, v.state.positionAbs, v.state.vehicleThatLetsMeChangeLine.state.positionAbs);
+									}
+								}
 							}
 						}
 					}
@@ -1104,8 +1180,7 @@ namespace CityTrafficSimulator
 		/// </summary>
 		/// <param name="xw">XMLWriter, in denen die verwalteten Daten gespeichert werden soll</param>
 		/// <param name="xsn">zugehöriger XML-Namespace</param>
-		/// <param name="fahrauftraege">Liste von zu speichernden Fahraufträgen</param>
-		public void SaveToFile(XmlWriter xw, XmlSerializerNamespaces xsn, List<Auftrag> fahrauftraege)
+		public void SaveToFile(XmlWriter xw, XmlSerializerNamespaces xsn)
 			{
 			try
 				{
@@ -1118,12 +1193,6 @@ namespace CityTrafficSimulator
 					{
 					nc.PrepareForSave();
 					}
-				foreach (Auftrag a in fahrauftraege)
-					{
-					a.PrepareForSave();
-					}
-
-
 					
 				// zunächst das Layout speichern
 				xw.WriteStartElement("Layout");
@@ -1151,20 +1220,6 @@ namespace CityTrafficSimulator
 						}
 
 					xw.WriteEndElement();
-
-
-				// nun die Fahraufträge speichern
-				xw.WriteStartElement("Traffic");
-
-					// Fahraufträge serialisieren
-					XmlSerializer xs3 = new XmlSerializer(typeof(Auftrag));
-					foreach (Auftrag a in fahrauftraege)
-						{
-						xs3.Serialize(xw, a, xsn);
-						}
-
-				xw.WriteEndElement();
-
 				}
 			catch (IOException ex)
 				{
@@ -1181,7 +1236,7 @@ namespace CityTrafficSimulator
 		/// <param name="lf">LoadingForm für Statusinformationen</param>
 		public List<Auftrag> LoadFromFile(XmlDocument xd, LoadingForm.LoadingForm lf)
 			{
-			lf.SetupLowerProgess("Lese XML-Struktur...", 2);
+			lf.SetupLowerProgess("Parsing XML...", 2);
 
 			List<Auftrag> toReturn = new List<Auftrag>();
 			int saveVersion = 0;
@@ -1251,7 +1306,7 @@ namespace CityTrafficSimulator
 				connections.Add(ln);
 				}
 
-			lf.SetupLowerProgess("Stelle LineNodes wieder her...", m_nodes.Count);
+			lf.SetupLowerProgess("Restoring LineNodes...", m_nodes.Count);
 
 			// Nodes wiederherstellen
 			foreach (LineNode ln in m_nodes)
@@ -1260,7 +1315,7 @@ namespace CityTrafficSimulator
 				lf.StepLowerProgress();
 				}
 
-			lf.SetupLowerProgess("Stelle NodeConnections wieder her...", m_connections.Count);
+			lf.SetupLowerProgess("Restoring NodeConnections...", m_connections.Count);
 
 			// LineNodes wiederherstellen
 			foreach (NodeConnection nc in m_connections)
@@ -1272,7 +1327,7 @@ namespace CityTrafficSimulator
 				lf.StepLowerProgress();
 				}
 
-			lf.SetupLowerProgess("Berechne Intersections und Spurwechsel...", m_connections.Count);
+			lf.SetupLowerProgess("Calculate Intersections and Line Change Points...", m_connections.Count);
 
 			// Intersections wiederherstellen
 			foreach (NodeConnection nc in m_connections)
@@ -1285,50 +1340,53 @@ namespace CityTrafficSimulator
 
 			// Fahraufträge laden
 			// entsprechenden Node auswählen
-			XmlNodeList xnlAuftrag = xd.SelectNodes("//CityTrafficSimulator/Traffic/Auftrag");
-
-			lf.SetupLowerProgess("Lade Fahraufträge...", 2 * xnlAuftrag.Count);
-			
-			foreach (XmlNode aXmlNode in xnlAuftrag)
+			if (saveVersion < 5)
 				{
-				// Node in einen TextReader packen
-				TextReader tr = new StringReader(aXmlNode.OuterXml);
-				// und Deserializen
-				XmlSerializer xs = new XmlSerializer(typeof(Auftrag));
-				Auftrag ln = (Auftrag)xs.Deserialize(tr);
+				XmlNodeList xnlAuftrag = xd.SelectNodes("//CityTrafficSimulator/Traffic/Auftrag");
 
-				// in alten Dateien wurde das Feld häufigkeit statt trafficDensity gespeichert. Da es dieses Feld heute nicht mehr gibt, müssen wir konvertieren:
-				if (saveVersion < 1)
+				lf.SetupLowerProgess("Load Old Traffic Volume...", 2 * xnlAuftrag.Count);
+
+				foreach (XmlNode aXmlNode in xnlAuftrag)
 					{
-					// eigentlich wollte ich hier direkt mit aXmlNode arbeiten, das hat jedoch komische Fehler verursacht (SelectSingleNode) wählt immer den gleichen aus)
-					// daher der Umweg über das neue XmlDocument.
-					XmlDocument doc = new XmlDocument();
-					XmlElement elem = doc.CreateElement("Auftrag");
-					elem.InnerXml = aXmlNode.InnerXml;
-					doc.AppendChild(elem);
+					// Node in einen TextReader packen
+					TextReader tr = new StringReader(aXmlNode.OuterXml);
+					// und Deserializen
+					XmlSerializer xs = new XmlSerializer(typeof(Auftrag));
+					Auftrag ln = (Auftrag)xs.Deserialize(tr);
 
-					XmlNode haeufigkeitNode = doc.SelectSingleNode("//Auftrag/häufigkeit");
-					if (haeufigkeitNode != null)
+					// in alten Dateien wurde das Feld häufigkeit statt trafficDensity gespeichert. Da es dieses Feld heute nicht mehr gibt, müssen wir konvertieren:
+					if (saveVersion < 1)
 						{
-						ln.trafficDensity = 72000 / Int32.Parse(haeufigkeitNode.InnerXml);
+						// eigentlich wollte ich hier direkt mit aXmlNode arbeiten, das hat jedoch komische Fehler verursacht (SelectSingleNode) wählt immer den gleichen aus)
+						// daher der Umweg über das neue XmlDocument.
+						XmlDocument doc = new XmlDocument();
+						XmlElement elem = doc.CreateElement("Auftrag");
+						elem.InnerXml = aXmlNode.InnerXml;
+						doc.AppendChild(elem);
+
+						XmlNode haeufigkeitNode = doc.SelectSingleNode("//Auftrag/häufigkeit");
+						if (haeufigkeitNode != null)
+							{
+							ln.trafficDensity = 72000 / Int32.Parse(haeufigkeitNode.InnerXml);
+							}
+						haeufigkeitNode = null;
 						}
-					haeufigkeitNode = null;
+
+					// ab in die Liste
+					toReturn.Add(ln);
+
+					lf.StepLowerProgress();
 					}
 
-				// ab in die Liste
-				toReturn.Add(ln);
+				// Nodes wiederherstellen
+				foreach (Auftrag a in toReturn)
+					{
+					a.RecoverFromLoad(saveVersion, nodes);
 
-				lf.StepLowerProgress();
+					lf.StepLowerProgress();
+					}
+
 				}
-
-			// Nodes wiederherstellen
-			foreach (Auftrag a in toReturn)
-				{
-				a.RecoverFromLoad(saveVersion, nodes);
-
-				lf.StepLowerProgress();
-				}
-
 
 			return toReturn;
 			}

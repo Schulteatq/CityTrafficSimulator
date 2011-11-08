@@ -90,6 +90,7 @@
     <Compile Include="LoadingForm\LoadingForm.Designer.cs">
       <DependentUpon>LoadingForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="Routing.cs" />
     <Compile Include="Timeline\TimelineGroup.cs" />
     <Compile Include="Timeline\TimelineSteuerung.cs" />
     <Compile Include="Timeline\TrafficLightForm.cs">
@@ -176,6 +177,10 @@
       <DependentUpon>TrafficLightForm.cs</DependentUpon>
       <SubType>Designer</SubType>
     </EmbeddedResource>
+    <EmbeddedResource Include="Verkehr\TrafficVolumeForm.resx">
+      <DependentUpon>TrafficVolumeForm.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DependentUpon>Resources.resx</DependentUpon>
@@ -202,6 +207,13 @@
     <Compile Include="Tools\Vector2.cs" />
     <Compile Include="Vehicle\VehicleDistance.cs" />
     <Compile Include="Verkehr\BunchOfNodes.cs" />
+    <Compile Include="Verkehr\TrafficVolume.cs" />
+    <Compile Include="Verkehr\TrafficVolumeForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Verkehr\TrafficVolumeForm.Designer.cs">
+      <DependentUpon>TrafficVolumeForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="Verkehr\VerkehrSteuerung.cs" />
     <Compile Include="XmlSaver.cs" />
   </ItemGroup>

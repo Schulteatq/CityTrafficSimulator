@@ -137,6 +137,20 @@ namespace CityTrafficSimulator
 			set { m_enableIncomingLineChange = value; }
 			}
 
+		/// <summary>
+		/// Target velocity on this NodeConnection
+		/// </summary>
+		private double m_targetVelocity = 14;
+		/// <summary>
+		/// Target velocity on this NodeConnection
+		/// </summary>
+		public double targetVelocity
+			{
+			get { return m_targetVelocity; }
+			set { m_targetVelocity = value; }
+			}
+
+
 
 		/// <summary>
 		/// Comparer, der zwei LineChangePoints miteinander vergleicht.
@@ -628,6 +642,26 @@ namespace CityTrafficSimulator
 				}
 			}
 
+		/// <summary>
+		/// Returns whether the given vehicle type is allowed on this NodeConnection.
+		/// </summary>
+		/// <param name="type">Vehicle type to check</param>
+		/// <returns>true if the given vehicle type is allowed on this NodeConnection</returns>
+		public bool CheckForSuitability(Vehicle.IVehicle.VehicleTypes type)
+			{
+			switch (type)
+				{
+				case IVehicle.VehicleTypes.CAR:
+					return carsAllowed;
+				case IVehicle.VehicleTypes.BUS:
+					return busAllowed;
+				case IVehicle.VehicleTypes.TRAM:
+					return tramAllowed;
+				default:
+					return false;
+				}
+			}
+
 		#endregion
 
 		#region Intersections
@@ -769,6 +803,18 @@ namespace CityTrafficSimulator
 		[XmlIgnore]
 		private List<IVehicle> vehiclesToRemove = new List<IVehicle>();
 
+		/// <summary>
+		/// Returns whether a vehicle can be spawned at the given arc position.
+		/// Attention: As this method does not know anything about the vehicle to spawn, it does not check for vehicles prior to arcPosition!
+		/// </summary>
+		/// <param name="arcPosition">Arc position on this NodeConnection</param>
+		/// <returns>true if there is enough space to spawn this vehicle</returns>
+		public bool CanSpawnVehicleAt(double arcPosition)
+			{
+			LinkedListNode<IVehicle> lln = GetVehicleListNodeBehindArcPosition(arcPosition - 0.1); // TODO: this is an ugly hack 
+			return (lln == null || (lln.Value.currentPosition - lln.Value.length - lln.Value.s0 > arcPosition));
+			}
+
         /// <summary>
         /// Fügt der Linie ein Auto hinzu und sorgt dafür
         /// </summary>
@@ -776,8 +822,7 @@ namespace CityTrafficSimulator
 		/// <returns>true, if Vehicle was successfully created - otherwise false</returns>
         public bool AddVehicle(IVehicle veh)
             {
-			// prüfen, ob die Linie nicht schon zu voll mit Autos ist
-			if (vehicles.First == null || vehicles.First.Value.currentPosition - vehicles.First.Value.length > veh.physics.velocity + veh.state.position)
+			if (CanSpawnVehicleAt(0))
 				{
 				AddVehicleAt(veh, 0);
 				return true;
@@ -1144,34 +1189,39 @@ namespace CityTrafficSimulator
 			}
 
 		/// <summary>
+		/// Renders all LineChangePoints originating from this NodeConnection
+		/// </summary>
+		/// <param name="g">Render canvas</param>
+		public void DrawLineChangePoints(Graphics g)
+			{
+			using (Pen orangePen = new Pen(Color.Orange, 1))
+				{
+				using (Brush greenBrush = new SolidBrush(Color.Green))
+					{
+					using (Brush orangeBrush = new SolidBrush(Color.Orange))
+						{
+						using (Brush redBrush = new SolidBrush(Color.Red))
+							{
+							foreach (LineChangePoint lcp in m_lineChangePoints)
+								{
+								// LineChangePoints malen:
+								lcp.lineSegment.Draw(g, orangePen);
+								g.FillEllipse(greenBrush, new Rectangle(lineSegment.AtTime(lcp.start.time) - new Vector2(2, 2), new Size(3, 3)));
+								g.FillEllipse(orangeBrush, new Rectangle(lcp.otherStart.nc.lineSegment.AtTime(lcp.otherStart.time) - new Vector2(2, 2), new Size(3, 3)));
+								g.FillEllipse(redBrush, new Rectangle(lcp.target.nc.lineSegment.AtTime(lcp.target.time) - new Vector2(2, 2), new Size(3, 3)));
+								}
+							}
+						}
+					}
+				}
+			}
+
+		/// <summary>
 		/// Zeichnet Debuginformationen auf die Zeichenfläche g
 		/// </summary>
 		/// <param name="g">Die Zeichenfläche auf der gezeichnet werden soll</param>
 		public void DrawDebugData(Graphics g)
 			{
-			using (Pen blackPen = new Pen(Color.DarkGray, 1))
-				{
-				foreach (LineChangePoint lcp in m_lineChangePoints)
-					{
-					// LineChangePoints malen:
-					lcp.lineSegment.Draw(g, new Pen(Color.Orange, 1));
-					g.FillEllipse(new SolidBrush(Color.Green), new Rectangle(lineSegment.AtTime(lcp.start.time) - new Vector2(2, 2), new Size(3, 3)));
-					g.FillEllipse(new SolidBrush(Color.Orange), new Rectangle(lcp.otherStart.nc.lineSegment.AtTime(lcp.otherStart.time) - new Vector2(2, 2), new Size(3, 3)));
-					g.FillEllipse(new SolidBrush(Color.Red), new Rectangle(lcp.target.nc.lineSegment.AtTime(lcp.target.time) - new Vector2(2, 2), new Size(3, 3)));
-					}
-				}
-
-			using (Pen greenPen = new Pen(Color.Green, 3))
-				{
-				foreach (IVehicle v in vehicles)
-					{
-					if (v.state.vehicleThatLetsMeChangeLine != null)
-						{
-						g.DrawLine(greenPen, v.state.positionAbs, v.state.vehicleThatLetsMeChangeLine.state.positionAbs);
-						}
-					}
-				}
-
 			g.DrawString(/*"Länge: " + (lineSegment.length/10) + "m\n*/"avg Speed:" + getAverageSpeedOfVehicles() + " m/s", new Font("Arial", 9), new SolidBrush(Color.Black), lineSegment.AtTime(0.5));
 			}
 

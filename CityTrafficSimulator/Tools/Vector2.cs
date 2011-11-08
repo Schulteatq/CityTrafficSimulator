@@ -212,6 +212,16 @@ namespace CityTrafficSimulator
             }
 
 		/// <summary>
+		/// Sets this vector's coordinates to Max(this, v).
+		/// </summary>
+		/// <param name="v">other vector</param>
+		public void Nibble(Vector2 v)
+			{
+			x = Math.Max(x, v.x);
+			y = Math.Max(y, v.y);
+			}
+
+		/// <summary>
 		/// formatiert den Vektor als String
 		/// </summary>
 		/// <returns>(x, y)</returns>

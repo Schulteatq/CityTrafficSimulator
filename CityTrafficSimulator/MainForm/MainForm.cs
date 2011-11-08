@@ -64,6 +64,9 @@ namespace CityTrafficSimulator
 
 		private bool dockToGrid = false;
 
+		private NodeSteuerung.RenderOptions renderOptionsDaGrid = new NodeSteuerung.RenderOptions();
+		private NodeSteuerung.RenderOptions renderOptionsThumbnail = new NodeSteuerung.RenderOptions();
+		
 		private Bitmap backgroundImage;
 		private Bitmap resampledBackgroundImage;
 
@@ -108,11 +111,11 @@ namespace CityTrafficSimulator
 		/// <summary>
 		/// Startknoten für Verkehr
 		/// </summary>
-		private List<LineNode> fromLineNodes = new List<LineNode>();
+		public List<LineNode> fromLineNodes = new List<LineNode>();
 		/// <summary>
 		/// Zielknoten für Verkehr
 		/// </summary>
-		private List<LineNode> toLineNodes = new List<LineNode>();
+		public List<LineNode> toLineNodes = new List<LineNode>();
 
 		/// <summary>
 		/// Thumbnail Rectangle World-Koordinaten
@@ -124,12 +127,6 @@ namespace CityTrafficSimulator
 		private Rectangle thumbGridClientRect;
 
 		/// <summary>
-		/// angezeigter Bereich vom DaGrid
-		/// </summary>
-		private Rectangle daGridClippingRect = new Rectangle(0, 0, 1000, 1000);
-
-
-		/// <summary>
 		/// vorläufige Standardgruppe für LSA
 		/// </summary>
 		private TimelineGroup unsortedGroup = new TimelineGroup("unsortierte LSA", false);
@@ -138,7 +135,7 @@ namespace CityTrafficSimulator
 		/// <summary>
 		/// NodeSteuerung
 		/// </summary>
-		private NodeSteuerung nodeSteuerung = new NodeSteuerung();
+		public NodeSteuerung nodeSteuerung = new NodeSteuerung();
 
 		/// <summary>
 		/// TimelineSteuerung
@@ -146,9 +143,19 @@ namespace CityTrafficSimulator
 		private TimelineSteuerung timelineSteuerung = new TimelineSteuerung();
 
 		/// <summary>
+		/// TrafficVolumeSteuerung
+		/// </summary>
+		private Verkehr.VerkehrSteuerung trafficVolumeSteuerung = new Verkehr.VerkehrSteuerung();
+
+		/// <summary>
 		/// Formular zur LSA-Steuerung
 		/// </summary>
 		private TrafficLightForm trafficLightForm;
+
+		/// <summary>
+		/// TrafficVolumeForm
+		/// </summary>
+		private Verkehr.TrafficVolumeForm trafficVolumeForm;
 
 
 		/// <summary>
@@ -276,11 +283,36 @@ namespace CityTrafficSimulator
 			trafficLightForm = new TrafficLightForm(timelineSteuerung);
 			trafficLightForm.Show();
 
+			trafficVolumeForm = new Verkehr.TrafficVolumeForm(trafficVolumeSteuerung, this, nodeSteuerung);
+			trafficVolumeForm.Show();
+
 			timelineSteuerung.CurrentTimeChanged += new TimelineSteuerung.CurrentTimeChangedEventHandler(timelineSteuerung_CurrentTimeChanged);
 
 			zoomComboBox.SelectedIndex = 7;
 
 			this.SetStyle(ControlStyles.OptimizedDoubleBuffer | ControlStyles.AllPaintingInWmPaint | ControlStyles.UserPaint, true);
+
+			renderOptionsDaGrid.renderLineNodes = true;
+			renderOptionsDaGrid.renderNodeConnections = true;
+			renderOptionsDaGrid.renderVehicles = true;
+			renderOptionsDaGrid.performClipping = true;
+			renderOptionsDaGrid.clippingRect = new Rectangle(0, 0, 10000, 10000);
+			renderOptionsDaGrid.renderIntersections = false;
+			renderOptionsDaGrid.renderLineChangePoints = false;
+			renderOptionsDaGrid.renderLineNodeDebugData = false;
+			renderOptionsDaGrid.renderNodeConnectionDebugData = false;
+			renderOptionsDaGrid.renderVehicleDebugData = false;
+
+			renderOptionsThumbnail.renderLineNodes = false;
+			renderOptionsThumbnail.renderNodeConnections = true;
+			renderOptionsThumbnail.renderVehicles = false;
+			renderOptionsThumbnail.performClipping = false;
+			renderOptionsThumbnail.renderIntersections = false;
+			renderOptionsThumbnail.renderLineChangePoints = false;
+			renderOptionsThumbnail.renderLineNodeDebugData = false;
+			renderOptionsThumbnail.renderNodeConnectionDebugData = false;
+			renderOptionsThumbnail.renderVehicleDebugData = false;
+
 			}
 
 		void timelineSteuerung_CurrentTimeChanged(object sender, TimelineSteuerung.CurrentTimeChangedEventArgs e)
@@ -1095,7 +1127,7 @@ namespace CityTrafficSimulator
 					e.Graphics.DrawPath(BlackPen, gp);
 					}
 
-				nodeSteuerung.Draw(e.Graphics, daGridClippingRect, true, true, drawNodeConnectionsCheckBox.Checked, drawDebugCheckBox.Checked);
+				nodeSteuerung.RenderNetwork(e.Graphics, renderOptionsDaGrid);
 
 				//to-/fromLineNode malen
 				foreach (LineNode ln in toLineNodes)
@@ -1209,7 +1241,21 @@ namespace CityTrafficSimulator
 
 			using (Pen BlackPen = new Pen(Color.Black, 1.0F))
 				{
-				nodeSteuerung.Draw(e.Graphics, new Rectangle(), false, false, true, false);
+				nodeSteuerung.RenderNetwork(e.Graphics, renderOptionsThumbnail);
+
+				//to-/fromLineNode malen
+				foreach (LineNode ln in toLineNodes)
+					{
+					RectangleF foo = ln.positionRect;
+					foo.Inflate(24, 24);
+					e.Graphics.FillEllipse(new SolidBrush(Color.Red), foo);
+					}
+				foreach (LineNode ln in fromLineNodes)
+					{
+					RectangleF foo = ln.positionRect;
+					foo.Inflate(24, 24);
+					e.Graphics.FillEllipse(new SolidBrush(Color.Green), foo);
+					}
 
 				e.Graphics.Transform = new Matrix(1, 0, 0, 1, 0, 0);
 				e.Graphics.DrawRectangle(BlackPen, thumbGridClientRect);
@@ -1225,10 +1271,10 @@ namespace CityTrafficSimulator
 			if (zoomComboBox.SelectedIndex >= 0)
 				{
 				// daGridClippingRect aktualisieren
-				daGridClippingRect.X = (int)Math.Floor(-daGridAutoscrollPosition.X * zoomMultipliers[zoomComboBox.SelectedIndex, 1]);
-				daGridClippingRect.Y = (int)Math.Floor(-daGridAutoscrollPosition.Y * zoomMultipliers[zoomComboBox.SelectedIndex, 1]);
-				daGridClippingRect.Width = (int)Math.Ceiling(splitContainer1.Panel1.ClientSize.Width * zoomMultipliers[zoomComboBox.SelectedIndex, 1]);
-				daGridClippingRect.Height = (int)Math.Ceiling(splitContainer1.Panel1.ClientSize.Height * zoomMultipliers[zoomComboBox.SelectedIndex, 1]);
+				renderOptionsDaGrid.clippingRect.X = (int)Math.Floor(-daGridAutoscrollPosition.X * zoomMultipliers[zoomComboBox.SelectedIndex, 1]);
+				renderOptionsDaGrid.clippingRect.Y = (int)Math.Floor(-daGridAutoscrollPosition.Y * zoomMultipliers[zoomComboBox.SelectedIndex, 1]);
+				renderOptionsDaGrid.clippingRect.Width = (int)Math.Ceiling(splitContainer1.Panel1.ClientSize.Width * zoomMultipliers[zoomComboBox.SelectedIndex, 1]);
+				renderOptionsDaGrid.clippingRect.Height = (int)Math.Ceiling(splitContainer1.Panel1.ClientSize.Height * zoomMultipliers[zoomComboBox.SelectedIndex, 1]);
 				}
 			}
 
@@ -1284,7 +1330,7 @@ namespace CityTrafficSimulator
 						fahraufträge.Add(a);
 						}
 
-					XmlSaver.SaveToFile(sfd.FileName, nodeSteuerung, timelineSteuerung, fahraufträge);
+					XmlSaver.SaveToFile(sfd.FileName, nodeSteuerung, timelineSteuerung, trafficVolumeSteuerung);
 					}
 				}
 			}
@@ -1306,7 +1352,7 @@ namespace CityTrafficSimulator
 					timelineSteuerung.Clear();
 
 					// Laden
-					List<Auftrag> fahrauftraege = XmlSaver.LoadFromFile(ofd.FileName, nodeSteuerung, timelineSteuerung);
+					List<Auftrag> fahrauftraege = XmlSaver.LoadFromFile(ofd.FileName, nodeSteuerung, timelineSteuerung, trafficVolumeSteuerung);
 
 					/*// Timeline mit den Ampeln füllen
 					// TODO: ist das nicht eigentlich Aufgabe der NodeSteuerung oder so?
@@ -1351,11 +1397,7 @@ namespace CityTrafficSimulator
 			//tickCount++;
 
 			nodeSteuerung.Tick(tickLength);
-
-			foreach (Auftrag a in AufträgeCheckBox.Items)
-				{
-				a.Tick(tickLength);
-				}
+			trafficVolumeSteuerung.Tick(tickLength);
 				
 			nodeSteuerung.Reset();
 

@@ -23,8 +23,8 @@ namespace CityTrafficSimulator
 		/// <param name="filename">Dateiname der zu speichernden Datei</param>
 		/// <param name="nodeSteuerung">NodeSteuerung</param>
 		/// <param name="timelineSteuerung">TimelineSteuerung</param>
-		/// <param name="fahrauftraege">Liste von Fahraufträgen</param>
-		public static void SaveToFile(string filename, NodeSteuerung nodeSteuerung, TimelineSteuerung timelineSteuerung, List<Auftrag> fahrauftraege)
+		/// <param name="trafficVolumeSteuerung">VerkehrSteuerung</param>
+		public static void SaveToFile(string filename, NodeSteuerung nodeSteuerung, TimelineSteuerung timelineSteuerung, Verkehr.VerkehrSteuerung trafficVolumeSteuerung)
 			{
 			try
 				{
@@ -39,11 +39,12 @@ namespace CityTrafficSimulator
 
 					// saveVersion schreiben
 					xw.WriteStartAttribute("saveVersion");
-					xw.WriteString("4");
+					xw.WriteString("5");
 					xw.WriteEndAttribute();
 
-					nodeSteuerung.SaveToFile(xw, xsn, fahrauftraege);
+					nodeSteuerung.SaveToFile(xw, xsn);
 					timelineSteuerung.SaveToFile(xw, xsn);
+					trafficVolumeSteuerung.SaveToFile(xw, xsn);
 
 				xw.WriteEndElement();
 
@@ -64,28 +65,42 @@ namespace CityTrafficSimulator
 		/// <param name="filename">Dateiname der zu ladenden Datei</param>
 		/// <param name="nodeSteuerung">NodeSteuerung in das Layout eingelesen werden soll</param>
 		/// <param name="timelineSteuerung">TimelineSteuerung in die die LSA eingelesen werden soll</param>
-		public static List<Auftrag> LoadFromFile(String filename, NodeSteuerung nodeSteuerung, TimelineSteuerung timelineSteuerung)
+		/// <param name="trafficVolumeSteuerung">VerkehrSteurung to load into</param>
+		public static List<Auftrag> LoadFromFile(String filename, NodeSteuerung nodeSteuerung, TimelineSteuerung timelineSteuerung, Verkehr.VerkehrSteuerung trafficVolumeSteuerung)
 			{
-
 			LoadingForm.LoadingForm lf = new LoadingForm.LoadingForm();
-			lf.Text = "Laden von Datei '" + filename + "'...";
+			lf.Text = "Loading file '" + filename + "'...";
 			lf.Show();
 
-			lf.SetupUpperProgress("Lade Dokument...", 7);
+			lf.SetupUpperProgress("Loading Document...", 8);
 
 			// Dokument laden
 			XmlDocument xd = new XmlDocument();
 			xd.Load(filename);
 
-			lf.StepUpperProgress("Lade Layout...");
-
+			// parse save file version
+			int saveVersion = 0;
+			XmlNode mainNode = xd.SelectSingleNode("//CityTrafficSimulator");
+			XmlNode saveVersionNode = mainNode.Attributes.GetNamedItem("saveVersion");
+			if (saveVersionNode != null)
+				saveVersion = Int32.Parse(saveVersionNode.Value);
+			else
+				saveVersion = 0; 
+			
+			lf.StepUpperProgress("Parsing Network Layout...");
 			List<Auftrag> toReturn = nodeSteuerung.LoadFromFile(xd, lf);
 
-			lf.StepUpperProgress("Lade LSA...");
-
+			lf.StepUpperProgress("Parsing Singnals...");
 			timelineSteuerung.LoadFromFile(xd, nodeSteuerung.nodes, lf);
 
-			lf.StepUpperProgress("fertig");
+			lf.StepUpperProgress("Parsing Traffic Volume...");
+			trafficVolumeSteuerung.LoadFromFile(xd, nodeSteuerung.nodes, lf);
+			if (saveVersion < 5)
+				{
+				trafficVolumeSteuerung.ImportOldTrafficVolumeData(toReturn);
+				}
+
+			lf.StepUpperProgress("Done");
 
 			lf.Close();
 			lf = null;

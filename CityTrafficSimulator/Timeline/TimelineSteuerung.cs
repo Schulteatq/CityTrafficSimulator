@@ -291,7 +291,7 @@ namespace CityTrafficSimulator.Timeline
 		/// <param name="lf">LoadingForm für Statusinformationen</param>
 		public void LoadFromFile(XmlDocument xd, List<LineNode> nodesList, LoadingForm.LoadingForm lf)
 			{
-			lf.SetupLowerProgess("Lese XML-Struktur...", 1);
+			lf.SetupLowerProgess("Parsing XML...", 1);
 
 			int saveVersion = 0;
 
@@ -348,7 +348,7 @@ namespace CityTrafficSimulator.Timeline
 				}
 			else
 				{
-				TimelineGroup unsortedGroup = new TimelineGroup("unsortierte LSA", false);
+				TimelineGroup unsortedGroup = new TimelineGroup("Unsorted Signals", false);
 
 				// entsprechenden Node auswählen
 				XmlNodeList xnlLineNode = xd.SelectNodes("//CityTrafficSimulator/Layout/LineNode/tLight");
@@ -378,7 +378,7 @@ namespace CityTrafficSimulator.Timeline
 				m_groups.Add(unsortedGroup);
 				}
 
-			lf.SetupLowerProgess("stelle LSA wieder her...", m_groups.Count);
+			lf.SetupLowerProgess("Restoring Signals...", m_groups.Count);
 
 			// Abschließende Arbeiten: Referenzen auflösen
 			foreach (TimelineGroup tg in m_groups)

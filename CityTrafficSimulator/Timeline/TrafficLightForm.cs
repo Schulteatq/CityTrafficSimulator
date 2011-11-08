@@ -240,6 +240,5 @@ namespace CityTrafficSimulator.Timeline
 			if (! isNotified)
 				steuerung.maxTime = (double)cycleTimeSpinEdit.Value;
 			}
-
 		}
 	}

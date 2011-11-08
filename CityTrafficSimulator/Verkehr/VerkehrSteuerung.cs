@@ -19,14 +19,19 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Text;
+using System.IO;
+using System.Windows.Forms;
+using System.Xml;
+using System.Xml.Serialization;
 
 namespace CityTrafficSimulator.Verkehr
 	{
 	/// <summary>
 	/// Steuert das Verkehrsaufkommen
 	/// </summary>
-	public class VerkehrSteuerung
+	public class VerkehrSteuerung : ITickable
 		{
 		#region Klassenmember inklusive Modifikationsmethoden
 
@@ -51,6 +56,7 @@ namespace CityTrafficSimulator.Verkehr
 		public void AddStartPoint(BunchOfNodes sp)
 			{
 			m_startPoints.Add(sp);
+			OnStartPointsChanged(new StartPointsChangedEventArgs());
 			}
 
 		/// <summary>
@@ -60,6 +66,7 @@ namespace CityTrafficSimulator.Verkehr
 		public void RemoveStartPoint(BunchOfNodes sp)
 			{
 			m_startPoints.Remove(sp);
+			OnStartPointsChanged(new StartPointsChangedEventArgs());
 			}
 
 		/// <summary>
@@ -68,6 +75,21 @@ namespace CityTrafficSimulator.Verkehr
 		public void ClearStartPoints()
 			{
 			m_startPoints.Clear();
+			OnStartPointsChanged(new StartPointsChangedEventArgs());
+			}
+
+		/// <summary>
+		/// Updates the title of the start point bunch with the given index
+		/// </summary>
+		/// <param name="index">Index in start point list</param>
+		/// <param name="title">New title</param>
+		public void UpdateStartPointTitle(int index, string title)
+			{
+			if (index < m_startPoints.Count)
+				{
+				m_startPoints[index].title = title;
+				OnStartPointsChanged(new StartPointsChangedEventArgs());
+				}
 			}
 
 		#endregion
@@ -77,63 +99,464 @@ namespace CityTrafficSimulator.Verkehr
 		/// <summary>
 		/// Liste der Zielpunkte
 		/// </summary>
-		private List<BunchOfNodes> m_targetPoints = new List<BunchOfNodes>();
+		private List<BunchOfNodes> m_destinationPoints = new List<BunchOfNodes>();
 		/// <summary>
 		/// Liste der Zielpunkte
 		/// </summary>
-		public List<BunchOfNodes> targetPoints
+		public List<BunchOfNodes> destinationPoints
 			{
-			get { return m_targetPoints; }
+			get { return m_destinationPoints; }
 			}
 
 		/// <summary>
 		/// fügt eine BunchOfNodes den targetPoints hinzu
 		/// </summary>
 		/// <param name="sp">hinzuzufügende BunchOfNodes</param>
-		public void AddTargetPoint(BunchOfNodes sp)
+		public void AddDestinationPoint(BunchOfNodes sp)
 			{
-			m_targetPoints.Add(sp);
+			m_destinationPoints.Add(sp);
+			OnDestinationPointsChanged(new DestinationPointsChangedEventArgs());
 			}
 
 		/// <summary>
 		/// entfernt die BunchOfNodes sp aus targetPoints
 		/// </summary>
 		/// <param name="sp">zu löschende BunchOfNodes</param>
-		public void RemoveTargetPoint(BunchOfNodes sp)
+		public void RemoveDestinationPoint(BunchOfNodes sp)
 			{
-			m_targetPoints.Remove(sp);
+			m_destinationPoints.Remove(sp);
+			OnDestinationPointsChanged(new DestinationPointsChangedEventArgs());
 			}
 
 		/// <summary>
 		/// Leert die Liste der Zielpunkte
 		/// </summary>
-		public void ClearTargetPoints()
+		public void ClearDestinationPoints()
 			{
-			m_targetPoints.Clear();
+			m_destinationPoints.Clear();
+			OnDestinationPointsChanged(new DestinationPointsChangedEventArgs());
+			}
+
+		/// <summary>
+		/// Updates the title of the destination point bunch with the given index
+		/// </summary>
+		/// <param name="index">Index in destination point list</param>
+		/// <param name="title">New title</param>
+		public void UpdateDestinationPointTitle(int index, string title)
+			{
+			if (index < m_destinationPoints.Count)
+				{
+				m_destinationPoints[index].title = title;
+				OnDestinationPointsChanged(new DestinationPointsChangedEventArgs());
+				}
 			}
 
 		#endregion
 
 		/// <summary>
-		/// Liste von Fahraufträgen
+		/// List of traffic volumes
 		/// </summary>
-		private List<Auftrag> m_auftraege  = new List<Auftrag>();
+		private List<TrafficVolume> m_trafficVolumes = new List<TrafficVolume>();
 		/// <summary>
-		/// Liste von Fahraufträgen
+		/// List of traffic volumes
 		/// </summary>
-		public List<Auftrag> auftraege
+		public List<TrafficVolume> trafficVolumes
 			{
-			get { return m_auftraege; }
+			get { return m_trafficVolumes; }
+			}
+
+		/// <summary>
+		/// Global multiplier for traffic volume
+		/// </summary>
+		private double m_globalTrafficMultiplier = 1;
+		/// <summary>
+		/// Global multiplier for traffic volume
+		/// </summary>
+		public double globalTrafficMultiplier
+			{
+			get { return m_globalTrafficMultiplier; }
+			set { m_globalTrafficMultiplier = value; OnGlobalTrafficMultiplierChanged(new GlobalTrafficMultiplierChangedEventArgs()); }
 			}
 		
 		#endregion
 
+		#region Methods
+
+		/// <summary>
+		/// Returns the Traffic Volume for the route from start to destination.
+		/// If no such TrafficVolume exists, a new one will be created.
+		/// start and destination MUST be != null!
+		/// </summary>
+		/// <param name="start">Start nodes</param>
+		/// <param name="destination">Destination nodes</param>
+		/// <returns></returns>
+		public TrafficVolume GetOrCreateTrafficVolume(BunchOfNodes start, BunchOfNodes destination)
+			{
+			Debug.Assert(start != null && destination != null);
+
+			// There certainly are data structures offering better algorithms to search for these specific entities.
+			// But m_trafficVolumes usually contains < 100 items, so performance can be seen as unimportant here.
+			foreach (TrafficVolume tv in m_trafficVolumes)
+				{
+				if (tv.startNodes == start && tv.destinationNodes == destination)
+					return tv;
+				}
+
+			TrafficVolume newTV = new TrafficVolume(start, destination);
+			m_trafficVolumes.Add(newTV);
+			return newTV;
+			}
+
+
+		/// <summary>
+		/// Finds a BunchOfNode in bofList being equal to nodeList. If no such BoF exists, a new one will be created and added.
+		/// </summary>
+		/// <param name="nodeList">List of LineNodes</param>
+		/// <param name="bofList">List of BunchOfNodes</param>
+		/// <returns>A BunchOfNodes containing the same LineNodes as nodeList</returns>
+		private BunchOfNodes GetOrCreateEqualBoF(List<LineNode> nodeList, List<BunchOfNodes> bofList)
+			{
+			// search for an fitting BunchOfNode
+			foreach (BunchOfNodes bof in bofList)
+				{
+				bool equal = true;
+				foreach (LineNode ln in nodeList)
+					{
+					if (!bof.nodes.Contains(ln))
+						{
+						equal = false;
+						break;
+						}
+					}
+
+				if (equal)
+					{
+					return bof;
+					}
+				}
+
+			// No equal BoF was found => create a new one
+			BunchOfNodes newBof = new BunchOfNodes(nodeList, "Bunch " + (bofList.Count + 1).ToString());
+			bofList.Add(newBof);
+			return newBof;
+			}
+
+		/// <summary>
+		/// Imports traffic volume from older file versions still containing "Aufträge"
+		/// </summary>
+		/// <param name="fahrauftraege">List of all "Aufträge" to import</param>
+		public void ImportOldTrafficVolumeData(List<Auftrag> fahrauftraege)
+			{
+			foreach (Auftrag a in fahrauftraege)
+				{
+				BunchOfNodes startBof = GetOrCreateEqualBoF(a.startNodes, startPoints);
+				BunchOfNodes destinationBof = GetOrCreateEqualBoF(a.endNodes, destinationPoints);
+
+				TrafficVolume tv = GetOrCreateTrafficVolume(startBof, destinationBof);
+				switch (a.vehicleType)
+					{
+					case CityTrafficSimulator.Vehicle.IVehicle.VehicleTypes.CAR:
+						tv.SetTrafficVolume((int)(tv.trafficVolumeCars + a.trafficDensity * 0.92), (int)(tv.trafficVolumeTrucks + a.trafficDensity * 0.08), tv.trafficVolumeBusses, tv.trafficVolumeTrams);
+						break;
+					case CityTrafficSimulator.Vehicle.IVehicle.VehicleTypes.BUS:
+						tv.SetTrafficVolume(tv.trafficVolumeCars, tv.trafficVolumeTrucks, tv.trafficVolumeBusses + a.trafficDensity, tv.trafficVolumeTrams);
+						break;
+					case CityTrafficSimulator.Vehicle.IVehicle.VehicleTypes.TRAM:
+						tv.SetTrafficVolume(tv.trafficVolumeCars, tv.trafficVolumeTrucks, tv.trafficVolumeBusses, tv.trafficVolumeTrams + a.trafficDensity);
+						break;
+					}
+				}
+
+			OnStartPointsChanged(new StartPointsChangedEventArgs());
+			OnDestinationPointsChanged(new DestinationPointsChangedEventArgs());
+			}
+
+		#endregion
+
+		#region Save/Load
+
+		/// <summary>
+		/// Writes all handeled data to a XML document
+		/// </summary>
+		/// <param name="xw">XMLWriter to use</param>
+		/// <param name="xsn">corresponding XML namespace</param>
+		public void SaveToFile(XmlWriter xw, XmlSerializerNamespaces xsn)
+			{
+			try
+				{
+				XmlSerializer bofSerializer = new XmlSerializer(typeof(BunchOfNodes));
+				XmlSerializer tvSerializer = new XmlSerializer(typeof(TrafficVolume));
+
+				// Prepare data for serialization
+				foreach (BunchOfNodes bof in startPoints)
+					{
+					bof.PrepareForSave();
+					}
+				foreach (BunchOfNodes bof in destinationPoints)
+					{
+					bof.PrepareForSave();
+					}
+				foreach (TrafficVolume tv in trafficVolumes)
+					{
+					tv.PrepareForSave();
+					}
+
+				// Write Data
+				xw.WriteStartElement("TrafficVolumes");
+
+				xw.WriteStartElement("StartPoints");
+				foreach (BunchOfNodes bof in startPoints)
+					{
+					bofSerializer.Serialize(xw, bof, xsn);
+					}
+				xw.WriteEndElement();
+
+				xw.WriteStartElement("DestinationPoints");
+				foreach (BunchOfNodes bof in destinationPoints)
+					{
+					bofSerializer.Serialize(xw, bof, xsn);
+					}
+				xw.WriteEndElement();
+
+				foreach (TrafficVolume tv in trafficVolumes)
+					{
+					tvSerializer.Serialize(xw, tv, xsn);
+					}
+
+				xw.WriteEndElement();
+				}
+			catch (IOException ex)
+				{
+				MessageBox.Show(ex.Message);
+				throw;
+				}
+			}
+
+		/// <summary>
+		/// Loads the traffic volume setup from the given XML file
+		/// </summary>
+		/// <param name="xd">XmlDocument to parse</param>
+		/// <param name="nodesList">List of all existing LineNodes</param>
+		/// <param name="lf">LoadingForm for status updates</param>
+		public void LoadFromFile(XmlDocument xd, List<LineNode> nodesList, LoadingForm.LoadingForm lf)
+			{
+			lf.SetupLowerProgess("Parsing XML...", 3);
+
+			// clear everything first
+			m_trafficVolumes.Clear();
+			m_startPoints.Clear();
+			m_destinationPoints.Clear();
+
+			// parse save file version (currently not needed, but probably in future)
+			int saveVersion = 0;
+			XmlNode mainNode = xd.SelectSingleNode("//CityTrafficSimulator");
+			XmlNode saveVersionNode = mainNode.Attributes.GetNamedItem("saveVersion");
+			if (saveVersionNode != null)
+				saveVersion = Int32.Parse(saveVersionNode.Value);
+			else
+				saveVersion = 0;
+
+			// Load start points:
+			lf.StepLowerProgress();
+			// get corresponding XML nodes
+			XmlNodeList xnlStartNodes = xd.SelectNodes("//CityTrafficSimulator/TrafficVolumes/StartPoints/BunchOfNodes");
+			foreach (XmlNode aXmlNode in xnlStartNodes)
+				{
+				// Deserialize each node
+				TextReader tr = new StringReader(aXmlNode.OuterXml);
+				XmlSerializer xs = new XmlSerializer(typeof(BunchOfNodes));
+				BunchOfNodes bof = (BunchOfNodes)xs.Deserialize(tr);
+				bof.RecoverFromLoad(saveVersion, nodesList);
+				m_startPoints.Add(bof);
+				}
+
+			// Load destination points:
+			lf.StepLowerProgress();
+			// get corresponding XML nodes
+			XmlNodeList xnlDestinationNodes = xd.SelectNodes("//CityTrafficSimulator/TrafficVolumes/DestinationPoints/BunchOfNodes");
+			foreach (XmlNode aXmlNode in xnlDestinationNodes)
+				{
+				// Deserialize each node
+				TextReader tr = new StringReader(aXmlNode.OuterXml);
+				XmlSerializer xs = new XmlSerializer(typeof(BunchOfNodes));
+				BunchOfNodes bof = (BunchOfNodes)xs.Deserialize(tr);
+				bof.RecoverFromLoad(saveVersion, nodesList);
+				m_destinationPoints.Add(bof);
+				}
+
+			// Load traffic volumes:
+			lf.StepLowerProgress();
+			// get corresponding XML nodes
+			XmlNodeList xnlTrafficVolumes = xd.SelectNodes("//CityTrafficSimulator/TrafficVolumes/TrafficVolume");
+			foreach (XmlNode aXmlNode in xnlTrafficVolumes)
+				{
+				// Deserialize each node
+				TextReader tr = new StringReader(aXmlNode.OuterXml);
+				XmlSerializer xs = new XmlSerializer(typeof(TrafficVolume));
+				TrafficVolume tv = (TrafficVolume)xs.Deserialize(tr);
+
+				tv.RecoverFromLoad(saveVersion, startPoints, destinationPoints);
+				m_trafficVolumes.Add(tv);
+				}
+
+			OnStartPointsChanged(new StartPointsChangedEventArgs());
+			OnDestinationPointsChanged(new DestinationPointsChangedEventArgs());
+			}
+
+
+		#endregion
 
 		#region Event-Gedöns
 
-		
+		#region StartPointsChanged event
+
+		/// <summary>
+		/// EventArgs for a StartPointsChanged event
+		/// </summary>
+		public class StartPointsChangedEventArgs : EventArgs
+			{
+			/// <summary>
+			/// Creates new StartPointsChangedEventArgs
+			/// </summary>
+			public StartPointsChangedEventArgs()
+				{
+				}
+			}
+
+		/// <summary>
+		/// Delegate for the StartPointsChanged-EventHandler, which is called when the collection of start points has changed
+		/// </summary>
+		/// <param name="sender">Sneder of the event</param>
+		/// <param name="e">Event parameter</param>
+		public delegate void StartPointsChangedEventHandler(object sender, StartPointsChangedEventArgs e);
+
+		/// <summary>
+		/// The StartPointsChanged event occurs when the collection of start points has changed
+		/// </summary>
+		public event StartPointsChangedEventHandler StartPointsChanged;
+
+		/// <summary>
+		/// Helper method to initiate the StartPointsChanged event
+		/// </summary>
+		/// <param name="e">Event parameters</param>
+		protected void OnStartPointsChanged(StartPointsChangedEventArgs e)
+			{
+			if (StartPointsChanged != null)
+				{
+				StartPointsChanged(this, e);
+				}
+			}
 
 		#endregion
 
+		#region DestinationPointsChanged event
+
+		/// <summary>
+		/// EventArgs for a DestinationPointsChanged event
+		/// </summary>
+		public class DestinationPointsChangedEventArgs : EventArgs
+			{
+			/// <summary>
+			/// Creates new DestinationPointsChangedEventArgs
+			/// </summary>
+			public DestinationPointsChangedEventArgs()
+				{
+				}
+			}
+
+		/// <summary>
+		/// Delegate for the DestinationPointsChanged-EventHandler, which is called when the collection of destination points has changed
+		/// </summary>
+		/// <param name="sender">Sneder of the event</param>
+		/// <param name="e">Event parameter</param>
+		public delegate void DestinationPointsChangedEventHandler(object sender, DestinationPointsChangedEventArgs e);
+
+		/// <summary>
+		/// The DestinationPointsChanged event occurs when the collection of destination points has changed
+		/// </summary>
+		public event DestinationPointsChangedEventHandler DestinationPointsChanged;
+
+		/// <summary>
+		/// Helper method to initiate the DestinationPointsChanged event
+		/// </summary>
+		/// <param name="e">Event parameters</param>
+		protected void OnDestinationPointsChanged(DestinationPointsChangedEventArgs e)
+			{
+			if (DestinationPointsChanged != null)
+				{
+				DestinationPointsChanged(this, e);
+				}
+			}
+
+		#endregion
+
+		#region GlobalTrafficMultiplierChanged event
+
+		/// <summary>
+		/// EventArgs for a GlobalTrafficMultiplierChanged event
+		/// </summary>
+		public class GlobalTrafficMultiplierChangedEventArgs : EventArgs
+			{
+			/// <summary>
+			/// Creates new GlobalTrafficMultiplierChangedEventArgs
+			/// </summary>
+			public GlobalTrafficMultiplierChangedEventArgs()
+				{
+				}
+			}
+
+		/// <summary>
+		/// Delegate for the GlobalTrafficMultiplierChanged-EventHandler, which is called when the global traffic volume multiplier has changed
+		/// </summary>
+		/// <param name="sender">Sneder of the event</param>
+		/// <param name="e">Event parameter</param>
+		public delegate void GlobalTrafficMultiplierChangedEventHandler(object sender, GlobalTrafficMultiplierChangedEventArgs e);
+
+		/// <summary>
+		/// The GlobalTrafficMultiplierChanged event occurs when the global traffic volume multiplier has changed
+		/// </summary>
+		public event GlobalTrafficMultiplierChangedEventHandler GlobalTrafficMultiplierChanged;
+
+		/// <summary>
+		/// Helper method to initiate the GlobalTrafficMultiplierChanged event
+		/// </summary>
+		/// <param name="e">Event parameters</param>
+		protected void OnGlobalTrafficMultiplierChanged(GlobalTrafficMultiplierChangedEventArgs e)
+			{
+			if (GlobalTrafficMultiplierChanged != null)
+				{
+				GlobalTrafficMultiplierChanged(this, e);
+				}
+			}
+
+		#endregion
+
+		#endregion
+
+
+		#region ITickable Member
+
+		/// <summary>
+		/// Notifies all handled entities that the world time has advanced by tickLength.
+		/// </summary>
+		/// <param name="tickLength">Amount the time has advanced</param>
+		public void Tick(double tickLength)
+			{
+			double tmp = tickLength * globalTrafficMultiplier;
+			foreach (TrafficVolume tv in trafficVolumes)
+				{
+				tv.Tick(tmp);
+				}
+			}
+
+		/// <summary>
+		/// Is called after the tick.
+		/// </summary>
+		public void Reset()
+			{
+			// Nothing to do here
+			}
+
+		#endregion
 		}
 	}

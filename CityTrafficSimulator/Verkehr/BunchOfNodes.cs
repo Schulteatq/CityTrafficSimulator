@@ -32,6 +32,20 @@ namespace CityTrafficSimulator.Verkehr
 	[Serializable]
 	public class BunchOfNodes : ISavable
 		{
+		#region Hashcodes
+
+		/// <summary>
+		/// Class variable which stores the last used hash code - needs to be incremented on every class instantiation.
+		/// </summary>
+		private static int hashcodeIndex = 0;
+
+		/// <summary>
+		/// Hash code of this very object.
+		/// </summary>
+		public int hashcode = -1;
+
+		#endregion
+
 		#region Klassenmember
 
 		/// <summary>
@@ -69,10 +83,30 @@ namespace CityTrafficSimulator.Verkehr
 		/// <summary>
 		/// Erstellt eine neue leere BunchOfNodes mit dem Titel title
 		/// </summary>
+		/// <param name="nodes">List of nodes for this BunchOfNodes</param>
 		/// <param name="title">Titel dieser Ansammlung von Nodes</param>
-		public BunchOfNodes(string title)
+		public BunchOfNodes(List<LineNode> nodes, string title)
 			{
+			hashcode = hashcodeIndex++;
+
+			this.m_nodes = nodes;
 			this.m_title = title;
+			}
+
+		/// <summary>
+		/// DO NOT USE: Empty Constructor - only needed for XML Serialization
+		/// </summary>
+		public BunchOfNodes()
+			{
+			}
+
+		/// <summary>
+		/// Returns the title of this bunch of nodes
+		/// </summary>
+		/// <returns>this.title</returns>
+		public override string ToString()
+			{
+			return m_title;
 			}
 
 		#endregion

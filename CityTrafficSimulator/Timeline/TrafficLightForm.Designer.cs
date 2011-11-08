@@ -35,6 +35,8 @@
 			this.statusLabel = new System.Windows.Forms.ToolStripStatusLabel();
 			this.splitContainer1 = new System.Windows.Forms.SplitContainer();
 			this.groupBox1 = new System.Windows.Forms.GroupBox();
+			this.cycleTimeSpinEdit = new System.Windows.Forms.NumericUpDown();
+			this.label5 = new System.Windows.Forms.Label();
 			this.label4 = new System.Windows.Forms.Label();
 			this.zoomSpinEdit = new System.Windows.Forms.NumericUpDown();
 			this.trafficLightGroupBox = new System.Windows.Forms.GroupBox();
@@ -50,17 +52,15 @@
 			this.removeGroupButton = new System.Windows.Forms.Button();
 			this.addGroupButton = new System.Windows.Forms.Button();
 			this.timelineControl = new CityTrafficSimulator.TimelineControl();
-			this.label5 = new System.Windows.Forms.Label();
-			this.cycleTimeSpinEdit = new System.Windows.Forms.NumericUpDown();
 			this.statusStrip1.SuspendLayout();
 			this.splitContainer1.Panel1.SuspendLayout();
 			this.splitContainer1.Panel2.SuspendLayout();
 			this.splitContainer1.SuspendLayout();
 			this.groupBox1.SuspendLayout();
+			((System.ComponentModel.ISupportInitialize)(this.cycleTimeSpinEdit)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this.zoomSpinEdit)).BeginInit();
 			this.trafficLightGroupBox.SuspendLayout();
 			this.groupsGroupBox.SuspendLayout();
-			((System.ComponentModel.ISupportInitialize)(this.cycleTimeSpinEdit)).BeginInit();
 			this.SuspendLayout();
 			// 
 			// statusStrip1
@@ -113,6 +113,38 @@
 			this.groupBox1.TabIndex = 2;
 			this.groupBox1.TabStop = false;
 			this.groupBox1.Text = "View";
+			// 
+			// cycleTimeSpinEdit
+			// 
+			this.cycleTimeSpinEdit.Location = new System.Drawing.Point(208, 19);
+			this.cycleTimeSpinEdit.Maximum = new decimal(new int[] {
+            240,
+            0,
+            0,
+            0});
+			this.cycleTimeSpinEdit.Minimum = new decimal(new int[] {
+            10,
+            0,
+            0,
+            0});
+			this.cycleTimeSpinEdit.Name = "cycleTimeSpinEdit";
+			this.cycleTimeSpinEdit.Size = new System.Drawing.Size(104, 20);
+			this.cycleTimeSpinEdit.TabIndex = 3;
+			this.cycleTimeSpinEdit.Value = new decimal(new int[] {
+            50,
+            0,
+            0,
+            0});
+			this.cycleTimeSpinEdit.ValueChanged += new System.EventHandler(this.cycleTimeSpinEdit_ValueChanged);
+			// 
+			// label5
+			// 
+			this.label5.AutoSize = true;
+			this.label5.Location = new System.Drawing.Point(6, 21);
+			this.label5.Name = "label5";
+			this.label5.Size = new System.Drawing.Size(94, 13);
+			this.label5.TabIndex = 2;
+			this.label5.Text = "Signal Cycle Time:";
 			// 
 			// label4
 			// 
@@ -284,38 +316,6 @@
 			this.timelineControl.EventChanged += new CityTrafficSimulator.TimelineControl.EventChangedEventHandler(this.timelineControl_EventChanged);
 			this.timelineControl.KeyDown += new System.Windows.Forms.KeyEventHandler(this.timelineControl_KeyDown);
 			// 
-			// label5
-			// 
-			this.label5.AutoSize = true;
-			this.label5.Location = new System.Drawing.Point(6, 21);
-			this.label5.Name = "label5";
-			this.label5.Size = new System.Drawing.Size(94, 13);
-			this.label5.TabIndex = 2;
-			this.label5.Text = "Signal Cycle Time:";
-			// 
-			// cycleTimeSpinEdit
-			// 
-			this.cycleTimeSpinEdit.Location = new System.Drawing.Point(208, 19);
-			this.cycleTimeSpinEdit.Maximum = new decimal(new int[] {
-            240,
-            0,
-            0,
-            0});
-			this.cycleTimeSpinEdit.Minimum = new decimal(new int[] {
-            10,
-            0,
-            0,
-            0});
-			this.cycleTimeSpinEdit.Name = "cycleTimeSpinEdit";
-			this.cycleTimeSpinEdit.Size = new System.Drawing.Size(104, 20);
-			this.cycleTimeSpinEdit.TabIndex = 3;
-			this.cycleTimeSpinEdit.Value = new decimal(new int[] {
-            50,
-            0,
-            0,
-            0});
-			this.cycleTimeSpinEdit.ValueChanged += new System.EventHandler(this.cycleTimeSpinEdit_ValueChanged);
-			// 
 			// TrafficLightForm
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -333,12 +333,12 @@
 			this.splitContainer1.ResumeLayout(false);
 			this.groupBox1.ResumeLayout(false);
 			this.groupBox1.PerformLayout();
+			((System.ComponentModel.ISupportInitialize)(this.cycleTimeSpinEdit)).EndInit();
 			((System.ComponentModel.ISupportInitialize)(this.zoomSpinEdit)).EndInit();
 			this.trafficLightGroupBox.ResumeLayout(false);
 			this.trafficLightGroupBox.PerformLayout();
 			this.groupsGroupBox.ResumeLayout(false);
 			this.groupsGroupBox.PerformLayout();
-			((System.ComponentModel.ISupportInitialize)(this.cycleTimeSpinEdit)).EndInit();
 			this.ResumeLayout(false);
 			this.PerformLayout();
 

@@ -326,6 +326,7 @@ namespace CityTrafficSimulator.Vehicle
         public IVehicle.Physics physics
             {
             get { return m_Physics; }
+			set { m_Physics = value; }
             }
 
 		/// <summary>
@@ -2024,7 +2025,6 @@ namespace CityTrafficSimulator.Vehicle
 					g.DrawLine(nextNodeConnectionsPen, rs.startConnection.startNode.position, rs.nextNode.position);
 					}
 				}
-
 
 			g.DrawString(hashcode.ToString() + " @ " + currentNodeConnection.lineSegment.PosToTime(currentPosition).ToString("0.##") + "t ," + currentPosition.ToString("####") + "dm - " + physics.velocity.ToString("##.#") + "m/s - Mult.: " + physics.multiplierDesiredVelocity.ToString("#.##") + "\nnoch " + WayToGo.SegmentCount() + " nodes zu befahren\n\n" + debugData.ToString(), debugFont, blackBrush, state.positionAbs + new Vector2(0, -10));
 			}

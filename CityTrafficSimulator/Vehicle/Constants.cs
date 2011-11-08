@@ -21,7 +21,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace CityTrafficSimulator.Vehicle
+namespace CityTrafficSimulator
 	{
 	/// <summary>
 	/// statische Klasse, die lediglich einige wichtige Konstanten rund um Vehicles global speichert
@@ -90,7 +90,7 @@ namespace CityTrafficSimulator.Vehicle
 		/// <summary>
 		/// minimale Länge eines LineChangeIntervals, damit es für die Wegberechnung berücksichtigt wird
 		/// </summary>
-		public const double minimumLineChangeLength = 192;
+		public const double minimumLineChangeLength = 150;
 
 		/// <summary>
 		/// distance to end of LineChangeInterval where the vehicle shal stop in case of a forced line change
