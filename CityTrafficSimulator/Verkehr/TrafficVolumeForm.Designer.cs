@@ -29,6 +29,8 @@
 		private void InitializeComponent()
 			{
 			this.splitContainer1 = new System.Windows.Forms.SplitContainer();
+			this.btnUpdateDestinationNodes = new System.Windows.Forms.Button();
+			this.btnUpdateStartNodes = new System.Windows.Forms.Button();
 			this.btnSetDestinationTitle = new System.Windows.Forms.Button();
 			this.label1 = new System.Windows.Forms.Label();
 			this.btnSetStartTitle = new System.Windows.Forms.Button();
@@ -43,7 +45,6 @@
 			this.btnRemoveStartNode = new System.Windows.Forms.Button();
 			this.btnRemoveDestinationNode = new System.Windows.Forms.Button();
 			this.btnAddDestinationNode = new System.Windows.Forms.Button();
-			this.thumbGrid = new CityTrafficSimulator.RechenkaestchenControl();
 			this.spinGlobalTrafficVolumeMultiplier = new System.Windows.Forms.NumericUpDown();
 			this.groupBox1 = new System.Windows.Forms.GroupBox();
 			this.label6 = new System.Windows.Forms.Label();
@@ -75,6 +76,8 @@
 			// 
 			// splitContainer1.Panel1
 			// 
+			this.splitContainer1.Panel1.Controls.Add(this.btnUpdateDestinationNodes);
+			this.splitContainer1.Panel1.Controls.Add(this.btnUpdateStartNodes);
 			this.splitContainer1.Panel1.Controls.Add(this.btnSetDestinationTitle);
 			this.splitContainer1.Panel1.Controls.Add(this.label1);
 			this.splitContainer1.Panel1.Controls.Add(this.btnSetStartTitle);
@@ -93,20 +96,41 @@
 			// 
 			// splitContainer1.Panel2
 			// 
-			this.splitContainer1.Panel2.Controls.Add(this.thumbGrid);
+			this.splitContainer1.Panel2.AutoScroll = true;
 			this.splitContainer1.Panel2.Controls.Add(this.spinGlobalTrafficVolumeMultiplier);
 			this.splitContainer1.Panel2.Controls.Add(this.groupBox1);
 			this.splitContainer1.Panel2.Controls.Add(this.label7);
-			this.splitContainer1.Size = new System.Drawing.Size(890, 484);
-			this.splitContainer1.SplitterDistance = 590;
+			this.splitContainer1.Size = new System.Drawing.Size(890, 431);
+			this.splitContainer1.Panel2MinSize = 260;
+			this.splitContainer1.SplitterDistance = 600;
 			this.splitContainer1.TabIndex = 0;
+			// 
+			// btnUpdateDestinationNodes
+			// 
+			this.btnUpdateDestinationNodes.Location = new System.Drawing.Point(292, 292);
+			this.btnUpdateDestinationNodes.Name = "btnUpdateDestinationNodes";
+			this.btnUpdateDestinationNodes.Size = new System.Drawing.Size(60, 23);
+			this.btnUpdateDestinationNodes.TabIndex = 10;
+			this.btnUpdateDestinationNodes.Text = "Update";
+			this.btnUpdateDestinationNodes.UseVisualStyleBackColor = true;
+			this.btnUpdateDestinationNodes.Click += new System.EventHandler(this.btnUpdateDestinationNodes_Click);
+			// 
+			// btnUpdateStartNodes
+			// 
+			this.btnUpdateStartNodes.Location = new System.Drawing.Point(92, 366);
+			this.btnUpdateStartNodes.Name = "btnUpdateStartNodes";
+			this.btnUpdateStartNodes.Size = new System.Drawing.Size(60, 23);
+			this.btnUpdateStartNodes.TabIndex = 4;
+			this.btnUpdateStartNodes.Text = "Update";
+			this.btnUpdateStartNodes.UseVisualStyleBackColor = true;
+			this.btnUpdateStartNodes.Click += new System.EventHandler(this.btnUpdateStartNodes_Click);
 			// 
 			// btnSetDestinationTitle
 			// 
 			this.btnSetDestinationTitle.Location = new System.Drawing.Point(378, 264);
 			this.btnSetDestinationTitle.Name = "btnSetDestinationTitle";
 			this.btnSetDestinationTitle.Size = new System.Drawing.Size(40, 23);
-			this.btnSetDestinationTitle.TabIndex = 13;
+			this.btnSetDestinationTitle.TabIndex = 8;
 			this.btnSetDestinationTitle.Text = "Set";
 			this.btnSetDestinationTitle.UseVisualStyleBackColor = true;
 			this.btnSetDestinationTitle.Click += new System.EventHandler(this.btnSetDestinationTitle_Click);
@@ -125,7 +149,7 @@
 			this.btnSetStartTitle.Location = new System.Drawing.Point(178, 338);
 			this.btnSetStartTitle.Name = "btnSetStartTitle";
 			this.btnSetStartTitle.Size = new System.Drawing.Size(40, 23);
-			this.btnSetStartTitle.TabIndex = 12;
+			this.btnSetStartTitle.TabIndex = 2;
 			this.btnSetStartTitle.Text = "Set";
 			this.btnSetStartTitle.UseVisualStyleBackColor = true;
 			this.btnSetStartTitle.Click += new System.EventHandler(this.btnSetStartTitle_Click);
@@ -154,7 +178,7 @@
 			this.lbDestinationNodes.Location = new System.Drawing.Point(270, 74);
 			this.lbDestinationNodes.Name = "lbDestinationNodes";
 			this.lbDestinationNodes.Size = new System.Drawing.Size(148, 186);
-			this.lbDestinationNodes.TabIndex = 1;
+			this.lbDestinationNodes.TabIndex = 6;
 			this.lbDestinationNodes.SelectedIndexChanged += new System.EventHandler(this.lbDestinationNodes_SelectedIndexChanged);
 			// 
 			// lblStartTitle
@@ -180,14 +204,14 @@
 			this.editDestinationNodeTitle.Location = new System.Drawing.Point(252, 266);
 			this.editDestinationNodeTitle.Name = "editDestinationNodeTitle";
 			this.editDestinationNodeTitle.Size = new System.Drawing.Size(120, 20);
-			this.editDestinationNodeTitle.TabIndex = 9;
+			this.editDestinationNodeTitle.TabIndex = 7;
 			// 
 			// btnAddStartNode
 			// 
-			this.btnAddStartNode.Location = new System.Drawing.Point(52, 366);
+			this.btnAddStartNode.Location = new System.Drawing.Point(26, 366);
 			this.btnAddStartNode.Name = "btnAddStartNode";
-			this.btnAddStartNode.Size = new System.Drawing.Size(80, 23);
-			this.btnAddStartNode.TabIndex = 4;
+			this.btnAddStartNode.Size = new System.Drawing.Size(60, 23);
+			this.btnAddStartNode.TabIndex = 3;
 			this.btnAddStartNode.Text = "Add";
 			this.btnAddStartNode.UseVisualStyleBackColor = true;
 			this.btnAddStartNode.Click += new System.EventHandler(this.btnAddStartNode_Click);
@@ -197,13 +221,13 @@
 			this.editStartNodeTitle.Location = new System.Drawing.Point(52, 340);
 			this.editStartNodeTitle.Name = "editStartNodeTitle";
 			this.editStartNodeTitle.Size = new System.Drawing.Size(120, 20);
-			this.editStartNodeTitle.TabIndex = 8;
+			this.editStartNodeTitle.TabIndex = 1;
 			// 
 			// btnRemoveStartNode
 			// 
-			this.btnRemoveStartNode.Location = new System.Drawing.Point(138, 366);
+			this.btnRemoveStartNode.Location = new System.Drawing.Point(158, 366);
 			this.btnRemoveStartNode.Name = "btnRemoveStartNode";
-			this.btnRemoveStartNode.Size = new System.Drawing.Size(80, 23);
+			this.btnRemoveStartNode.Size = new System.Drawing.Size(60, 23);
 			this.btnRemoveStartNode.TabIndex = 5;
 			this.btnRemoveStartNode.Text = "Remove";
 			this.btnRemoveStartNode.UseVisualStyleBackColor = true;
@@ -211,39 +235,23 @@
 			// 
 			// btnRemoveDestinationNode
 			// 
-			this.btnRemoveDestinationNode.Location = new System.Drawing.Point(338, 292);
+			this.btnRemoveDestinationNode.Location = new System.Drawing.Point(358, 292);
 			this.btnRemoveDestinationNode.Name = "btnRemoveDestinationNode";
-			this.btnRemoveDestinationNode.Size = new System.Drawing.Size(80, 23);
-			this.btnRemoveDestinationNode.TabIndex = 7;
+			this.btnRemoveDestinationNode.Size = new System.Drawing.Size(60, 23);
+			this.btnRemoveDestinationNode.TabIndex = 11;
 			this.btnRemoveDestinationNode.Text = "Remove";
 			this.btnRemoveDestinationNode.UseVisualStyleBackColor = true;
 			this.btnRemoveDestinationNode.Click += new System.EventHandler(this.btnRemoveDestinationNode_Click);
 			// 
 			// btnAddDestinationNode
 			// 
-			this.btnAddDestinationNode.Location = new System.Drawing.Point(252, 292);
+			this.btnAddDestinationNode.Location = new System.Drawing.Point(226, 292);
 			this.btnAddDestinationNode.Name = "btnAddDestinationNode";
-			this.btnAddDestinationNode.Size = new System.Drawing.Size(80, 23);
-			this.btnAddDestinationNode.TabIndex = 6;
+			this.btnAddDestinationNode.Size = new System.Drawing.Size(60, 23);
+			this.btnAddDestinationNode.TabIndex = 9;
 			this.btnAddDestinationNode.Text = "Add";
 			this.btnAddDestinationNode.UseVisualStyleBackColor = true;
 			this.btnAddDestinationNode.Click += new System.EventHandler(this.btnAddDestinationNode_Click);
-			// 
-			// thumbGrid
-			// 
-			this.thumbGrid.BackColor = System.Drawing.Color.White;
-			this.thumbGrid.CellHeight = 0;
-			this.thumbGrid.CellSize = new System.Drawing.Size(0, 0);
-			this.thumbGrid.CellWidth = 0;
-			this.thumbGrid.Dimension = new System.Drawing.Point(0, 0);
-			this.thumbGrid.DrawGrid = false;
-			this.thumbGrid.Location = new System.Drawing.Point(12, 3);
-			this.thumbGrid.Max_X = 0;
-			this.thumbGrid.Max_Y = 0;
-			this.thumbGrid.Name = "thumbGrid";
-			this.thumbGrid.Size = new System.Drawing.Size(272, 272);
-			this.thumbGrid.TabIndex = 23;
-			this.thumbGrid.Paint += new System.Windows.Forms.PaintEventHandler(this.thumbGrid_Paint);
 			// 
 			// spinGlobalTrafficVolumeMultiplier
 			// 
@@ -253,15 +261,15 @@
             0,
             0,
             65536});
-			this.spinGlobalTrafficVolumeMultiplier.Location = new System.Drawing.Point(179, 281);
+			this.spinGlobalTrafficVolumeMultiplier.Location = new System.Drawing.Point(164, 7);
 			this.spinGlobalTrafficVolumeMultiplier.Maximum = new decimal(new int[] {
             10,
             0,
             0,
             0});
 			this.spinGlobalTrafficVolumeMultiplier.Name = "spinGlobalTrafficVolumeMultiplier";
-			this.spinGlobalTrafficVolumeMultiplier.Size = new System.Drawing.Size(99, 20);
-			this.spinGlobalTrafficVolumeMultiplier.TabIndex = 22;
+			this.spinGlobalTrafficVolumeMultiplier.Size = new System.Drawing.Size(89, 20);
+			this.spinGlobalTrafficVolumeMultiplier.TabIndex = 20;
 			this.spinGlobalTrafficVolumeMultiplier.Value = new decimal(new int[] {
             1,
             0,
@@ -279,9 +287,9 @@
 			this.groupBox1.Controls.Add(this.spinTramVolume);
 			this.groupBox1.Controls.Add(this.spinBusVolume);
 			this.groupBox1.Controls.Add(this.spinCarsVolume);
-			this.groupBox1.Location = new System.Drawing.Point(12, 307);
+			this.groupBox1.Location = new System.Drawing.Point(3, 33);
 			this.groupBox1.Name = "groupBox1";
-			this.groupBox1.Size = new System.Drawing.Size(272, 138);
+			this.groupBox1.Size = new System.Drawing.Size(250, 138);
 			this.groupBox1.TabIndex = 0;
 			this.groupBox1.TabStop = false;
 			this.groupBox1.Text = "Traffic Volume:";
@@ -324,60 +332,60 @@
 			// 
 			// spinTruckVolume
 			// 
-			this.spinTruckVolume.Location = new System.Drawing.Point(167, 45);
+			this.spinTruckVolume.Location = new System.Drawing.Point(161, 45);
 			this.spinTruckVolume.Maximum = new decimal(new int[] {
             100000,
             0,
             0,
             0});
 			this.spinTruckVolume.Name = "spinTruckVolume";
-			this.spinTruckVolume.Size = new System.Drawing.Size(99, 20);
-			this.spinTruckVolume.TabIndex = 3;
+			this.spinTruckVolume.Size = new System.Drawing.Size(83, 20);
+			this.spinTruckVolume.TabIndex = 22;
 			this.spinTruckVolume.ValueChanged += new System.EventHandler(this.spinTruckVolume_ValueChanged);
 			// 
 			// spinTramVolume
 			// 
-			this.spinTramVolume.Location = new System.Drawing.Point(167, 97);
+			this.spinTramVolume.Location = new System.Drawing.Point(161, 97);
 			this.spinTramVolume.Maximum = new decimal(new int[] {
             100000,
             0,
             0,
             0});
 			this.spinTramVolume.Name = "spinTramVolume";
-			this.spinTramVolume.Size = new System.Drawing.Size(99, 20);
-			this.spinTramVolume.TabIndex = 2;
+			this.spinTramVolume.Size = new System.Drawing.Size(83, 20);
+			this.spinTramVolume.TabIndex = 24;
 			this.spinTramVolume.ValueChanged += new System.EventHandler(this.spinTramVolume_ValueChanged);
 			// 
 			// spinBusVolume
 			// 
-			this.spinBusVolume.Location = new System.Drawing.Point(167, 71);
+			this.spinBusVolume.Location = new System.Drawing.Point(161, 71);
 			this.spinBusVolume.Maximum = new decimal(new int[] {
             100000,
             0,
             0,
             0});
 			this.spinBusVolume.Name = "spinBusVolume";
-			this.spinBusVolume.Size = new System.Drawing.Size(99, 20);
-			this.spinBusVolume.TabIndex = 1;
+			this.spinBusVolume.Size = new System.Drawing.Size(83, 20);
+			this.spinBusVolume.TabIndex = 23;
 			this.spinBusVolume.ValueChanged += new System.EventHandler(this.spinBusVolume_ValueChanged);
 			// 
 			// spinCarsVolume
 			// 
-			this.spinCarsVolume.Location = new System.Drawing.Point(167, 19);
+			this.spinCarsVolume.Location = new System.Drawing.Point(161, 19);
 			this.spinCarsVolume.Maximum = new decimal(new int[] {
             100000,
             0,
             0,
             0});
 			this.spinCarsVolume.Name = "spinCarsVolume";
-			this.spinCarsVolume.Size = new System.Drawing.Size(99, 20);
-			this.spinCarsVolume.TabIndex = 0;
+			this.spinCarsVolume.Size = new System.Drawing.Size(83, 20);
+			this.spinCarsVolume.TabIndex = 21;
 			this.spinCarsVolume.ValueChanged += new System.EventHandler(this.spinCarsVolume_ValueChanged);
 			// 
 			// label7
 			// 
 			this.label7.AutoSize = true;
-			this.label7.Location = new System.Drawing.Point(18, 283);
+			this.label7.Location = new System.Drawing.Point(3, 9);
 			this.label7.Name = "label7";
 			this.label7.Size = new System.Drawing.Size(155, 13);
 			this.label7.TabIndex = 21;
@@ -387,7 +395,7 @@
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-			this.ClientSize = new System.Drawing.Size(890, 484);
+			this.ClientSize = new System.Drawing.Size(890, 431);
 			this.ControlBox = false;
 			this.Controls.Add(this.splitContainer1);
 			this.Name = "TrafficVolumeForm";
@@ -436,6 +444,7 @@
 		private System.Windows.Forms.NumericUpDown spinTruckVolume;
 		private System.Windows.Forms.NumericUpDown spinGlobalTrafficVolumeMultiplier;
 		private System.Windows.Forms.Label label7;
-		private RechenkaestchenControl thumbGrid;
+		private System.Windows.Forms.Button btnUpdateDestinationNodes;
+		private System.Windows.Forms.Button btnUpdateStartNodes;
 		}
 	}

@@ -101,6 +101,7 @@ namespace CityTrafficSimulator
 				}
 
 			lf.StepUpperProgress("Done");
+			lf.ShowLog();
 
 			lf.Close();
 			lf = null;

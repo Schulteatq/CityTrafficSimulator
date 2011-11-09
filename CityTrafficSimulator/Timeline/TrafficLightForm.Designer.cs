@@ -67,9 +67,9 @@
 			// 
 			this.statusStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.statusLabel});
-			this.statusStrip1.Location = new System.Drawing.Point(0, 324);
+			this.statusStrip1.Location = new System.Drawing.Point(0, 281);
 			this.statusStrip1.Name = "statusStrip1";
-			this.statusStrip1.Size = new System.Drawing.Size(881, 22);
+			this.statusStrip1.Size = new System.Drawing.Size(890, 22);
 			this.statusStrip1.TabIndex = 0;
 			this.statusStrip1.Text = "statusStrip1";
 			// 
@@ -82,23 +82,23 @@
 			// splitContainer1
 			// 
 			this.splitContainer1.Dock = System.Windows.Forms.DockStyle.Fill;
-			this.splitContainer1.FixedPanel = System.Windows.Forms.FixedPanel.Panel1;
+			this.splitContainer1.FixedPanel = System.Windows.Forms.FixedPanel.Panel2;
 			this.splitContainer1.Location = new System.Drawing.Point(0, 0);
 			this.splitContainer1.Name = "splitContainer1";
 			// 
 			// splitContainer1.Panel1
 			// 
-			this.splitContainer1.Panel1.Controls.Add(this.groupBox1);
-			this.splitContainer1.Panel1.Controls.Add(this.trafficLightGroupBox);
-			this.splitContainer1.Panel1.Controls.Add(this.groupsGroupBox);
-			this.splitContainer1.Panel1MinSize = 340;
+			this.splitContainer1.Panel1.AutoScroll = true;
+			this.splitContainer1.Panel1.Controls.Add(this.timelineControl);
 			// 
 			// splitContainer1.Panel2
 			// 
 			this.splitContainer1.Panel2.AutoScroll = true;
-			this.splitContainer1.Panel2.Controls.Add(this.timelineControl);
-			this.splitContainer1.Size = new System.Drawing.Size(881, 324);
-			this.splitContainer1.SplitterDistance = 340;
+			this.splitContainer1.Panel2.Controls.Add(this.groupBox1);
+			this.splitContainer1.Panel2.Controls.Add(this.trafficLightGroupBox);
+			this.splitContainer1.Panel2.Controls.Add(this.groupsGroupBox);
+			this.splitContainer1.Size = new System.Drawing.Size(890, 281);
+			this.splitContainer1.SplitterDistance = 600;
 			this.splitContainer1.TabIndex = 1;
 			// 
 			// groupBox1
@@ -107,16 +107,16 @@
 			this.groupBox1.Controls.Add(this.label5);
 			this.groupBox1.Controls.Add(this.label4);
 			this.groupBox1.Controls.Add(this.zoomSpinEdit);
-			this.groupBox1.Location = new System.Drawing.Point(12, 225);
+			this.groupBox1.Location = new System.Drawing.Point(3, 195);
 			this.groupBox1.Name = "groupBox1";
-			this.groupBox1.Size = new System.Drawing.Size(318, 86);
+			this.groupBox1.Size = new System.Drawing.Size(250, 75);
 			this.groupBox1.TabIndex = 2;
 			this.groupBox1.TabStop = false;
 			this.groupBox1.Text = "View";
 			// 
 			// cycleTimeSpinEdit
 			// 
-			this.cycleTimeSpinEdit.Location = new System.Drawing.Point(208, 19);
+			this.cycleTimeSpinEdit.Location = new System.Drawing.Point(140, 21);
 			this.cycleTimeSpinEdit.Maximum = new decimal(new int[] {
             240,
             0,
@@ -157,7 +157,7 @@
 			// 
 			// zoomSpinEdit
 			// 
-			this.zoomSpinEdit.Location = new System.Drawing.Point(208, 45);
+			this.zoomSpinEdit.Location = new System.Drawing.Point(140, 47);
 			this.zoomSpinEdit.Maximum = new decimal(new int[] {
             20,
             0,
@@ -186,9 +186,9 @@
 			this.trafficLightGroupBox.Controls.Add(this.trafficLightNameEdit);
 			this.trafficLightGroupBox.Controls.Add(this.removeTrafficLightButton);
 			this.trafficLightGroupBox.Controls.Add(this.addTrafficLightButton);
-			this.trafficLightGroupBox.Location = new System.Drawing.Point(12, 103);
+			this.trafficLightGroupBox.Location = new System.Drawing.Point(3, 86);
 			this.trafficLightGroupBox.Name = "trafficLightGroupBox";
-			this.trafficLightGroupBox.Size = new System.Drawing.Size(318, 116);
+			this.trafficLightGroupBox.Size = new System.Drawing.Size(250, 103);
 			this.trafficLightGroupBox.TabIndex = 1;
 			this.trafficLightGroupBox.TabStop = false;
 			this.trafficLightGroupBox.Text = "Signal";
@@ -208,7 +208,7 @@
 			this.groupComboBox.FormattingEnabled = true;
 			this.groupComboBox.Location = new System.Drawing.Point(98, 45);
 			this.groupComboBox.Name = "groupComboBox";
-			this.groupComboBox.Size = new System.Drawing.Size(214, 21);
+			this.groupComboBox.Size = new System.Drawing.Size(146, 21);
 			this.groupComboBox.TabIndex = 8;
 			this.groupComboBox.SelectedIndexChanged += new System.EventHandler(this.groupComboBox_SelectedIndexChanged);
 			// 
@@ -225,15 +225,15 @@
 			// 
 			this.trafficLightNameEdit.Location = new System.Drawing.Point(98, 19);
 			this.trafficLightNameEdit.Name = "trafficLightNameEdit";
-			this.trafficLightNameEdit.Size = new System.Drawing.Size(214, 20);
+			this.trafficLightNameEdit.Size = new System.Drawing.Size(146, 20);
 			this.trafficLightNameEdit.TabIndex = 6;
 			this.trafficLightNameEdit.TextChanged += new System.EventHandler(this.trafficLightNameEdit_TextChanged);
 			// 
 			// removeTrafficLightButton
 			// 
-			this.removeTrafficLightButton.Location = new System.Drawing.Point(208, 72);
+			this.removeTrafficLightButton.Location = new System.Drawing.Point(154, 72);
 			this.removeTrafficLightButton.Name = "removeTrafficLightButton";
-			this.removeTrafficLightButton.Size = new System.Drawing.Size(104, 23);
+			this.removeTrafficLightButton.Size = new System.Drawing.Size(90, 23);
 			this.removeTrafficLightButton.TabIndex = 5;
 			this.removeTrafficLightButton.Text = "Remove Signal";
 			this.removeTrafficLightButton.UseVisualStyleBackColor = true;
@@ -241,9 +241,9 @@
 			// 
 			// addTrafficLightButton
 			// 
-			this.addTrafficLightButton.Location = new System.Drawing.Point(98, 72);
+			this.addTrafficLightButton.Location = new System.Drawing.Point(58, 72);
 			this.addTrafficLightButton.Name = "addTrafficLightButton";
-			this.addTrafficLightButton.Size = new System.Drawing.Size(104, 23);
+			this.addTrafficLightButton.Size = new System.Drawing.Size(90, 23);
 			this.addTrafficLightButton.TabIndex = 4;
 			this.addTrafficLightButton.Text = "Create Signal";
 			this.addTrafficLightButton.UseVisualStyleBackColor = true;
@@ -255,9 +255,9 @@
 			this.groupsGroupBox.Controls.Add(this.groupTitleEdit);
 			this.groupsGroupBox.Controls.Add(this.removeGroupButton);
 			this.groupsGroupBox.Controls.Add(this.addGroupButton);
-			this.groupsGroupBox.Location = new System.Drawing.Point(12, 12);
+			this.groupsGroupBox.Location = new System.Drawing.Point(3, 3);
 			this.groupsGroupBox.Name = "groupsGroupBox";
-			this.groupsGroupBox.Size = new System.Drawing.Size(318, 85);
+			this.groupsGroupBox.Size = new System.Drawing.Size(250, 77);
 			this.groupsGroupBox.TabIndex = 0;
 			this.groupsGroupBox.TabStop = false;
 			this.groupsGroupBox.Text = "Signal Groups";
@@ -275,15 +275,15 @@
 			// 
 			this.groupTitleEdit.Location = new System.Drawing.Point(98, 19);
 			this.groupTitleEdit.Name = "groupTitleEdit";
-			this.groupTitleEdit.Size = new System.Drawing.Size(214, 20);
+			this.groupTitleEdit.Size = new System.Drawing.Size(146, 20);
 			this.groupTitleEdit.TabIndex = 2;
 			this.groupTitleEdit.TextChanged += new System.EventHandler(this.groupTitleEdit_TextChanged);
 			// 
 			// removeGroupButton
 			// 
-			this.removeGroupButton.Location = new System.Drawing.Point(208, 45);
+			this.removeGroupButton.Location = new System.Drawing.Point(154, 45);
 			this.removeGroupButton.Name = "removeGroupButton";
-			this.removeGroupButton.Size = new System.Drawing.Size(104, 23);
+			this.removeGroupButton.Size = new System.Drawing.Size(90, 23);
 			this.removeGroupButton.TabIndex = 1;
 			this.removeGroupButton.Text = "Remove Group";
 			this.removeGroupButton.UseVisualStyleBackColor = true;
@@ -291,9 +291,9 @@
 			// 
 			// addGroupButton
 			// 
-			this.addGroupButton.Location = new System.Drawing.Point(98, 45);
+			this.addGroupButton.Location = new System.Drawing.Point(58, 45);
 			this.addGroupButton.Name = "addGroupButton";
-			this.addGroupButton.Size = new System.Drawing.Size(104, 23);
+			this.addGroupButton.Size = new System.Drawing.Size(90, 23);
 			this.addGroupButton.TabIndex = 0;
 			this.addGroupButton.Text = "Create Group";
 			this.addGroupButton.UseVisualStyleBackColor = true;
@@ -320,7 +320,7 @@
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-			this.ClientSize = new System.Drawing.Size(881, 346);
+			this.ClientSize = new System.Drawing.Size(890, 303);
 			this.ControlBox = false;
 			this.Controls.Add(this.splitContainer1);
 			this.Controls.Add(this.statusStrip1);

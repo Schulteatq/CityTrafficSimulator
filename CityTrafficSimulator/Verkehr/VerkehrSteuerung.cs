@@ -65,6 +65,9 @@ namespace CityTrafficSimulator.Verkehr
 		/// <param name="sp">zu löschende BunchOfNodes</param>
 		public void RemoveStartPoint(BunchOfNodes sp)
 			{
+			// remove all corresponding traffic volumes
+			trafficVolumes.RemoveAll(delegate(TrafficVolume tv) { return tv.startNodes == sp; });
+
 			m_startPoints.Remove(sp);
 			OnStartPointsChanged(new StartPointsChangedEventArgs());
 			}
@@ -75,6 +78,7 @@ namespace CityTrafficSimulator.Verkehr
 		public void ClearStartPoints()
 			{
 			m_startPoints.Clear();
+			m_trafficVolumes.Clear();
 			OnStartPointsChanged(new StartPointsChangedEventArgs());
 			}
 
@@ -90,6 +94,21 @@ namespace CityTrafficSimulator.Verkehr
 				m_startPoints[index].title = title;
 				OnStartPointsChanged(new StartPointsChangedEventArgs());
 				}
+			}
+
+		/// <summary>
+		/// Updates the LineNodes of the start point bunch with the given index
+		/// </summary>
+		/// <param name="index">Index in the start point list</param>
+		/// <param name="nodes">New list of nodes</param>
+		public void UpdateStartPointNodes(int index, List<LineNode> nodes)
+			{
+			if (index < m_startPoints.Count)
+				{
+				m_startPoints[index].nodes = nodes;
+				OnDestinationPointsChanged(new DestinationPointsChangedEventArgs());
+				}
+
 			}
 
 		#endregion
@@ -124,6 +143,9 @@ namespace CityTrafficSimulator.Verkehr
 		/// <param name="sp">zu löschende BunchOfNodes</param>
 		public void RemoveDestinationPoint(BunchOfNodes sp)
 			{
+			// remove all corresponding traffic volumes
+			trafficVolumes.RemoveAll(delegate(TrafficVolume tv) { return tv.destinationNodes == sp; });
+
 			m_destinationPoints.Remove(sp);
 			OnDestinationPointsChanged(new DestinationPointsChangedEventArgs());
 			}
@@ -134,6 +156,7 @@ namespace CityTrafficSimulator.Verkehr
 		public void ClearDestinationPoints()
 			{
 			m_destinationPoints.Clear();
+			m_trafficVolumes.Clear();
 			OnDestinationPointsChanged(new DestinationPointsChangedEventArgs());
 			}
 
@@ -149,6 +172,21 @@ namespace CityTrafficSimulator.Verkehr
 				m_destinationPoints[index].title = title;
 				OnDestinationPointsChanged(new DestinationPointsChangedEventArgs());
 				}
+			}
+
+		/// <summary>
+		/// Updates the LineNodes of the destination point bunch with the given index
+		/// </summary>
+		/// <param name="index">Index in the destination point list</param>
+		/// <param name="nodes">New list of nodes</param>
+		public void UpdateDestinationPointNodes(int index, List<LineNode> nodes)
+			{
+			if (index < m_destinationPoints.Count)
+				{
+				m_destinationPoints[index].nodes = nodes;
+				OnDestinationPointsChanged(new DestinationPointsChangedEventArgs());
+				}
+
 			}
 
 		#endregion
@@ -396,7 +434,14 @@ namespace CityTrafficSimulator.Verkehr
 				TrafficVolume tv = (TrafficVolume)xs.Deserialize(tr);
 
 				tv.RecoverFromLoad(saveVersion, startPoints, destinationPoints);
-				m_trafficVolumes.Add(tv);
+				if (tv.startNodes != null && tv.destinationNodes != null)
+					{
+					m_trafficVolumes.Add(tv);
+					}
+				else
+					{
+					lf.Log("Error during traffic volume deserialization: Could not dereference start-/end nodes. Traffic volume was dismissed.");
+					}
 				}
 
 			OnStartPointsChanged(new StartPointsChangedEventArgs());

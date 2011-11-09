@@ -29,6 +29,9 @@ using System.IO;
 using System.Xml;
 using System.Xml.Serialization;
 
+using Crownwood.Magic.Common;
+using Crownwood.Magic.Docking;
+
 using CityTrafficSimulator.Timeline;
 using CityTrafficSimulator.Vehicle;
 using CityTrafficSimulator.Tools.ObserverPattern;
@@ -41,6 +44,76 @@ namespace CityTrafficSimulator
 	/// </summary>
 	public partial class MainForm : Form
 		{
+		#region Docking stuff
+
+		/// <summary>
+		/// The one and only holy DockingManager
+		/// </summary>
+		private Crownwood.Magic.Docking.DockingManager _dockingManager;
+
+		private void SetContentDefaultSettings(Content c, Size s)
+			{
+			c.DisplaySize = s;
+			c.FloatingSize = s;
+			c.AutoHideSize = s;
+			c.CloseButton = false;
+			}
+
+		private void SetupDockingStuff()
+			{
+			// Setup main canvas
+			_dockingManager.InnerControl = pnlMainGrid;
+			_dockingManager.ContentHiding += new DockingManager.ContentHidingHandler(_dockingManager_ContentHiding);
+			statusleiste.Visible = false;
+
+			// Setup right docks: Most setup panels
+			Content connectionContent = _dockingManager.Contents.Add(pnlConnectionSetup, "Connection Setup");
+			SetContentDefaultSettings(connectionContent, pnlConnectionSetup.Size);
+			Content networkContent = _dockingManager.Contents.Add(pnlNetworkInfo, "Network Info");
+			SetContentDefaultSettings(networkContent, pnlNetworkInfo.Size);
+			Content signalContent = _dockingManager.Contents.Add(pnlSignalAssignment, "Signal Assignment");
+			SetContentDefaultSettings(signalContent, pnlSignalAssignment.Size);
+			Content viewContent = _dockingManager.Contents.Add(pnlRenderSetup, "Render Setup");
+			SetContentDefaultSettings(viewContent, pnlRenderSetup.Size);
+			Content canvasContent = _dockingManager.Contents.Add(pnlCanvasSetup, "Canvas Setup");
+			SetContentDefaultSettings(canvasContent, pnlCanvasSetup.Size);
+			Content simContent = _dockingManager.Contents.Add(pnlSimulationSetup, "Simulation Setup");
+			SetContentDefaultSettings(simContent, pnlSimulationSetup.Size);
+			Content thumbContent = _dockingManager.Contents.Add(thumbGrid, "Thumbnail View");
+			SetContentDefaultSettings(thumbContent, new Size(150, 150));
+			
+			WindowContent dock0 = _dockingManager.AddContentWithState(connectionContent, State.DockRight);
+			_dockingManager.AddContentToWindowContent(signalContent, dock0);
+
+			WindowContent dock1 = _dockingManager.AddContentToZone(networkContent, dock0.ParentZone, 1) as WindowContent;
+			_dockingManager.AddContentToWindowContent(simContent, dock1);
+
+			WindowContent dock2 = _dockingManager.AddContentToZone(thumbContent, dock0.ParentZone, 2) as WindowContent;
+			_dockingManager.AddContentToWindowContent(viewContent, dock2); 
+			_dockingManager.AddContentToWindowContent(canvasContent, dock2);
+
+
+			// Setup bottom docks: TrafficLightForm, TrafficVolumeForm, pnlTimeline
+			trafficLightForm = new TrafficLightForm(timelineSteuerung);
+			trafficVolumeForm = new Verkehr.TrafficVolumeForm(trafficVolumeSteuerung, this, nodeSteuerung);
+
+			Content tlfContent = _dockingManager.Contents.Add(trafficLightForm, "Signal Editor");
+			SetContentDefaultSettings(tlfContent, trafficLightForm.Size);
+			Content tvfContent = _dockingManager.Contents.Add(trafficVolumeForm, "Traffic Volume Editor");
+			SetContentDefaultSettings(tvfContent, trafficVolumeForm.Size);
+
+			WindowContent bottomDock = _dockingManager.AddContentWithState(tlfContent, State.DockBottom);
+			_dockingManager.AddContentToWindowContent(tvfContent, bottomDock);
+
+			}
+
+		void _dockingManager_ContentHiding(Content c, CancelEventArgs cea)
+			{
+			cea.Cancel = true;
+			}
+
+		#endregion
+
 		#region Hilfsklassen
 		private enum DragNDrop
 			{
@@ -52,17 +125,33 @@ namespace CityTrafficSimulator
 			MOVE_THUMB_RECT,
 			DRAG_RUBBERBAND
 			}
+
+		/// <summary>
+		/// MainForm invalidation level
+		/// </summary>
+		public enum InvalidationLevel
+			{
+			/// <summary>
+			/// invalidate everything
+			/// </summary>
+			ALL,
+			/// <summary>
+			/// invalidate only main canvas
+			/// </summary>
+			ONLY_MAIN_CANVAS,
+			/// <summary>
+			/// invalidate main canvas and timeline
+			/// </summary>
+			MAIN_CANVAS_AND_TIMLINE
+			}
+
 		#endregion
 
 		#region Variablen / Properties
 		private Random rnd = new Random();
 
-		/// <summary>
-		/// Flag, ob gerade OnEventChanged() gefeuert wurde
-		/// </summary>
-		private bool changedEvent = false;
-
 		private bool dockToGrid = false;
+		private bool isNotified = false;
 
 		private NodeSteuerung.RenderOptions renderOptionsDaGrid = new NodeSteuerung.RenderOptions();
 		private NodeSteuerung.RenderOptions renderOptionsThumbnail = new NodeSteuerung.RenderOptions();
@@ -107,15 +196,32 @@ namespace CityTrafficSimulator
 		private bool doHandleTrafficLightTreeViewSelect = true;
 
 
+		/// <summary>
+		/// currently selected start nodes for traffic volume
+		/// </summary>
+		private List<LineNode> m_fromLineNodes = new List<LineNode>();
+		/// <summary>
+		/// currently selected start nodes for traffic volume
+		/// </summary>
+		public List<LineNode> fromLineNodes
+			{
+			get { return m_fromLineNodes; }
+			set { m_fromLineNodes = value; thumbGrid.Invalidate(); }
+			}
 
 		/// <summary>
-		/// Startknoten für Verkehr
+		/// currently selected destination nodes for traffic volume
 		/// </summary>
-		public List<LineNode> fromLineNodes = new List<LineNode>();
+		private List<LineNode> m_toLineNodes = new List<LineNode>();
 		/// <summary>
-		/// Zielknoten für Verkehr
+		/// currently selected destination nodes for traffic volume
 		/// </summary>
-		public List<LineNode> toLineNodes = new List<LineNode>();
+		public List<LineNode> toLineNodes
+			{
+			get { return m_toLineNodes; }
+			set { m_toLineNodes = value; thumbGrid.Invalidate(); }
+			}
+
 
 		/// <summary>
 		/// Thumbnail Rectangle World-Koordinaten
@@ -196,12 +302,12 @@ namespace CityTrafficSimulator
 						trafficLightTreeView.SelectNodeByTimelineEntry(m_selectedLineNodes[0].tLight);
 						trafficLightTreeView.Select();
 						doHandleTrafficLightTreeViewSelect = true;
-						timeline.selectedEntry = m_selectedLineNodes[0].tLight;
+						trafficLightForm.selectedEntry = m_selectedLineNodes[0].tLight;
 						}
 					else
 						{
 						trafficLightTreeView.SelectedNode = null;
-						timeline.selectedEntry = null;
+						trafficLightForm.selectedEntry = null;
 						}
 
 					selectedNodeConnection = null;
@@ -209,7 +315,7 @@ namespace CityTrafficSimulator
 				else
 					{
 					trafficLightTreeView.SelectedNode = null;
-					timeline.selectedEntry = null;
+					trafficLightForm.selectedEntry = null;
 					}
 				}
 			}
@@ -277,18 +383,16 @@ namespace CityTrafficSimulator
 			timelineSteuerung.maxTime = 50;
 
 			InitializeComponent();
-			timeline.steuerung = timelineSteuerung;
+
+			_dockingManager = new Crownwood.Magic.Docking.DockingManager(this, VisualStyle.IDE);
+			SetupDockingStuff();
+
 			trafficLightTreeView.steuerung = timelineSteuerung;
-
-			trafficLightForm = new TrafficLightForm(timelineSteuerung);
-			trafficLightForm.Show();
-
-			trafficVolumeForm = new Verkehr.TrafficVolumeForm(trafficVolumeSteuerung, this, nodeSteuerung);
-			trafficVolumeForm.Show();
-
 			timelineSteuerung.CurrentTimeChanged += new TimelineSteuerung.CurrentTimeChangedEventHandler(timelineSteuerung_CurrentTimeChanged);
+			trafficLightForm.SelectedEntryChanged += new TrafficLightForm.SelectedEntryChangedEventHandler(trafficLightForm_SelectedEntryChanged);
 
 			zoomComboBox.SelectedIndex = 7;
+			DaGrid.Size = new System.Drawing.Size((int)canvasWidthSpinEdit.Value, (int)canvasHeigthSpinEdit.Value);
 
 			this.SetStyle(ControlStyles.OptimizedDoubleBuffer | ControlStyles.AllPaintingInWmPaint | ControlStyles.UserPaint, true);
 
@@ -315,36 +419,25 @@ namespace CityTrafficSimulator
 
 			}
 
-		void timelineSteuerung_CurrentTimeChanged(object sender, TimelineSteuerung.CurrentTimeChangedEventArgs e)
+		private void trafficLightForm_SelectedEntryChanged(object sender, TrafficLightForm.SelectedEntryChangedEventArgs e)
+			{
+			isNotified = true;
+			if (trafficLightForm.selectedEntry != null)
+				{
+				TrafficLight tl = trafficLightForm.selectedEntry as TrafficLight;
+				m_selectedLineNodes.Clear();
+				m_selectedLineNodes.AddRange(tl.assignedNodes);
+				DaGrid.Invalidate();
+				}
+			isNotified = false;
+			}
+
+		private void timelineSteuerung_CurrentTimeChanged(object sender, TimelineSteuerung.CurrentTimeChangedEventArgs e)
 			{
 			DaGrid.Invalidate();
 			}
 
 		#region Drag'n'Drop Gedöns
-
-		#region Timeline
-		private void timeline_MouseMove(object sender, MouseEventArgs e)
-			{
-			if (changedEvent)
-				{
-				changedEvent = false;
-				}
-			else
-				{
-				statusLabel.Text = "Zeitleiste Mausposition: " + timeline.GetTimeAtControlPosition(e.Location, false).ToString() + "s";
-				}
-			}
-
-		private void timeline_MouseDown(object sender, MouseEventArgs e)
-			{
-
-			}
-
-		private void timeline_MouseUp(object sender, MouseEventArgs e)
-			{
-			howToDrag = DragNDrop.NONE;
-			}
-		#endregion
 
 		#region thumbGrid
 		private void thumbGrid_MouseMove(object sender, MouseEventArgs e)
@@ -380,7 +473,7 @@ namespace CityTrafficSimulator
 				thumbGridClientRect.X = e.Location.X - thumbGridClientRect.Width/2;
 				thumbGridClientRect.Y = e.Location.Y - thumbGridClientRect.Height/2;
 
-				splitContainer1.Panel1.AutoScrollPosition = new Point(
+				pnlMainGrid.AutoScrollPosition = new Point(
 					(int)Math.Round(zoom * thumbGridClientRect.X * zoomMultipliers[zoomComboBox.SelectedIndex, 0]),
 					(int)Math.Round(zoom * thumbGridClientRect.Y * zoomMultipliers[zoomComboBox.SelectedIndex, 0]));
 
@@ -403,12 +496,12 @@ namespace CityTrafficSimulator
 				/*thumbGridWorldRect = new Rectangle(
 					(int)Math.Round(-daGridAutoscrollPosition.X * zoomMultipliers[zoomComboBox.SelectedIndex, 1]),
 					(int)Math.Round(-daGridAutoscrollPosition.Y * zoomMultipliers[zoomComboBox.SelectedIndex, 1]),
-					(int)Math.Round(splitContainer1.Panel1.ClientSize.Width * zoomMultipliers[zoomComboBox.SelectedIndex, 1]),
-					(int)Math.Round(splitContainer1.Panel1.ClientSize.Height * zoomMultipliers[zoomComboBox.SelectedIndex, 1]));
+					(int)Math.Round(pnlMainGrid.ClientSize.Width * zoomMultipliers[zoomComboBox.SelectedIndex, 1]),
+					(int)Math.Round(pnlMainGrid.ClientSize.Height * zoomMultipliers[zoomComboBox.SelectedIndex, 1]));
 				*/
 
 
-				splitContainer1.Panel1.AutoScrollPosition = new Point(
+				pnlMainGrid.AutoScrollPosition = new Point(
 					(int)Math.Round(zoom * thumbGridClientRect.X * zoomMultipliers[zoomComboBox.SelectedIndex, 0]),
 					(int)Math.Round(zoom * thumbGridClientRect.Y * zoomMultipliers[zoomComboBox.SelectedIndex, 0]));
 
@@ -694,7 +787,7 @@ namespace CityTrafficSimulator
 					break;
 				}
 
-			Invalidate();
+			Invalidate(InvalidationLevel.ONLY_MAIN_CANVAS);
 			}
 
 		void DaGrid_MouseMove(object sender, MouseEventArgs e)
@@ -711,8 +804,8 @@ namespace CityTrafficSimulator
 							{
 							m_selectedLineNodes[i].position = DaGrid.DockToGrid(clickedPosition + selectedLineNodesMovingOffset[i], dockToGrid);
 							}
-						
-						Invalidate();
+
+						Invalidate(InvalidationLevel.ONLY_MAIN_CANVAS);
 						break;
 					case DragNDrop.CREATE_NODE:
 						selectedLineNodes[0].outSlopeAbs = DaGrid.DockToGrid(clickedPosition, dockToGrid);
@@ -731,7 +824,7 @@ namespace CityTrafficSimulator
 							m_selectedLineNodes[i].inSlope = m_selectedLineNodes[0].inSlope * streckungsfaktor;
 							}
 
-						Invalidate();
+						Invalidate(InvalidationLevel.ONLY_MAIN_CANVAS);
 						break;
 					case DragNDrop.MOVE_IN_SLOPE:
 						selectedLineNodes[0].inSlopeAbs = DaGrid.DockToGrid(clickedPosition, dockToGrid);
@@ -761,7 +854,7 @@ namespace CityTrafficSimulator
 								ln.outSlope = -1 * ln.inSlope;
 								}
 							}
-						Invalidate();
+						Invalidate(InvalidationLevel.ONLY_MAIN_CANVAS);
 						break;
 					case DragNDrop.MOVE_OUT_SLOPE:
 						selectedLineNodes[0].outSlopeAbs = DaGrid.DockToGrid(clickedPosition, dockToGrid);
@@ -790,26 +883,20 @@ namespace CityTrafficSimulator
 								ln.inSlope = -1 * ln.outSlope;
 								}							
 							}
-						Invalidate();
+						Invalidate(InvalidationLevel.ONLY_MAIN_CANVAS);
 						break;
 					case DragNDrop.DRAG_RUBBERBAND:
 						daGridRubberband.Width = (int) Math.Round(clickedPosition.X - daGridRubberband.X);
 						daGridRubberband.Height = (int) Math.Round(clickedPosition.Y - daGridRubberband.Y);
-						Invalidate();
+						Invalidate(InvalidationLevel.ONLY_MAIN_CANVAS);
 						break;
 					default:
-						if (drawDebugCheckBox.Checked)
-							{
-							//Invalidate();
-							}
 						break;
 					}
 				}
 			else
-				if (drawDebugCheckBox.Checked)
-					{
-					//Invalidate();
-					}
+				{
+				}
 			}
 
 		void DaGrid_MouseUp(object sender, MouseEventArgs e)
@@ -854,7 +941,7 @@ namespace CityTrafficSimulator
 
 			// Drag'n'Drop Bereich wieder löschen
 			howToDrag = DragNDrop.NONE;
-			Invalidate();
+			Invalidate(InvalidationLevel.ONLY_MAIN_CANVAS);
 			}
 
 		void DaGrid_KeyDown(object sender, KeyEventArgs e)
@@ -869,7 +956,7 @@ namespace CityTrafficSimulator
 					{
 					ln.position.X -= 1;
 					e.Handled = true;
-					Invalidate();
+					Invalidate(InvalidationLevel.ONLY_MAIN_CANVAS);
 					}
 				break;
 			case Keys.Right:
@@ -877,7 +964,7 @@ namespace CityTrafficSimulator
 					{
 					ln.position.X += 1;
 					e.Handled = true;
-					Invalidate();
+					Invalidate(InvalidationLevel.ONLY_MAIN_CANVAS);
 					}
 				break;
 			case Keys.Up:
@@ -885,7 +972,7 @@ namespace CityTrafficSimulator
 					{
 					ln.position.Y -= 1;
 					e.Handled = true;
-					Invalidate();
+					Invalidate(InvalidationLevel.ONLY_MAIN_CANVAS);
 					}
 				break;
 			case Keys.Down:
@@ -893,7 +980,7 @@ namespace CityTrafficSimulator
 					{
 					ln.position.Y += 1;
 					e.Handled = true;
-					Invalidate();
+					Invalidate(InvalidationLevel.ONLY_MAIN_CANVAS);
 					}
 				break;
 			#endregion
@@ -922,14 +1009,14 @@ namespace CityTrafficSimulator
 						}
 					selectedLineNodes.Clear();
 					e.Handled = true;
-					Invalidate();
+					Invalidate(InvalidationLevel.ONLY_MAIN_CANVAS);
 
 					if (selectedNodeConnection != null)
 						{
 						nodeSteuerung.Disconnect(selectedNodeConnection.startNode, selectedNodeConnection.endNode);
 						selectedNodeConnection = null;
 						e.Handled = true;
-						Invalidate();
+						Invalidate(InvalidationLevel.ONLY_MAIN_CANVAS);
 						}
 					}
 				break;
@@ -940,14 +1027,14 @@ namespace CityTrafficSimulator
 					{
 					nodeSteuerung.SplitNodeConnection(selectedNodeConnection);
 					selectedNodeConnection = null;
-					Invalidate();
+					Invalidate(InvalidationLevel.ONLY_MAIN_CANVAS);
 					}
 				break;
 			case Keys.Return:
 				if (selectedNodeConnection != null)
 					{
 					nodeSteuerung.FindLineChangePoints(selectedNodeConnection, 50, 32);
-					Invalidate();
+					Invalidate(InvalidationLevel.ONLY_MAIN_CANVAS);
 					}
 				break;
 
@@ -1002,7 +1089,7 @@ namespace CityTrafficSimulator
 					{
 					fromLineNodes.Add(ln);
 					}
-				Invalidate();
+				Invalidate(InvalidationLevel.ONLY_MAIN_CANVAS);
 				break;
 
 			case Keys.N:
@@ -1011,7 +1098,7 @@ namespace CityTrafficSimulator
 					{
 					toLineNodes.Add(ln);
 					}
-				Invalidate();
+				Invalidate(InvalidationLevel.ONLY_MAIN_CANVAS);
 				break;
 			#endregion
 
@@ -1071,7 +1158,7 @@ namespace CityTrafficSimulator
 
 			#endregion
 			case Keys.D:
-				drawDebugCheckBox.Checked = !drawDebugCheckBox.Checked;
+				
 				break;
 				}
 			}
@@ -1081,14 +1168,14 @@ namespace CityTrafficSimulator
 		#region Zeichnen
 		void DaGrid_Paint(object sender, PaintEventArgs e)
 			{
-			// Da splitContainer1.Panel1.OnScroll nicht alles mitbekommt, muss das eben die Paintmethode übernehmen
-			if (daGridAutoscrollPosition != splitContainer1.Panel1.AutoScrollPosition)
+			// Da pnlMainGrid.OnScroll nicht alles mitbekommt, muss das eben die Paintmethode übernehmen
+			if (daGridAutoscrollPosition != pnlMainGrid.AutoScrollPosition)
 				{
 				daGridZoomPosition = new Point(
-					(int)Math.Round((-splitContainer1.Panel1.AutoScrollPosition.X + splitContainer1.Panel1.Width / 2) * zoomMultipliers[zoomComboBox.SelectedIndex, 1]),
-					(int)Math.Round((-splitContainer1.Panel1.AutoScrollPosition.Y + splitContainer1.Panel1.Height / 2) * zoomMultipliers[zoomComboBox.SelectedIndex, 1]));
+					(int)Math.Round((-pnlMainGrid.AutoScrollPosition.X + pnlMainGrid.Width / 2) * zoomMultipliers[zoomComboBox.SelectedIndex, 1]),
+					(int)Math.Round((-pnlMainGrid.AutoScrollPosition.Y + pnlMainGrid.Height / 2) * zoomMultipliers[zoomComboBox.SelectedIndex, 1]));
 
-				daGridAutoscrollPosition = splitContainer1.Panel1.AutoScrollPosition;
+				daGridAutoscrollPosition = pnlMainGrid.AutoScrollPosition;
 
 				UpdateDaGridClippingRect();
 				UpdateThumbGridRect();
@@ -1187,49 +1274,31 @@ namespace CityTrafficSimulator
 
 
 				// Statusinfo zeichnen:
-				if (drawDebugCheckBox.Checked)
+				if (selectedVehicle != null && cbRenderVehiclesDebug.Checked)
 					{
-					e.Graphics.DrawString(
-						"#Intersections: " + nodeSteuerung.intersections.Count, new Font("Arial", 10),
-						new SolidBrush(Color.Black),
-						-splitContainer1.Panel1.AutoScrollPosition.X * zoomMultipliers[zoomComboBox.SelectedIndex, 1] + 8,
-						-splitContainer1.Panel1.AutoScrollPosition.Y * zoomMultipliers[zoomComboBox.SelectedIndex, 1] + 8);
-
-					if (selectedVehicle != null)
-						{
-						selectedVehicle.DrawDebugData(e.Graphics);
-						}
-
-					// Auto unter Mauszeiger finden
-					//IVehicle v = nodeSteuerung.GetVehicleAt(currentMousePosition);
-
-					/*if (v != null)
-						{
-						v.DrawDebugData(e.Graphics);
-						}*/
-
+					selectedVehicle.DrawDebugData(e.Graphics);
 					}
+
 				renderStopwatch.Stop();
 				e.Graphics.DrawString(
 					"thinking time: " + thinkStopwatch.ElapsedMilliseconds + "ms, possible thoughts per second: " + ((thinkStopwatch.ElapsedMilliseconds != 0) ? (1000 / thinkStopwatch.ElapsedMilliseconds).ToString() : "-"),
 					new Font("Arial", 10),
 					new SolidBrush(Color.Black),
-					-splitContainer1.Panel1.AutoScrollPosition.X * zoomMultipliers[zoomComboBox.SelectedIndex, 1] + 8,
-					-splitContainer1.Panel1.AutoScrollPosition.Y * zoomMultipliers[zoomComboBox.SelectedIndex, 1] + 40);
+					-pnlMainGrid.AutoScrollPosition.X * zoomMultipliers[zoomComboBox.SelectedIndex, 1] + 8,
+					-pnlMainGrid.AutoScrollPosition.Y * zoomMultipliers[zoomComboBox.SelectedIndex, 1] + 40);
 
 				e.Graphics.DrawString(
 					"rendering time: " + renderStopwatch.ElapsedMilliseconds + "ms, possible fps: " + ((renderStopwatch.ElapsedMilliseconds != 0) ? (1000 / renderStopwatch.ElapsedMilliseconds).ToString() : "-"),
 					new Font("Arial", 10),
 					new SolidBrush(Color.Black),
-					-splitContainer1.Panel1.AutoScrollPosition.X * zoomMultipliers[zoomComboBox.SelectedIndex, 1] + 8,
-					-splitContainer1.Panel1.AutoScrollPosition.Y * zoomMultipliers[zoomComboBox.SelectedIndex, 1] + 56);
+					-pnlMainGrid.AutoScrollPosition.X * zoomMultipliers[zoomComboBox.SelectedIndex, 1] + 8,
+					-pnlMainGrid.AutoScrollPosition.Y * zoomMultipliers[zoomComboBox.SelectedIndex, 1] + 56);
 
 				}
 			}
 
 		private void thumbGrid_Paint(object sender, PaintEventArgs e)
 			{
-			// TODO: Paint Methode entschlacken und outsourcen?
 			e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
 			e.Graphics.InterpolationMode = InterpolationMode.Bilinear;
 
@@ -1243,17 +1312,39 @@ namespace CityTrafficSimulator
 				{
 				nodeSteuerung.RenderNetwork(e.Graphics, renderOptionsThumbnail);
 
+				if (fromLineNodes.Count > 0 && toLineNodes.Count > 0)
+					{
+					Routing route = Routing.CalculateShortestConenction(fromLineNodes[0], toLineNodes, Vehicle.IVehicle.VehicleTypes.CAR);
+
+					using (Pen orangePen = new Pen(Color.Orange, 4 / zoom))
+						{
+						foreach (Routing.RouteSegment rs in route)
+							{
+							if (!rs.lineChangeNeeded)
+								{
+								NodeConnection nextNC = rs.startConnection;
+								e.Graphics.DrawBezier(orangePen, nextNC.lineSegment.p0, nextNC.lineSegment.p1, nextNC.lineSegment.p2, nextNC.lineSegment.p3);
+								}
+							else
+								{
+								e.Graphics.DrawLine(orangePen, rs.startConnection.startNode.position, rs.nextNode.position);
+								}
+							}
+						}
+
+					}
+
 				//to-/fromLineNode malen
 				foreach (LineNode ln in toLineNodes)
 					{
 					RectangleF foo = ln.positionRect;
-					foo.Inflate(24, 24);
+					foo.Inflate(4 / zoom, 4 / zoom);
 					e.Graphics.FillEllipse(new SolidBrush(Color.Red), foo);
 					}
 				foreach (LineNode ln in fromLineNodes)
 					{
 					RectangleF foo = ln.positionRect;
-					foo.Inflate(24, 24);
+					foo.Inflate(4 / zoom, 4 / zoom);
 					e.Graphics.FillEllipse(new SolidBrush(Color.Green), foo);
 					}
 
@@ -1273,8 +1364,8 @@ namespace CityTrafficSimulator
 				// daGridClippingRect aktualisieren
 				renderOptionsDaGrid.clippingRect.X = (int)Math.Floor(-daGridAutoscrollPosition.X * zoomMultipliers[zoomComboBox.SelectedIndex, 1]);
 				renderOptionsDaGrid.clippingRect.Y = (int)Math.Floor(-daGridAutoscrollPosition.Y * zoomMultipliers[zoomComboBox.SelectedIndex, 1]);
-				renderOptionsDaGrid.clippingRect.Width = (int)Math.Ceiling(splitContainer1.Panel1.ClientSize.Width * zoomMultipliers[zoomComboBox.SelectedIndex, 1]);
-				renderOptionsDaGrid.clippingRect.Height = (int)Math.Ceiling(splitContainer1.Panel1.ClientSize.Height * zoomMultipliers[zoomComboBox.SelectedIndex, 1]);
+				renderOptionsDaGrid.clippingRect.Width = (int)Math.Ceiling(pnlMainGrid.ClientSize.Width * zoomMultipliers[zoomComboBox.SelectedIndex, 1]);
+				renderOptionsDaGrid.clippingRect.Height = (int)Math.Ceiling(pnlMainGrid.ClientSize.Height * zoomMultipliers[zoomComboBox.SelectedIndex, 1]);
 				}
 			}
 
@@ -1291,19 +1382,17 @@ namespace CityTrafficSimulator
 				thumbGridWorldRect = new Rectangle(
 					(int)Math.Round(-daGridAutoscrollPosition.X * zoomMultipliers[zoomComboBox.SelectedIndex, 1]),
 					(int)Math.Round(-daGridAutoscrollPosition.Y * zoomMultipliers[zoomComboBox.SelectedIndex, 1]),
-					(int)Math.Round(splitContainer1.Panel1.ClientSize.Width * zoomMultipliers[zoomComboBox.SelectedIndex, 1]),
-					(int)Math.Round(splitContainer1.Panel1.ClientSize.Height * zoomMultipliers[zoomComboBox.SelectedIndex, 1]));
+					(int)Math.Round(pnlMainGrid.ClientSize.Width * zoomMultipliers[zoomComboBox.SelectedIndex, 1]),
+					(int)Math.Round(pnlMainGrid.ClientSize.Height * zoomMultipliers[zoomComboBox.SelectedIndex, 1]));
 
 				thumbGridClientRect = new Rectangle(
 					(int)Math.Round(-daGridAutoscrollPosition.X * zoom * zoomMultipliers[zoomComboBox.SelectedIndex, 1]),
 					(int)Math.Round(-daGridAutoscrollPosition.Y * zoom * zoomMultipliers[zoomComboBox.SelectedIndex, 1]),
-					(int)Math.Round(splitContainer1.Panel1.ClientSize.Width * zoom * zoomMultipliers[zoomComboBox.SelectedIndex, 1]),
-					(int)Math.Round(splitContainer1.Panel1.ClientSize.Height * zoom * zoomMultipliers[zoomComboBox.SelectedIndex, 1]));
+					(int)Math.Round(pnlMainGrid.ClientSize.Width * zoom * zoomMultipliers[zoomComboBox.SelectedIndex, 1]),
+					(int)Math.Round(pnlMainGrid.ClientSize.Height * zoom * zoomMultipliers[zoomComboBox.SelectedIndex, 1]));
 
-				if (tabControl1.SelectedTab == thumbTabPage)
-					{
-					thumbGrid.Invalidate();
-					}
+
+				thumbGrid.Invalidate();
 				}
 			}
 
@@ -1324,12 +1413,6 @@ namespace CityTrafficSimulator
 
 				if (sfd.ShowDialog() == DialogResult.OK)
 					{
-					List<Auftrag> fahraufträge = new List<Auftrag>();
-					foreach (Auftrag a in AufträgeCheckBox.Items)
-						{
-						fahraufträge.Add(a);
-						}
-
 					XmlSaver.SaveToFile(sfd.FileName, nodeSteuerung, timelineSteuerung, trafficVolumeSteuerung);
 					}
 				}
@@ -1348,35 +1431,16 @@ namespace CityTrafficSimulator
 					{
 					// erstma alles vorhandene löschen
 					selectedLineNodes.Clear();
-					AufträgeCheckBox.Items.Clear();
 					timelineSteuerung.Clear();
 
 					// Laden
 					List<Auftrag> fahrauftraege = XmlSaver.LoadFromFile(ofd.FileName, nodeSteuerung, timelineSteuerung, trafficVolumeSteuerung);
 
-					/*// Timeline mit den Ampeln füllen
-					// TODO: ist das nicht eigentlich Aufgabe der NodeSteuerung oder so?
-					foreach (LineNode ln in nodeSteuerung.nodes)
-						{
-						if (ln.tLight != null)
-							{
-							ln.tLight.parentGroup = unsortedGroup;
-							timelineSteuerung.AddEntry(ln.tLight);
-							}
-						}
-					*/
-					// Fahraufträge in Liste eintragen 
-					// TODO: sollte auch eleganter gelöst werden...
-					foreach (Auftrag a in fahrauftraege)
-						{
-						AufträgeCheckBox.Items.Add(a);
-						}
-
 					titleEdit.Text = nodeSteuerung.title;
 					infoEdit.Text = nodeSteuerung.infoText;
 
 					// neuzeichnen
-					Invalidate();
+					Invalidate(InvalidationLevel.ALL);
 
 					}
 				}
@@ -1403,33 +1467,9 @@ namespace CityTrafficSimulator
 
 			thinkStopwatch.Stop();
 
-			Invalidate();
+			Invalidate(InvalidationLevel.MAIN_CANVAS_AND_TIMLINE);
 			}
 
-		private void dockToGridcheckBox_CheckedChanged(object sender, EventArgs e)
-			{
-			dockToGrid = dockToGridcheckBox.Checked;
-			}
-
-		private void addCarButton_Click(object sender, EventArgs e)
-			{
-			// TODO / BUG:
-			//		Fahrzeuge auf Routen von Verkehrsaufträgen bauen beim Berechnen der Route
-			//		Müll (nicht genügend Connections oder Nullpointer auf dem route-Stack) wenn
-			//		sie über den "neue(s) ..." Button erstellt werden
-			if (fromLineNodes.Count > 0 && toLineNodes.Count > 0)
-				{
-				IVehicle.Physics p = new IVehicle.Physics((double)v0Edit.Value, 0, 0);
-				Car t = new Car(p);
-
-				nodeSteuerung.AddVehicle(t, fromLineNodes[rnd.Next(fromLineNodes.Count)], toLineNodes);
-				Invalidate();
-				}
-			}
-
-		private void carRemoveButton_Click(object sender, EventArgs e)
-			{
-			}
 		#endregion
 
 		private void timerOnCheckBox_CheckedChanged(object sender, EventArgs e)
@@ -1451,7 +1491,7 @@ namespace CityTrafficSimulator
 					backgroundImageEdit.Text = ofd.FileName;
 					backgroundImage = new Bitmap(backgroundImageEdit.Text);
 					UpdateBackgroundImage();
-					Invalidate();
+					Invalidate(InvalidationLevel.ONLY_MAIN_CANVAS);
 					}
 				}
 
@@ -1478,98 +1518,32 @@ namespace CityTrafficSimulator
 			return result;
 			}
 
-		private void NeuerAuftragButton_Click(object sender, EventArgs e)
-			{
-			if (fromLineNodes.Count > 0 && toLineNodes.Count > 0)
-				{
-				IVehicle.VehicleTypes type;
-				switch (vehicleTypeComboBox.SelectedIndex)
-					{
-					case 1:
-						type = IVehicle.VehicleTypes.BUS;
-						break;
-					case 2:
-						type = IVehicle.VehicleTypes.TRAM;
-						break;
-					default:
-						type = IVehicle.VehicleTypes.CAR;
-						break;
-					}
-
-				Auftrag auftragToAdd = new Auftrag(
-					type,
-					fromLineNodes, 
-					toLineNodes, 
-					(int)HäufigkeitSpinEdit.Value);
-				AufträgeCheckBox.Items.Add(auftragToAdd);
-				}
-			}
-
-		private void SetStartNodeButton_Click(object sender, EventArgs e)
-			{
-			fromLineNodes.Clear();
-			foreach (LineNode ln in selectedLineNodes)
-				{
-				fromLineNodes.Add(ln);
-				}
-			Invalidate();
-			}
-
-		private void SetEndNodeButton_Click(object sender, EventArgs e)
-			{
-			toLineNodes.Clear();
-			foreach (LineNode ln in selectedLineNodes)
-				{
-				toLineNodes.Add(ln);
-				}
-			Invalidate();
-			}
-
-		private void HäufigkeitSpinEdit_ValueChanged(object sender, EventArgs e)
-			{
-			if (AufträgeCheckBox.SelectedItem != null)
-				{
-				Auftrag auftragToModify = AufträgeCheckBox.SelectedItem as Auftrag;
-				if (auftragToModify != null)
-					{
-					if (true)
-						{
-						auftragToModify.trafficDensity = (int)HäufigkeitSpinEdit.Value;
-						AufträgeCheckBox.Invalidate();
-						}
-					}
-				}
-
-			}
-
-		private void AuftragLöschenButton_Click(object sender, EventArgs e)
-			{
-			if (AufträgeCheckBox.SelectedItem != null)
-				{
-				AufträgeCheckBox.Items.RemoveAt(AufträgeCheckBox.SelectedIndex);
-				}
-			}
-
 		private void Form1_Load(object sender, EventArgs e)
 			{
-			vehicleTypeComboBox.SelectedIndex = 0;
 			timelineSteuerung.AddGroup(unsortedGroup);
 			}
 
 		/// <summary>
-		/// Override der Invalidate() Methode, die alles neu zeichnet
+		/// Erweiterung der Invalidate() Methode, die alles neu zeichnet
 		/// </summary>
-		new public void Invalidate()
+		public void Invalidate(InvalidationLevel il)
 			{
 			base.Invalidate();
-			DaGrid.Invalidate();
-			timeline.Invalidate();
-			thumbGrid.Invalidate();
-			}
-
-		private void timeline_MouseClick(object sender, MouseEventArgs e)
-			{
-
+			switch (il)
+				{
+				case InvalidationLevel.ALL:
+					thumbGrid.Invalidate();
+					DaGrid.Invalidate();
+					break;
+				case InvalidationLevel.MAIN_CANVAS_AND_TIMLINE:
+					DaGrid.Invalidate();
+					break;
+				case InvalidationLevel.ONLY_MAIN_CANVAS:
+					DaGrid.Invalidate();
+					break;
+				default:
+					break;
+				}
 			}
 
 		private void nodeConnectionPrioritySpinEdit_ValueChanged(object sender, EventArgs e)
@@ -1577,7 +1551,7 @@ namespace CityTrafficSimulator
 			if (selectedNodeConnection != null)
 				{
 				selectedNodeConnection.priority = (int)nodeConnectionPrioritySpinEdit.Value;
-				Invalidate();
+				Invalidate(InvalidationLevel.ONLY_MAIN_CANVAS);
 				}
 			}
 
@@ -1597,17 +1571,21 @@ namespace CityTrafficSimulator
 
 				nc.RemoveAllVehiclesInRemoveList();
 				}
+			foreach (Intersection i in nodeSteuerung.intersections)
+				{
+				i.UnregisterAllVehicles();
+				}
 			}
 
 		private void zoomComboBox_SelectedIndexChanged(object sender, EventArgs e)
 			{
 			// neue Autoscrollposition berechnen und setzen
-			splitContainer1.Panel1.ScrollControlIntoView(DaGrid);
-			splitContainer1.Panel1.AutoScrollPosition = new Point(
-/*				(int)Math.Round((daGridAutoscrollPosition.X - splitContainer1.Panel1.Width/2) * zoomMultipliers[zoomComboBox.SelectedIndex, 0]), 
-				(int)Math.Round((daGridAutoscrollPosition.Y - splitContainer1.Panel1.Height/2) * zoomMultipliers[zoomComboBox.SelectedIndex, 0]));*/
-				(int)Math.Round((daGridZoomPosition.X * zoomMultipliers[zoomComboBox.SelectedIndex, 0]) - (splitContainer1.Panel1.Width / 2)),
-				(int)Math.Round((daGridZoomPosition.Y * zoomMultipliers[zoomComboBox.SelectedIndex, 0]) - (splitContainer1.Panel1.Height / 2)));
+			pnlMainGrid.ScrollControlIntoView(DaGrid);
+			pnlMainGrid.AutoScrollPosition = new Point(
+/*				(int)Math.Round((daGridAutoscrollPosition.X - pnlMainGrid.Width/2) * zoomMultipliers[zoomComboBox.SelectedIndex, 0]), 
+				(int)Math.Round((daGridAutoscrollPosition.Y - pnlMainGrid.Height/2) * zoomMultipliers[zoomComboBox.SelectedIndex, 0]));*/
+				(int)Math.Round((daGridZoomPosition.X * zoomMultipliers[zoomComboBox.SelectedIndex, 0]) - (pnlMainGrid.Width / 2)),
+				(int)Math.Round((daGridZoomPosition.Y * zoomMultipliers[zoomComboBox.SelectedIndex, 0]) - (pnlMainGrid.Height / 2)));
 			
 			// Bitmap umrechnen:
 			UpdateBackgroundImage();
@@ -1615,41 +1593,6 @@ namespace CityTrafficSimulator
 			UpdateDaGridClippingRect();
 			DaGrid.Invalidate();
 			UpdateThumbGridRect();
-			}
-
-		private void tabControl1_SelectedIndexChanged(object sender, EventArgs e)
-			{
-
-			}
-
-		private void AufträgeCheckBox_SelectedIndexChanged(object sender, EventArgs e)
-			{
-			if (AufträgeCheckBox.SelectedItem != null)
-				{
-				Auftrag auftragToModify = AufträgeCheckBox.SelectedItem as Auftrag;
-				if (auftragToModify != null)
-					{
-					fromLineNodes.Clear();
-					toLineNodes.Clear();
-
-					foreach (LineNode ln in auftragToModify.startNodes)
-						fromLineNodes.Add(ln);
-					foreach (LineNode ln in auftragToModify.endNodes)
-						toLineNodes.Add(ln);
-
-					HäufigkeitSpinEdit.Value = auftragToModify.trafficDensity;
-					vehicleTypeComboBox.SelectedIndex = 
-						(auftragToModify.vehicleType == IVehicle.VehicleTypes.CAR ? 0 
-						: (auftragToModify.vehicleType == IVehicle.VehicleTypes.BUS ? 1 : 2));
-
-					DaGrid.Invalidate();
-					}
-				}
-			}
-
-		private void drawDebugCheckBox_CheckedChanged(object sender, EventArgs e)
-			{
-			DaGrid.Invalidate();
 			}
 
 
@@ -1674,7 +1617,7 @@ namespace CityTrafficSimulator
 
 		private void DaGrid_Leave(object sender, EventArgs e)
 			{
-			daGridAutoscrollPosition = splitContainer1.Panel1.AutoScrollPosition;
+			daGridAutoscrollPosition = pnlMainGrid.AutoScrollPosition;
 			}
 
 		#region AutoScroll Bug von DaGrid und timeline umgehen
@@ -1697,29 +1640,14 @@ namespace CityTrafficSimulator
 			{
 			if (howToDrag != DragNDrop.MOVE_THUMB_RECT)
 				{
-				Point p = splitContainer1.Panel1.AutoScrollPosition;
+				Point p = pnlMainGrid.AutoScrollPosition;
 				AutoScrollPositionDelegate del = new AutoScrollPositionDelegate(SetAutoScrollPosition);
-				Object[] args = { splitContainer1.Panel1, p };
+				Object[] args = { pnlMainGrid, p };
 				BeginInvoke(del, args);
 				}
 			}
 
-
-		private void timeline_Enter(object sender, EventArgs e)
-			{
-			Point p = timelinePanel.AutoScrollPosition;
-			AutoScrollPositionDelegate del = new AutoScrollPositionDelegate(SetAutoScrollPosition);
-			Object[] args = { timelinePanel, p };
-			BeginInvoke(del, args);
-			}
-
 		#endregion
-
-		private void timeline_MouseLeave(object sender, EventArgs e)
-			{
-			this.Cursor = Cursors.Default;
-			statusLabel.Text = "";
-			}
 
 		private void thumbGrid_Resize(object sender, EventArgs e)
 			{
@@ -1732,7 +1660,7 @@ namespace CityTrafficSimulator
 			if (selectedNodeConnection != null)
 				{
 				selectedNodeConnection.carsAllowed = carsAllowedCheckBox.Checked;
-				Invalidate();
+				Invalidate(InvalidationLevel.ONLY_MAIN_CANVAS);
 				}
 			}
 
@@ -1741,7 +1669,7 @@ namespace CityTrafficSimulator
 			if (selectedNodeConnection != null)
 				{
 				selectedNodeConnection.busAllowed = busAllowedCheckBox.Checked;
-				Invalidate();
+				Invalidate(InvalidationLevel.ONLY_MAIN_CANVAS);
 				}
 			}
 
@@ -1750,89 +1678,8 @@ namespace CityTrafficSimulator
 			if (selectedNodeConnection != null)
 				{
 				selectedNodeConnection.tramAllowed = tramAllowedCheckBox.Checked;
-				Invalidate();
+				Invalidate(InvalidationLevel.ONLY_MAIN_CANVAS);
 				}
-			}
-
-		private void addTramButton_Click(object sender, EventArgs e)
-			{
-			// TODO / BUG:
-			//		Fahrzeuge auf Routen von Verkehrsaufträgen bauen beim Berechnen der Route
-			//		Müll (nicht genügend Connections oder Nullpointer auf dem route-Stack) wenn
-			//		sie über den "neue(s) ..." Button erstellt werden
-			if (fromLineNodes.Count > 0 && toLineNodes.Count > 0)
-				{
-				IVehicle.Physics p = new IVehicle.Physics((double)v0Edit.Value, 0, 0);
-				Tram t = new Tram(p);
-
-				nodeSteuerung.AddVehicle(t, fromLineNodes[rnd.Next(fromLineNodes.Count)], toLineNodes);
-				Invalidate();
-				}
-			}
-
-		private void vehicleTypeComboBox_SelectedIndexChanged(object sender, EventArgs e)
-			{
-			if (AufträgeCheckBox.SelectedItem != null)
-				{
-				Auftrag a = AufträgeCheckBox.SelectedItem as Auftrag;
-				if (a != null)
-					{
-					a.vehicleType = (vehicleTypeComboBox.SelectedIndex == 0 
-						? IVehicle.VehicleTypes.CAR 
-						: (vehicleTypeComboBox.SelectedIndex == 1 ? IVehicle.VehicleTypes.BUS : IVehicle.VehicleTypes.TRAM));
-					Invalidate();
-					}
-				}
-			}
-
-		private void addBusButton_Click(object sender, EventArgs e)
-			{
-			// TODO / BUG:
-			//		Fahrzeuge auf Routen von Verkehrsaufträgen bauen beim Berechnen der Route
-			//		Müll (nicht genügend Connections oder Nullpointer auf dem route-Stack) wenn
-			//		sie über den "neue(s) ..." Button erstellt werden
-			if (fromLineNodes.Count > 0 && toLineNodes.Count > 0)
-				{
-				IVehicle.Physics p = new IVehicle.Physics((double)v0Edit.Value, 0, 0);
-				Bus t = new Bus(p);
-
-				nodeSteuerung.AddVehicle(t, fromLineNodes[rnd.Next(fromLineNodes.Count)], toLineNodes);
-				Invalidate();
-				}
-			}
-
-		private void button3_Click(object sender, EventArgs e)
-			{
-			UpdateFromToNodeInSelectedAuftrag();
-			}
-
-		private void UpdateFromToNodeInSelectedAuftrag() 
-			{
-			if (AufträgeCheckBox.SelectedItem != null)
-				{
-				Auftrag auftragToModify = AufträgeCheckBox.SelectedItem as Auftrag;
-				if (auftragToModify != null)
-					{
-					auftragToModify.startNodes.Clear();
-					auftragToModify.endNodes.Clear();
-
-					foreach (LineNode ln in fromLineNodes)
-						{
-						auftragToModify.startNodes.Add(ln);
-						}
-					foreach (LineNode ln in toLineNodes)
-						{
-						auftragToModify.endNodes.Add(ln);
-						}
-
-					AufträgeCheckBox.Invalidate();
-					}
-				}
-			}
-
-		private void drawNodeConnectionsCheckBox_CheckedChanged(object sender, EventArgs e)
-			{
-			Invalidate();
 			}
 
 		private void findLineChangePointsButton_Click(object sender, EventArgs e)
@@ -1848,14 +1695,9 @@ namespace CityTrafficSimulator
 			DaGrid.Invalidate();
 			}
 
-		private void truckRatioSpinEdit_ValueChanged(object sender, EventArgs e)
-			{
-			Auftrag.truckRatio = (int)truckRatioSpinEdit.Value;
-			}
-
 		private void visualizationCheckBox_CheckedChanged(object sender, EventArgs e)
 			{
-			nodeSteuerung.setVisualizationInNodeConnections(visualizationCheckBox.Checked);
+			nodeSteuerung.setVisualizationInNodeConnections(cbRenderStatistics.Checked);
 			DaGrid.Invalidate();
 			}
 
@@ -1863,11 +1705,6 @@ namespace CityTrafficSimulator
 			{
 			UpdateDaGridClippingRect();
 			DaGrid.Invalidate();
-			}
-
-		private void numericUpDown1_ValueChanged(object sender, EventArgs e)
-			{
-			Auftrag.trafficDensityMultiplier = trafficDensityMultiplierSpinEdit.Value;
 			}
 
 		private void removeLineChangePoints_Click(object sender, EventArgs e)
@@ -1922,7 +1759,7 @@ namespace CityTrafficSimulator
 					{
 					nodeSteuerung.RemoveLineChangePoints(m_selectedNodeConnection, false, true);
 					}
-				Invalidate();
+				Invalidate(InvalidationLevel.ONLY_MAIN_CANVAS);
 				}
 
 			}
@@ -1940,7 +1777,7 @@ namespace CityTrafficSimulator
 					{
 					nodeSteuerung.RemoveLineChangePoints(m_selectedNodeConnection, true, false);
 					}
-				Invalidate();
+				Invalidate(InvalidationLevel.ONLY_MAIN_CANVAS);
 				}
 			}
 
@@ -1969,7 +1806,7 @@ namespace CityTrafficSimulator
 						tl.AddAssignedLineNode(ln);
 						}
 
-					timeline.selectedEntry = tl;
+					trafficLightForm.selectedEntry = tl;
 					}
 				// oder die der LSA zugeordneten Nodes auswählen
 				else
@@ -1992,58 +1829,12 @@ namespace CityTrafficSimulator
 							}
 						}
 
-					timeline.selectedEntry = null;
+					trafficLightForm.selectedEntry = null;
 					}
 				}
 
 			// neu zeichnen lohnt sich immer
-			Invalidate();
-			}
-
-		private void timeline_TimelineMoved(object sender, EventArgs e)
-			{
-			}
-
-		private void timeline_SelectionChanged(object sender, TimelineControl.SelectionChangedEventArgs e)
-			{
-			if (e.selectedEntry != null)
-				{
-				TrafficLight tl = e.selectedEntry as TrafficLight;
-				m_selectedLineNodes.Clear();
-				m_selectedLineNodes.AddRange(tl.assignedNodes);
-
-				DaGrid.Invalidate();
-				}
-			}
-
-		private void AufträgeCheckBox_KeyDown(object sender, KeyEventArgs e)
-			{
-			if (e.KeyCode == Keys.Delete && AufträgeCheckBox.SelectedItem != null)
-				{
-				AuftragLöschenButton_Click(this, new EventArgs());
-				}
-			}
-
-		private void timeline_EventChanged(object sender, TimelineControl.EventChangedEventArgs e)
-			{
-			switch (e.dragAction)
-				{
-				case TimelineControl.DragNDrop.MOVE_EVENT:
-					statusLabel.Text = "verschiebe Event, Start: " + e.handeledEvent.eventTime + "s, Ende: " + (e.handeledEvent.eventTime + e.handeledEvent.eventLength) + "s";
-					changedEvent = true;
-					break;
-				case TimelineControl.DragNDrop.MOVE_EVENT_START:
-					statusLabel.Text = "verschiebe Event-Start: " + e.handeledEvent.eventTime + "s";
-					changedEvent = true;
-					break;
-				case TimelineControl.DragNDrop.MOVE_EVENT_END:
-					statusLabel.Text = "verschiebe Event-Ende: " + (e.handeledEvent.eventTime + e.handeledEvent.eventLength) + "s";
-					changedEvent = true;
-					break;
-				default:
-					break;
-				}
-
+			Invalidate(InvalidationLevel.MAIN_CANVAS_AND_TIMLINE);
 			}
 
 		private void backgroundImageScalingSpinEdit_ValueChanged(object sender, EventArgs e)
@@ -2087,10 +1878,10 @@ namespace CityTrafficSimulator
 						}
 					}
 
-				timeline.selectedEntry = null;
+				trafficLightForm.selectedEntry = null;
 				}
 
-			Invalidate();
+			Invalidate(InvalidationLevel.MAIN_CANVAS_AND_TIMLINE);
 			}
 
 		private void showEditorButton_Click(object sender, EventArgs e)
@@ -2103,6 +1894,53 @@ namespace CityTrafficSimulator
 			trafficLightForm.BringToFront();
 			}
 
+		private void cbRenderLineNodes_CheckedChanged(object sender, EventArgs e)
+			{
+			renderOptionsDaGrid.renderLineNodes = cbRenderLineNodes.Checked;
+			DaGrid.Invalidate();
+			}
+
+		private void cbRenderConnections_CheckedChanged(object sender, EventArgs e)
+			{
+			renderOptionsDaGrid.renderNodeConnections = cbRenderConnections.Checked;
+			DaGrid.Invalidate();
+			}
+
+		private void cbRenderVehicles_CheckedChanged(object sender, EventArgs e)
+			{
+			renderOptionsDaGrid.renderVehicles = cbRenderVehicles.Checked;
+			DaGrid.Invalidate();
+			}
+
+		private void cbRenderLineNodesDebug_CheckedChanged(object sender, EventArgs e)
+			{
+			renderOptionsDaGrid.renderLineNodeDebugData = cbRenderLineNodesDebug.Checked;
+			DaGrid.Invalidate();
+			}
+
+		private void cbRenderConnectionsDebug_CheckedChanged(object sender, EventArgs e)
+			{
+			renderOptionsDaGrid.renderNodeConnectionDebugData = cbRenderConnectionsDebug.Checked;
+			DaGrid.Invalidate();
+			}
+
+		private void cbRenderVehiclesDebug_CheckedChanged(object sender, EventArgs e)
+			{
+			renderOptionsDaGrid.renderVehicleDebugData = cbRenderVehiclesDebug.Checked;
+			DaGrid.Invalidate();
+			}
+
+		private void cbRenderIntersections_CheckedChanged(object sender, EventArgs e)
+			{
+			renderOptionsDaGrid.renderIntersections = cbRenderIntersections.Checked;
+			DaGrid.Invalidate();
+			}
+
+		private void cbRenderLineChangePoints_CheckedChanged(object sender, EventArgs e)
+			{
+			renderOptionsDaGrid.renderLineChangePoints = cbRenderLineChangePoints.Checked;
+			DaGrid.Invalidate();
+			}
 
 		}
     }

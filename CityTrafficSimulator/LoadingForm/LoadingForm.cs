@@ -14,6 +14,16 @@ namespace CityTrafficSimulator.LoadingForm
 	public partial class LoadingForm : Form
 		{
 		/// <summary>
+		/// Log messages
+		/// </summary>
+		private StringBuilder logMessages = new StringBuilder();
+
+		/// <summary>
+		/// Number of logged messages
+		/// </summary>
+		private int numLogs = 0;
+
+		/// <summary>
 		/// Standardkonstruktor
 		/// </summary>
 		public LoadingForm()
@@ -92,6 +102,27 @@ namespace CityTrafficSimulator.LoadingForm
 			{
 			lowerProgress.PerformStep();
 			lowerProgress.Refresh();
+			}
+
+		/// <summary>
+		/// Append the given message to the log.
+		/// </summary>
+		/// <param name="message">message to log</param>
+		public void Log(string message)
+			{
+			logMessages.AppendLine(message);
+			++numLogs;
+			}
+
+		/// <summary>
+		/// Shows a dialog with all logged messages
+		/// </summary>
+		public void ShowLog()
+			{
+			if (numLogs > 0)
+				{
+				MessageBox.Show(numLogs.ToString() + " error(s) occured:\n" + logMessages.ToString());
+				}
 			}
 
 		}

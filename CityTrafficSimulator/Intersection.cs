@@ -423,6 +423,14 @@ namespace CityTrafficSimulator
 				}
 			}
 
+		/// <summary>
+		/// Unregisters all vehicles from this intersection.
+		/// </summary>
+		public void UnregisterAllVehicles()
+			{
+			aCrossingVehicles.Clear();
+			bCrossingVehicles.Clear();
+			}
 
 		/// <summary>
 		/// Calculates all interfering vehicles from registered vehicles.

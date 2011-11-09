@@ -30,6 +30,16 @@ namespace CityTrafficSimulator.Timeline
 		private TimelineSteuerung steuerung;
 
 		/// <summary>
+		/// selected entry in timeline control
+		/// </summary>
+		public TimelineEntry selectedEntry
+			{
+			get { return timelineControl.selectedEntry; }
+			set { timelineControl.selectedEntry = value; }
+			}
+
+
+		/// <summary>
 		/// Standardkonstruktor
 		/// </summary>
 		/// <param name="steuerung">TimelineSteuerung die die Informationen zur Anzeige enthält</param>
@@ -37,6 +47,7 @@ namespace CityTrafficSimulator.Timeline
 			{
 			this.steuerung = steuerung;
 			InitializeComponent();
+			this.splitContainer1.Panel2MinSize = 220;
 			timelineControl.steuerung = steuerung;
 			steuerung.GroupsChanged += new TimelineSteuerung.GroupsChangedEventHandler(steuerung_GroupsChanged);
 			steuerung.MaxTimeChanged += new TimelineSteuerung.MaxTimeChangedEventHandler(steuerung_MaxTimeChanged);
@@ -61,6 +72,7 @@ namespace CityTrafficSimulator.Timeline
 					groupComboBox.SelectedItem = timelineControl.selectedGroup;
 					}
 				}
+			OnSelectedEntryChanged(new SelectedEntryChangedEventArgs());
 			isNotified = false;
 			}
 
@@ -240,5 +252,47 @@ namespace CityTrafficSimulator.Timeline
 			if (! isNotified)
 				steuerung.maxTime = (double)cycleTimeSpinEdit.Value;
 			}
+
+		#region SelectedEntryChanged event
+
+		/// <summary>
+		/// EventArgs for a SelectedEntryChanged event
+		/// </summary>
+		public class SelectedEntryChangedEventArgs : EventArgs
+			{
+			/// <summary>
+			/// Creates new SelectedEntryChangedEventArgs
+			/// </summary>
+			public SelectedEntryChangedEventArgs()
+				{
+				}
+			}
+
+		/// <summary>
+		/// Delegate for the SelectedEntryChanged-EventHandler, which is called when the selected TimelineEntry of the TimelineControl has changed
+		/// </summary>
+		/// <param name="sender">Sneder of the event</param>
+		/// <param name="e">Event parameter</param>
+		public delegate void SelectedEntryChangedEventHandler(object sender, SelectedEntryChangedEventArgs e);
+
+		/// <summary>
+		/// The SelectedEntryChanged event occurs when the selected TimelineEntry of the TimelineControl has changed
+		/// </summary>
+		public event SelectedEntryChangedEventHandler SelectedEntryChanged;
+
+		/// <summary>
+		/// Helper method to initiate the SelectedEntryChanged event
+		/// </summary>
+		/// <param name="e">Event parameters</param>
+		protected void OnSelectedEntryChanged(SelectedEntryChangedEventArgs e)
+			{
+			if (SelectedEntryChanged != null)
+				{
+				SelectedEntryChanged(this, e);
+				}
+			}
+
+		#endregion
+
 		}
 	}

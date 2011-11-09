@@ -73,14 +73,6 @@ namespace CityTrafficSimulator.Verkehr
 			renderOptions.renderVehicleDebugData = false;
 			}
 
-		/// <summary>
-		/// Invalidates the thumbnail rendering
-		/// </summary>
-		public void InvalidateThumbGrid()
-			{
-			thumbGrid.Invalidate();
-			}
-
 		private void m_steuerung_GlobalTrafficMultiplierChanged(object sender, VerkehrSteuerung.GlobalTrafficMultiplierChangedEventArgs e)
 			{
 			if (!ignoreUpdateEvent)
@@ -119,16 +111,18 @@ namespace CityTrafficSimulator.Verkehr
 			label2.Location = new System.Drawing.Point(lbDestinationNodes.Location.X, 9);
 
 			lblStartTitle.Location = new System.Drawing.Point(lbStartNodes.Size.Width + lbStartNodes.Location.X - 200 , lbStartNodes.Size.Height + 32 + 3);
-			btnSetStartTitle.Location = new System.Drawing.Point(lbStartNodes.Size.Width + lbStartNodes.Location.X - 40, lbStartNodes.Size.Height + 32 - 1);
 			editStartNodeTitle.Location = new System.Drawing.Point(lbStartNodes.Size.Width + lbStartNodes.Location.X - 166, lbStartNodes.Size.Height + 32);
-			btnAddStartNode.Location = new System.Drawing.Point(lbStartNodes.Size.Width + lbStartNodes.Location.X - 85 - 80, lbStartNodes.Size.Height + 56);
-			btnRemoveStartNode.Location = new System.Drawing.Point(lbStartNodes.Size.Width + lbStartNodes.Location.X - 80, lbStartNodes.Size.Height + 56);
+			btnSetStartTitle.Location = new System.Drawing.Point(lbStartNodes.Size.Width + lbStartNodes.Location.X - 40, lbStartNodes.Size.Height + 32 - 1);
+			btnAddStartNode.Location = new System.Drawing.Point(lbStartNodes.Size.Width + lbStartNodes.Location.X - 65 - 65 - 60, lbStartNodes.Size.Height + 56);
+			btnUpdateStartNodes.Location = new System.Drawing.Point(lbStartNodes.Size.Width + lbStartNodes.Location.X - 65 - 60, lbStartNodes.Size.Height + 56);
+			btnRemoveStartNode.Location = new System.Drawing.Point(lbStartNodes.Size.Width + lbStartNodes.Location.X - 60, lbStartNodes.Size.Height + 56);
 
 			lblDestinationTitle.Location = new System.Drawing.Point(lbDestinationNodes.Size.Width + lbDestinationNodes.Location.X - 200, lbDestinationNodes.Size.Height + 32 + 3);
-			btnSetDestinationTitle.Location = new System.Drawing.Point(lbDestinationNodes.Size.Width + lbDestinationNodes.Location.X - 40, lbDestinationNodes.Size.Height + 32 - 1);
 			editDestinationNodeTitle.Location = new System.Drawing.Point(lbDestinationNodes.Size.Width + lbDestinationNodes.Location.X - 166, lbDestinationNodes.Size.Height + 32);
-			btnAddDestinationNode.Location = new System.Drawing.Point(lbDestinationNodes.Size.Width + lbDestinationNodes.Location.X - 85 - 80, lbDestinationNodes.Size.Height + 56);
-			btnRemoveDestinationNode.Location = new System.Drawing.Point(lbDestinationNodes.Size.Width + lbDestinationNodes.Location.X - 80, lbDestinationNodes.Size.Height + 56);
+			btnSetDestinationTitle.Location = new System.Drawing.Point(lbDestinationNodes.Size.Width + lbDestinationNodes.Location.X - 40, lbDestinationNodes.Size.Height + 32 - 1);
+			btnAddDestinationNode.Location = new System.Drawing.Point(lbDestinationNodes.Size.Width + lbDestinationNodes.Location.X - 65 - 65 - 60, lbDestinationNodes.Size.Height + 56);
+			btnUpdateDestinationNodes.Location = new System.Drawing.Point(lbDestinationNodes.Size.Width + lbDestinationNodes.Location.X - 65 - 60, lbDestinationNodes.Size.Height + 56);
+			btnRemoveDestinationNode.Location = new System.Drawing.Point(lbDestinationNodes.Size.Width + lbDestinationNodes.Location.X - 60, lbDestinationNodes.Size.Height + 56);
 			}
 
 		/// <summary>
@@ -257,9 +251,9 @@ namespace CityTrafficSimulator.Verkehr
 			if (bon != null)
 				{
 				editStartNodeTitle.Text = bon.title;
+				m_mainForm.fromLineNodes = bon.nodes;
 				}
 			GetTrafficVolume();
-			InvalidateThumbGrid();
 			}
 
 		private void lbDestinationNodes_SelectedIndexChanged(object sender, EventArgs e)
@@ -268,9 +262,9 @@ namespace CityTrafficSimulator.Verkehr
 			if (bon != null)
 				{
 				editDestinationNodeTitle.Text = bon.title;
+				m_mainForm.toLineNodes = bon.nodes;
 				} 
 			GetTrafficVolume();
-			InvalidateThumbGrid();
 			}
 
 		private void spinGlobalTrafficVolumeMultiplier_ValueChanged(object sender, EventArgs e)
@@ -280,62 +274,24 @@ namespace CityTrafficSimulator.Verkehr
 			ignoreUpdateEvent = false;
 			}
 
-		private void thumbGrid_Paint(object sender, PaintEventArgs e)
+		private void btnUpdateDestinationNodes_Click(object sender, EventArgs e)
 			{
-			e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
-			e.Graphics.InterpolationMode = InterpolationMode.Bilinear;
-
-			// calculate zoom factor
-			Vector2 bounds = m_nodeController.GetBounds();
-			bounds *= 1.05;
-			float zoom = (bounds.X == 0 && bounds.Y == 0) ? 1 : (float)Math.Min(thumbGrid.Size.Width / bounds.X, thumbGrid.Size.Height / bounds.Y);
-			e.Graphics.Transform = new Matrix(zoom, 0, 0, zoom, 0, 0);
-
-			// render network
-			m_nodeController.RenderNetwork(e.Graphics, renderOptions);
-
-			// render routing details
-			BunchOfNodes start = lbStartNodes.SelectedItem as BunchOfNodes;
-			BunchOfNodes destination = lbDestinationNodes.SelectedItem as BunchOfNodes;
-			if (start != null && destination != null)
+			if (m_mainForm.selectedLineNodes.Count > 0 && lbDestinationNodes.SelectedIndex > -1)
 				{
-				// render shortest connection if one exists
-				if (start.nodes.Count > 0)
-					{
-					Routing route = Routing.CalculateShortestConenction(start.nodes[0], destination.nodes, Vehicle.IVehicle.VehicleTypes.CAR);
-
-					using (Pen orangePen = new Pen(Color.Orange, 4/zoom))
-						{
-						foreach (Routing.RouteSegment rs in route)
-							{
-							if (!rs.lineChangeNeeded)
-								{
-								NodeConnection nextNC = rs.startConnection;
-								e.Graphics.DrawBezier(orangePen, nextNC.lineSegment.p0, nextNC.lineSegment.p1, nextNC.lineSegment.p2, nextNC.lineSegment.p3);
-								}
-							else
-								{
-								e.Graphics.DrawLine(orangePen, rs.startConnection.startNode.position, rs.nextNode.position);
-								}
-							}
-						}
-					}
-	
-				// render start- / destination nodes
-				foreach (LineNode ln in start.nodes)
-					{
-					RectangleF foo = ln.positionRect;
-					foo.Inflate(4 / zoom, 4 / zoom);
-					e.Graphics.FillEllipse(new SolidBrush(Color.Green), foo);
-					}
-				foreach (LineNode ln in destination.nodes)
-					{
-					RectangleF foo = ln.positionRect;
-					foo.Inflate(4 / zoom, 4 / zoom);
-					e.Graphics.FillEllipse(new SolidBrush(Color.Red), foo);
-					}
+				int tmp = lbDestinationNodes.SelectedIndex;
+				m_steuerung.UpdateDestinationPointNodes(tmp, m_mainForm.selectedLineNodes);
+				lbDestinationNodes.SelectedIndex = tmp;
 				}
+			}
 
+		private void btnUpdateStartNodes_Click(object sender, EventArgs e)
+			{
+			if (m_mainForm.selectedLineNodes.Count > 0 && lbStartNodes.SelectedIndex > -1)
+				{
+				int tmp = lbStartNodes.SelectedIndex;
+				m_steuerung.UpdateStartPointNodes(tmp, m_mainForm.selectedLineNodes);
+				lbStartNodes.SelectedIndex = tmp;
+				}
 			}
 		}
 	}
