@@ -26,6 +26,8 @@ using System.Windows.Forms;
 using System.Xml;
 using System.Xml.Serialization;
 
+using CityTrafficSimulator.Vehicle;
+
 namespace CityTrafficSimulator.Verkehr
 	{
 	/// <summary>
@@ -34,6 +36,11 @@ namespace CityTrafficSimulator.Verkehr
 	public class VerkehrSteuerung : ITickable
 		{
 		#region Klassenmember inklusive Modifikationsmethoden
+
+		/// <summary>
+		/// Random number generator
+		/// </summary>
+		private static Random rnd = new Random();
 
 		#region Startpunkte
 
@@ -215,6 +222,64 @@ namespace CityTrafficSimulator.Verkehr
 			get { return m_globalTrafficMultiplier; }
 			set { m_globalTrafficMultiplier = value; OnGlobalTrafficMultiplierChanged(new GlobalTrafficMultiplierChangedEventArgs()); }
 			}
+
+		/// <summary>
+		/// Target velocity for cars
+		/// </summary>
+		private double m_carTargetVelocity = 36;
+		/// <summary>
+		/// Target velocity for cars
+		/// </summary>
+		public double carTargetVelocity
+			{
+			get { return m_carTargetVelocity; }
+			set { m_carTargetVelocity = value; OnCarTargetVelocityChanged(new CarTargetVelocityChangedEventArgs()); }
+			}
+
+		/// <summary>
+		/// Target velocity for trucks
+		/// </summary>
+		private double m_truckTargetVelocity = 23;
+		/// <summary>
+		/// Target velocity for trucks
+		/// </summary>
+		public double truckTargetVelocity
+			{
+			get { return m_truckTargetVelocity; }
+			set { m_truckTargetVelocity = value; OnTruckTargetVelocityChanged(new TruckTargetVelocityChangedEventArgs()); }
+			}
+
+		/// <summary>
+		/// Target velocity for busses
+		/// </summary>
+		private double m_busTargetVelocity = 23;
+		/// <summary>
+		/// Target velocity for busses
+		/// </summary>
+		public double busTargetVelocity
+			{
+			get { return m_busTargetVelocity; }
+			set { m_busTargetVelocity = value; OnBusTargetVelocityChanged(new BusTargetVelocityChangedEventArgs()); }
+			}
+
+		/// <summary>
+		/// Target velocity for trams
+		/// </summary>
+		private double m_tramTargetVelocity = 23;
+		/// <summary>
+		/// Target velocity for trams
+		/// </summary>
+		public double tramTargetVelocity
+			{
+			get { return m_tramTargetVelocity; }
+			set { m_tramTargetVelocity = value; OnTramTargetVelocityChanged(new TramTargetVelocityChangedEventArgs()); }
+			}
+
+
+		/// <summary>
+		/// List of vehicles to spawn
+		/// </summary>
+		private List<TrafficVolume.VehicleSpawnedEventArgs> vehiclesToSpawn = new List<TrafficVolume.VehicleSpawnedEventArgs>();
 		
 		#endregion
 
@@ -241,6 +306,7 @@ namespace CityTrafficSimulator.Verkehr
 				}
 
 			TrafficVolume newTV = new TrafficVolume(start, destination);
+			newTV.VehicleSpawned += new TrafficVolume.VehicleSpawnedEventHandler(newTV_VehicleSpawned);
 			m_trafficVolumes.Add(newTV);
 			return newTV;
 			}
@@ -453,6 +519,11 @@ namespace CityTrafficSimulator.Verkehr
 
 		#region Event-Gedöns
 
+		private void newTV_VehicleSpawned(object sender, TrafficVolume.VehicleSpawnedEventArgs e)
+			{
+			vehiclesToSpawn.Add(e);
+			}
+
 		#region StartPointsChanged event
 
 		/// <summary>
@@ -576,10 +647,194 @@ namespace CityTrafficSimulator.Verkehr
 
 		#endregion
 
+		#region CarTargetVelocityChanged event
+
+		/// <summary>
+		/// EventArgs for a CarTargetVelocityChanged event
+		/// </summary>
+		public class CarTargetVelocityChangedEventArgs : EventArgs
+			{
+			/// <summary>
+			/// Creates new CarTargetVelocityChangedEventArgs
+			/// </summary>
+			public CarTargetVelocityChangedEventArgs()
+				{
+				}
+			}
+
+		/// <summary>
+		/// Delegate for the CarTargetVelocityChanged-EventHandler, which is called when the target velocity for cars has changed
+		/// </summary>
+		/// <param name="sender">Sneder of the event</param>
+		/// <param name="e">Event parameter</param>
+		public delegate void CarTargetVelocityChangedEventHandler(object sender, CarTargetVelocityChangedEventArgs e);
+
+		/// <summary>
+		/// The CarTargetVelocityChanged event occurs when the target velocity for cars has changed
+		/// </summary>
+		public event CarTargetVelocityChangedEventHandler CarTargetVelocityChanged;
+
+		/// <summary>
+		/// Helper method to initiate the CarTargetVelocityChanged event
+		/// </summary>
+		/// <param name="e">Event parameters</param>
+		protected void OnCarTargetVelocityChanged(CarTargetVelocityChangedEventArgs e)
+			{
+			if (CarTargetVelocityChanged != null)
+				{
+				CarTargetVelocityChanged(this, e);
+				}
+			}
+
+		#endregion
+
+		#region TruckTargetVelocityChanged event
+
+		/// <summary>
+		/// EventArgs for a TruckTargetVelocityChanged event
+		/// </summary>
+		public class TruckTargetVelocityChangedEventArgs : EventArgs
+			{
+			/// <summary>
+			/// Creates new TruckTargetVelocityChangedEventArgs
+			/// </summary>
+			public TruckTargetVelocityChangedEventArgs()
+				{
+				}
+			}
+
+		/// <summary>
+		/// Delegate for the TruckTargetVelocityChanged-EventHandler, which is called when the target velocity for trucks has changed
+		/// </summary>
+		/// <param name="sender">Sneder of the event</param>
+		/// <param name="e">Event parameter</param>
+		public delegate void TruckTargetVelocityChangedEventHandler(object sender, TruckTargetVelocityChangedEventArgs e);
+
+		/// <summary>
+		/// The TruckTargetVelocityChanged event occurs when the target velocity for trucks has changed
+		/// </summary>
+		public event TruckTargetVelocityChangedEventHandler TruckTargetVelocityChanged;
+
+		/// <summary>
+		/// Helper method to initiate the TruckTargetVelocityChanged event
+		/// </summary>
+		/// <param name="e">Event parameters</param>
+		protected void OnTruckTargetVelocityChanged(TruckTargetVelocityChangedEventArgs e)
+			{
+			if (TruckTargetVelocityChanged != null)
+				{
+				TruckTargetVelocityChanged(this, e);
+				}
+			}
+
+		#endregion
+
+		#region BusTargetVelocityChanged event
+
+		/// <summary>
+		/// EventArgs for a BusTargetVelocityChanged event
+		/// </summary>
+		public class BusTargetVelocityChangedEventArgs : EventArgs
+			{
+			/// <summary>
+			/// Creates new BusTargetVelocityChangedEventArgs
+			/// </summary>
+			public BusTargetVelocityChangedEventArgs()
+				{
+				}
+			}
+
+		/// <summary>
+		/// Delegate for the BusTargetVelocityChanged-EventHandler, which is called when the target velocity for busses has changed
+		/// </summary>
+		/// <param name="sender">Sneder of the event</param>
+		/// <param name="e">Event parameter</param>
+		public delegate void BusTargetVelocityChangedEventHandler(object sender, BusTargetVelocityChangedEventArgs e);
+
+		/// <summary>
+		/// The BusTargetVelocityChanged event occurs when the target velocity for busses has changed
+		/// </summary>
+		public event BusTargetVelocityChangedEventHandler BusTargetVelocityChanged;
+
+		/// <summary>
+		/// Helper method to initiate the BusTargetVelocityChanged event
+		/// </summary>
+		/// <param name="e">Event parameters</param>
+		protected void OnBusTargetVelocityChanged(BusTargetVelocityChangedEventArgs e)
+			{
+			if (BusTargetVelocityChanged != null)
+				{
+				BusTargetVelocityChanged(this, e);
+				}
+			}
+
+		#endregion
+
+		#region TramTargetVelocityChanged event
+
+		/// <summary>
+		/// EventArgs for a TramTargetVelocityChanged event
+		/// </summary>
+		public class TramTargetVelocityChangedEventArgs : EventArgs
+			{
+			/// <summary>
+			/// Creates new TramTargetVelocityChangedEventArgs
+			/// </summary>
+			public TramTargetVelocityChangedEventArgs()
+				{
+				}
+			}
+
+		/// <summary>
+		/// Delegate for the TramTargetVelocityChanged-EventHandler, which is called when the target velocity for trams has changed
+		/// </summary>
+		/// <param name="sender">Sneder of the event</param>
+		/// <param name="e">Event parameter</param>
+		public delegate void TramTargetVelocityChangedEventHandler(object sender, TramTargetVelocityChangedEventArgs e);
+
+		/// <summary>
+		/// The TramTargetVelocityChanged event occurs when the target velocity for trams has changed
+		/// </summary>
+		public event TramTargetVelocityChangedEventHandler TramTargetVelocityChanged;
+
+		/// <summary>
+		/// Helper method to initiate the TramTargetVelocityChanged event
+		/// </summary>
+		/// <param name="e">Event parameters</param>
+		protected void OnTramTargetVelocityChanged(TramTargetVelocityChangedEventArgs e)
+			{
+			if (TramTargetVelocityChanged != null)
+				{
+				TramTargetVelocityChanged(this, e);
+				}
+			}
+
+		#endregion
+
 		#endregion
 
 
 		#region ITickable Member
+
+		private bool SpawnVehicle(TrafficVolume.VehicleSpawnedEventArgs e)
+			{
+			LineNode start = e.tv.startNodes.nodes[rnd.Next(e.tv.startNodes.nodes.Count)];
+			if (start.nextConnections.Count > 0)
+				{
+				int foo = rnd.Next(start.nextConnections.Count);
+				NodeConnection nc = start.nextConnections[foo];
+
+				e.vehicleToSpawn.state = new IVehicle.State(nc, 0);
+				e.vehicleToSpawn.physics = new IVehicle.Physics(nc.targetVelocity, nc.targetVelocity, 0);
+				if (start.nextConnections[foo].AddVehicle(e.vehicleToSpawn))
+					{
+					e.vehicleToSpawn.targetNodes = e.tv.destinationNodes.nodes;
+					return true;
+					}
+				}
+
+			return false;
+			}
 
 		/// <summary>
 		/// Notifies all handled entities that the world time has advanced by tickLength.
@@ -592,6 +847,16 @@ namespace CityTrafficSimulator.Verkehr
 				{
 				tv.Tick(tmp);
 				}
+
+			List<TrafficVolume.VehicleSpawnedEventArgs> failedList = new List<TrafficVolume.VehicleSpawnedEventArgs>(vehiclesToSpawn.Count);
+			foreach (TrafficVolume.VehicleSpawnedEventArgs e in vehiclesToSpawn)
+				{
+				if (! SpawnVehicle(e))
+					{
+					failedList.Add(e);
+					}
+				}
+			vehiclesToSpawn = failedList;
 			}
 
 		/// <summary>

@@ -151,7 +151,6 @@ namespace CityTrafficSimulator
 		private Random rnd = new Random();
 
 		private bool dockToGrid = false;
-		private bool isNotified = false;
 
 		private NodeSteuerung.RenderOptions renderOptionsDaGrid = new NodeSteuerung.RenderOptions();
 		private NodeSteuerung.RenderOptions renderOptionsThumbnail = new NodeSteuerung.RenderOptions();
@@ -342,6 +341,7 @@ namespace CityTrafficSimulator
 					tramAllowedCheckBox.Checked = m_selectedNodeConnection.tramAllowed;
 					enableOutgoingLineChangeCheckBox.Checked = m_selectedNodeConnection.enableOutgoingLineChange;
 					enableIncomingLineChangeCheckBox.Checked = m_selectedNodeConnection.enableIncomingLineChange;
+					spinTargetVelocity.Value = (decimal)m_selectedNodeConnection.targetVelocity;
 
 					selectedLineNodes.Clear();
 					}
@@ -421,7 +421,6 @@ namespace CityTrafficSimulator
 
 		private void trafficLightForm_SelectedEntryChanged(object sender, TrafficLightForm.SelectedEntryChangedEventArgs e)
 			{
-			isNotified = true;
 			if (trafficLightForm.selectedEntry != null)
 				{
 				TrafficLight tl = trafficLightForm.selectedEntry as TrafficLight;
@@ -429,7 +428,6 @@ namespace CityTrafficSimulator
 				m_selectedLineNodes.AddRange(tl.assignedNodes);
 				DaGrid.Invalidate();
 				}
-			isNotified = false;
 			}
 
 		private void timelineSteuerung_CurrentTimeChanged(object sender, TimelineSteuerung.CurrentTimeChangedEventArgs e)
@@ -1884,16 +1882,6 @@ namespace CityTrafficSimulator
 			Invalidate(InvalidationLevel.MAIN_CANVAS_AND_TIMLINE);
 			}
 
-		private void showEditorButton_Click(object sender, EventArgs e)
-			{
-			if (trafficLightForm.IsDisposed)
-				{
-				trafficLightForm = new TrafficLightForm(timelineSteuerung);
-				}
-			trafficLightForm.Show();
-			trafficLightForm.BringToFront();
-			}
-
 		private void cbRenderLineNodes_CheckedChanged(object sender, EventArgs e)
 			{
 			renderOptionsDaGrid.renderLineNodes = cbRenderLineNodes.Checked;
@@ -1940,6 +1928,36 @@ namespace CityTrafficSimulator
 			{
 			renderOptionsDaGrid.renderLineChangePoints = cbRenderLineChangePoints.Checked;
 			DaGrid.Invalidate();
+			}
+
+		private void pnlNetworkInfo_Resize(object sender, EventArgs e)
+			{
+			int h = Math.Max(pnlNetworkInfo.ClientSize.Height, 150);
+			int w = pnlNetworkInfo.ClientSize.Width;
+
+			titleEdit.Size = new System.Drawing.Size(w - titleEdit.Location.X - 3, titleEdit.Height);
+			infoEdit.Size = new System.Drawing.Size(w - 6, h - infoEdit.Location.Y - 61);
+
+			LadenButton.Location = new System.Drawing.Point(w - 85 - 6 - 85 - 3, h - 55);
+			SpeichernButton.Location = new System.Drawing.Point(w - 85 - 3, h - 55);
+			aboutBoxButton.Location = new System.Drawing.Point(w - 85 - 6 - 85 - 3, h - 26);
+			}
+
+		private void spinTargetVelocity_ValueChanged(object sender, EventArgs e)
+			{
+			if (selectedNodeConnection != null)
+				{
+				selectedNodeConnection.targetVelocity = (double)spinTargetVelocity.Value;
+				}
+			}
+
+		private void pnlSignalAssignment_Resize(object sender, EventArgs e)
+			{
+			int h = Math.Max(pnlSignalAssignment.ClientSize.Height, 100);
+			int w = pnlSignalAssignment.ClientSize.Width;
+
+			trafficLightTreeView.Size = new System.Drawing.Size(w - 6, h - 3 - 23 - 6 - 3);
+			freeNodeButton.Location = new System.Drawing.Point(w - 85 - 3, h - 26);
 			}
 
 		}

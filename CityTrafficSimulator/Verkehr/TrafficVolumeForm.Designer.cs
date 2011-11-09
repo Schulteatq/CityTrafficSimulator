@@ -56,6 +56,15 @@
 			this.spinBusVolume = new System.Windows.Forms.NumericUpDown();
 			this.spinCarsVolume = new System.Windows.Forms.NumericUpDown();
 			this.label7 = new System.Windows.Forms.Label();
+			this.groupBox2 = new System.Windows.Forms.GroupBox();
+			this.spinCarsTargetVelocity = new System.Windows.Forms.NumericUpDown();
+			this.spinTrucksTargetVelocity = new System.Windows.Forms.NumericUpDown();
+			this.spinBussesTargetVelocity = new System.Windows.Forms.NumericUpDown();
+			this.spinTramsTargetVelocity = new System.Windows.Forms.NumericUpDown();
+			this.label8 = new System.Windows.Forms.Label();
+			this.label9 = new System.Windows.Forms.Label();
+			this.label10 = new System.Windows.Forms.Label();
+			this.label11 = new System.Windows.Forms.Label();
 			this.splitContainer1.Panel1.SuspendLayout();
 			this.splitContainer1.Panel2.SuspendLayout();
 			this.splitContainer1.SuspendLayout();
@@ -65,6 +74,11 @@
 			((System.ComponentModel.ISupportInitialize)(this.spinTramVolume)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this.spinBusVolume)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this.spinCarsVolume)).BeginInit();
+			this.groupBox2.SuspendLayout();
+			((System.ComponentModel.ISupportInitialize)(this.spinCarsTargetVelocity)).BeginInit();
+			((System.ComponentModel.ISupportInitialize)(this.spinTrucksTargetVelocity)).BeginInit();
+			((System.ComponentModel.ISupportInitialize)(this.spinBussesTargetVelocity)).BeginInit();
+			((System.ComponentModel.ISupportInitialize)(this.spinTramsTargetVelocity)).BeginInit();
 			this.SuspendLayout();
 			// 
 			// splitContainer1
@@ -97,11 +111,9 @@
 			// splitContainer1.Panel2
 			// 
 			this.splitContainer1.Panel2.AutoScroll = true;
-			this.splitContainer1.Panel2.Controls.Add(this.spinGlobalTrafficVolumeMultiplier);
+			this.splitContainer1.Panel2.Controls.Add(this.groupBox2);
 			this.splitContainer1.Panel2.Controls.Add(this.groupBox1);
-			this.splitContainer1.Panel2.Controls.Add(this.label7);
 			this.splitContainer1.Size = new System.Drawing.Size(890, 431);
-			this.splitContainer1.Panel2MinSize = 260;
 			this.splitContainer1.SplitterDistance = 600;
 			this.splitContainer1.TabIndex = 0;
 			// 
@@ -261,14 +273,14 @@
             0,
             0,
             65536});
-			this.spinGlobalTrafficVolumeMultiplier.Location = new System.Drawing.Point(164, 7);
+			this.spinGlobalTrafficVolumeMultiplier.Location = new System.Drawing.Point(161, 19);
 			this.spinGlobalTrafficVolumeMultiplier.Maximum = new decimal(new int[] {
             10,
             0,
             0,
             0});
 			this.spinGlobalTrafficVolumeMultiplier.Name = "spinGlobalTrafficVolumeMultiplier";
-			this.spinGlobalTrafficVolumeMultiplier.Size = new System.Drawing.Size(89, 20);
+			this.spinGlobalTrafficVolumeMultiplier.Size = new System.Drawing.Size(83, 20);
 			this.spinGlobalTrafficVolumeMultiplier.TabIndex = 20;
 			this.spinGlobalTrafficVolumeMultiplier.Value = new decimal(new int[] {
             1,
@@ -287,12 +299,12 @@
 			this.groupBox1.Controls.Add(this.spinTramVolume);
 			this.groupBox1.Controls.Add(this.spinBusVolume);
 			this.groupBox1.Controls.Add(this.spinCarsVolume);
-			this.groupBox1.Location = new System.Drawing.Point(3, 33);
+			this.groupBox1.Location = new System.Drawing.Point(3, 3);
 			this.groupBox1.Name = "groupBox1";
-			this.groupBox1.Size = new System.Drawing.Size(250, 138);
+			this.groupBox1.Size = new System.Drawing.Size(250, 126);
 			this.groupBox1.TabIndex = 0;
 			this.groupBox1.TabStop = false;
-			this.groupBox1.Text = "Traffic Volume:";
+			this.groupBox1.Text = "Per-Route Traffic Volume:";
 			// 
 			// label6
 			// 
@@ -385,11 +397,158 @@
 			// label7
 			// 
 			this.label7.AutoSize = true;
-			this.label7.Location = new System.Drawing.Point(3, 9);
+			this.label7.Location = new System.Drawing.Point(6, 21);
 			this.label7.Name = "label7";
 			this.label7.Size = new System.Drawing.Size(155, 13);
 			this.label7.TabIndex = 21;
 			this.label7.Text = "Global Traffic Volume Multiplier:";
+			// 
+			// groupBox2
+			// 
+			this.groupBox2.Controls.Add(this.label11);
+			this.groupBox2.Controls.Add(this.label10);
+			this.groupBox2.Controls.Add(this.label9);
+			this.groupBox2.Controls.Add(this.label8);
+			this.groupBox2.Controls.Add(this.spinTramsTargetVelocity);
+			this.groupBox2.Controls.Add(this.spinBussesTargetVelocity);
+			this.groupBox2.Controls.Add(this.spinTrucksTargetVelocity);
+			this.groupBox2.Controls.Add(this.spinCarsTargetVelocity);
+			this.groupBox2.Controls.Add(this.spinGlobalTrafficVolumeMultiplier);
+			this.groupBox2.Controls.Add(this.label7);
+			this.groupBox2.Location = new System.Drawing.Point(3, 135);
+			this.groupBox2.Name = "groupBox2";
+			this.groupBox2.Size = new System.Drawing.Size(250, 152);
+			this.groupBox2.TabIndex = 22;
+			this.groupBox2.TabStop = false;
+			this.groupBox2.Text = "Global Settings:";
+			// 
+			// spinCarsTargetVelocity
+			// 
+			this.spinCarsTargetVelocity.Location = new System.Drawing.Point(161, 45);
+			this.spinCarsTargetVelocity.Maximum = new decimal(new int[] {
+            1000,
+            0,
+            0,
+            0});
+			this.spinCarsTargetVelocity.Minimum = new decimal(new int[] {
+            1,
+            0,
+            0,
+            0});
+			this.spinCarsTargetVelocity.Name = "spinCarsTargetVelocity";
+			this.spinCarsTargetVelocity.Size = new System.Drawing.Size(83, 20);
+			this.spinCarsTargetVelocity.TabIndex = 22;
+			this.spinCarsTargetVelocity.Value = new decimal(new int[] {
+            36,
+            0,
+            0,
+            0});
+			this.spinCarsTargetVelocity.ValueChanged += new System.EventHandler(this.spinCarsTargetVelocity_ValueChanged);
+			// 
+			// spinTrucksTargetVelocity
+			// 
+			this.spinTrucksTargetVelocity.Location = new System.Drawing.Point(161, 71);
+			this.spinTrucksTargetVelocity.Maximum = new decimal(new int[] {
+            1000,
+            0,
+            0,
+            0});
+			this.spinTrucksTargetVelocity.Minimum = new decimal(new int[] {
+            1,
+            0,
+            0,
+            0});
+			this.spinTrucksTargetVelocity.Name = "spinTrucksTargetVelocity";
+			this.spinTrucksTargetVelocity.Size = new System.Drawing.Size(83, 20);
+			this.spinTrucksTargetVelocity.TabIndex = 23;
+			this.spinTrucksTargetVelocity.Value = new decimal(new int[] {
+            23,
+            0,
+            0,
+            0});
+			this.spinTrucksTargetVelocity.ValueChanged += new System.EventHandler(this.spinTrucksTargetVelocity_ValueChanged);
+			// 
+			// spinBussesTargetVelocity
+			// 
+			this.spinBussesTargetVelocity.Location = new System.Drawing.Point(161, 97);
+			this.spinBussesTargetVelocity.Maximum = new decimal(new int[] {
+            1000,
+            0,
+            0,
+            0});
+			this.spinBussesTargetVelocity.Minimum = new decimal(new int[] {
+            1,
+            0,
+            0,
+            0});
+			this.spinBussesTargetVelocity.Name = "spinBussesTargetVelocity";
+			this.spinBussesTargetVelocity.Size = new System.Drawing.Size(83, 20);
+			this.spinBussesTargetVelocity.TabIndex = 24;
+			this.spinBussesTargetVelocity.Value = new decimal(new int[] {
+            23,
+            0,
+            0,
+            0});
+			this.spinBussesTargetVelocity.ValueChanged += new System.EventHandler(this.spinBussesTargetVelocity_ValueChanged);
+			// 
+			// spinTramsTargetVelocity
+			// 
+			this.spinTramsTargetVelocity.Location = new System.Drawing.Point(161, 123);
+			this.spinTramsTargetVelocity.Maximum = new decimal(new int[] {
+            1000,
+            0,
+            0,
+            0});
+			this.spinTramsTargetVelocity.Minimum = new decimal(new int[] {
+            1,
+            0,
+            0,
+            0});
+			this.spinTramsTargetVelocity.Name = "spinTramsTargetVelocity";
+			this.spinTramsTargetVelocity.Size = new System.Drawing.Size(83, 20);
+			this.spinTramsTargetVelocity.TabIndex = 25;
+			this.spinTramsTargetVelocity.Value = new decimal(new int[] {
+            23,
+            0,
+            0,
+            0});
+			this.spinTramsTargetVelocity.ValueChanged += new System.EventHandler(this.spinTramsTargetVelocity_ValueChanged);
+			// 
+			// label8
+			// 
+			this.label8.AutoSize = true;
+			this.label8.Location = new System.Drawing.Point(6, 47);
+			this.label8.Name = "label8";
+			this.label8.Size = new System.Drawing.Size(127, 13);
+			this.label8.TabIndex = 26;
+			this.label8.Text = "Car Target Velocity (m/s):";
+			// 
+			// label9
+			// 
+			this.label9.AutoSize = true;
+			this.label9.Location = new System.Drawing.Point(6, 73);
+			this.label9.Name = "label9";
+			this.label9.Size = new System.Drawing.Size(139, 13);
+			this.label9.TabIndex = 27;
+			this.label9.Text = "Truck Target Velocity (m/s):";
+			// 
+			// label10
+			// 
+			this.label10.AutoSize = true;
+			this.label10.Location = new System.Drawing.Point(6, 99);
+			this.label10.Name = "label10";
+			this.label10.Size = new System.Drawing.Size(129, 13);
+			this.label10.TabIndex = 28;
+			this.label10.Text = "Bus Target Velocity (m/s):";
+			// 
+			// label11
+			// 
+			this.label11.AutoSize = true;
+			this.label11.Location = new System.Drawing.Point(6, 125);
+			this.label11.Name = "label11";
+			this.label11.Size = new System.Drawing.Size(135, 13);
+			this.label11.TabIndex = 29;
+			this.label11.Text = "Tram Target Velocity (m/s):";
 			// 
 			// TrafficVolumeForm
 			// 
@@ -403,7 +562,6 @@
 			this.splitContainer1.Panel1.ResumeLayout(false);
 			this.splitContainer1.Panel1.PerformLayout();
 			this.splitContainer1.Panel2.ResumeLayout(false);
-			this.splitContainer1.Panel2.PerformLayout();
 			this.splitContainer1.ResumeLayout(false);
 			((System.ComponentModel.ISupportInitialize)(this.spinGlobalTrafficVolumeMultiplier)).EndInit();
 			this.groupBox1.ResumeLayout(false);
@@ -412,6 +570,12 @@
 			((System.ComponentModel.ISupportInitialize)(this.spinTramVolume)).EndInit();
 			((System.ComponentModel.ISupportInitialize)(this.spinBusVolume)).EndInit();
 			((System.ComponentModel.ISupportInitialize)(this.spinCarsVolume)).EndInit();
+			this.groupBox2.ResumeLayout(false);
+			this.groupBox2.PerformLayout();
+			((System.ComponentModel.ISupportInitialize)(this.spinCarsTargetVelocity)).EndInit();
+			((System.ComponentModel.ISupportInitialize)(this.spinTrucksTargetVelocity)).EndInit();
+			((System.ComponentModel.ISupportInitialize)(this.spinBussesTargetVelocity)).EndInit();
+			((System.ComponentModel.ISupportInitialize)(this.spinTramsTargetVelocity)).EndInit();
 			this.ResumeLayout(false);
 
 			}
@@ -446,5 +610,14 @@
 		private System.Windows.Forms.Label label7;
 		private System.Windows.Forms.Button btnUpdateDestinationNodes;
 		private System.Windows.Forms.Button btnUpdateStartNodes;
+		private System.Windows.Forms.GroupBox groupBox2;
+		private System.Windows.Forms.NumericUpDown spinTramsTargetVelocity;
+		private System.Windows.Forms.NumericUpDown spinBussesTargetVelocity;
+		private System.Windows.Forms.NumericUpDown spinTrucksTargetVelocity;
+		private System.Windows.Forms.NumericUpDown spinCarsTargetVelocity;
+		private System.Windows.Forms.Label label11;
+		private System.Windows.Forms.Label label10;
+		private System.Windows.Forms.Label label9;
+		private System.Windows.Forms.Label label8;
 		}
 	}

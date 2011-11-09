@@ -273,7 +273,7 @@ namespace CityTrafficSimulator.Vehicle
 
 			lineChangeNeeded = false;
 			lci = null;
-			m_Physics.multiplierDesiredVelocity = 1;
+			m_Physics.multiplierTargetVelocity = 1;
 
 			// Tell other vehicle that waits for me, that I'm finished. Kinda redundant, but safe is safe.
 			m_State.UnsetLineChangeVehicleInteraction();
@@ -328,6 +328,26 @@ namespace CityTrafficSimulator.Vehicle
             get { return m_Physics; }
 			set { m_Physics = value; }
             }
+
+		/// <summary>
+		/// Target Velocity of this vehicle.
+		/// Currently only a shortcut to the target velocity of the current NodeConnection of this vehicle.
+		/// </summary>
+		public double targetVelocity
+			{
+			get 
+				{ 
+				return Math.Min(m_Physics.targetVelocity, (currentNodeConnection != null) ? currentNodeConnection.targetVelocity : 0); 
+				}
+			}
+
+		/// <summary>
+		/// effektive gewünschte Gecshwindigkeit des Autos (mit Multiplikator multipliziert)
+		/// </summary>
+		public double effectiveDesiredVelocity
+			{
+			get { return targetVelocity * m_Physics.multiplierTargetVelocity; }
+			}
 
 		/// <summary>
 		/// aktueller State des Fahrezeuges
@@ -427,7 +447,7 @@ namespace CityTrafficSimulator.Vehicle
 				{
 				lookaheadDistance = Math.Max(0, m_State.tailPositionOfOtherVehicle - currentPosition);
 				thinkAboutLineChange = false;
-				lowestAcceleration = CalculateAcceleration(physics.velocity, physics.effectiveDesiredVelocity, lookaheadDistance, physics.velocity);
+				lowestAcceleration = CalculateAcceleration(physics.velocity, effectiveDesiredVelocity, lookaheadDistance, physics.velocity);
 				}
 
 			#endregion
@@ -443,7 +463,7 @@ namespace CityTrafficSimulator.Vehicle
 				{
 				lookaheadDistance = theVehicleInFrontOfMe.distance;
 				thinkAboutLineChange = true;
-				lowestAcceleration = CalculateAcceleration(physics.velocity, physics.effectiveDesiredVelocity, theVehicleInFrontOfMe.distance, physics.velocity - theVehicleInFrontOfMe.vehicle.physics.velocity);
+				lowestAcceleration = CalculateAcceleration(physics.velocity, effectiveDesiredVelocity, theVehicleInFrontOfMe.distance, physics.velocity - theVehicleInFrontOfMe.vehicle.physics.velocity);
 
 				if (    (theVehicleInFrontOfMe.vehicle.physics.velocity < 2.5)
 					 || (theVehicleInFrontOfMe.vehicle.physics.velocity < 5 && theVehicleInFrontOfMe.vehicle.physics.acceleration < 0.1))
@@ -453,7 +473,7 @@ namespace CityTrafficSimulator.Vehicle
 				}
 			else
 				{
-				lowestAcceleration = CalculateAcceleration(physics.velocity, physics.effectiveDesiredVelocity, lookaheadDistance, physics.velocity);
+				lowestAcceleration = CalculateAcceleration(physics.velocity, effectiveDesiredVelocity, lookaheadDistance, physics.velocity);
 				}
 
 
@@ -469,7 +489,7 @@ namespace CityTrafficSimulator.Vehicle
 				{
 				lookaheadDistance = distanceToTrafficLight;
 				thinkAboutLineChange = false;
-				lowestAcceleration = CalculateAcceleration(physics.velocity, physics.effectiveDesiredVelocity, lookaheadDistance, physics.velocity);
+				lowestAcceleration = CalculateAcceleration(physics.velocity, effectiveDesiredVelocity, lookaheadDistance, physics.velocity);
 				}
 			
 			#endregion
@@ -488,7 +508,7 @@ namespace CityTrafficSimulator.Vehicle
 			if (distanceToIntersection > 0 && distanceToIntersection < lookaheadDistance)
 				{
 				lookaheadDistance = distanceToIntersection;
-				lowestAcceleration = CalculateAcceleration(physics.velocity, physics.effectiveDesiredVelocity, distanceToIntersection, physics.velocity);
+				lowestAcceleration = CalculateAcceleration(physics.velocity, effectiveDesiredVelocity, distanceToIntersection, physics.velocity);
 				}
 
 			// In case of simple calculations we need to unregister the vehicle from all intersections. Otherwise
@@ -540,12 +560,12 @@ namespace CityTrafficSimulator.Vehicle
 									{
 									// calculate my necessary acceleration in case of a line change
 									double myAccelerationOnOtherConnection = (otherVehicles.Right != null)
-										? CalculateAcceleration(physics.velocity, physics.effectiveDesiredVelocity, otherVehicles.Right.vehicle.currentPosition - myArcPositionOnOtherConnection, physics.velocity - otherVehicles.Right.vehicle.physics.velocity)
-										: CalculateAcceleration(physics.velocity, physics.effectiveDesiredVelocity, lookaheadDistance, physics.velocity);
+										? CalculateAcceleration(physics.velocity, effectiveDesiredVelocity, otherVehicles.Right.vehicle.currentPosition - myArcPositionOnOtherConnection, physics.velocity - otherVehicles.Right.vehicle.physics.velocity)
+										: CalculateAcceleration(physics.velocity, effectiveDesiredVelocity, lookaheadDistance, physics.velocity);
 
 									// calculate the necessary acceleration of the vehicle behind in case of a line change
 									double forcedAccelerationOfVehicleBehindMeOnOtherConnection = (otherVehicles.Left != null)
-										? CalculateAcceleration(otherVehicles.Left.vehicle.physics.velocity, otherVehicles.Left.vehicle.physics.effectiveDesiredVelocity, otherVehicles.Left.distance, otherVehicles.Left.vehicle.physics.velocity - physics.velocity)
+										? CalculateAcceleration(otherVehicles.Left.vehicle.physics.velocity, otherVehicles.Left.vehicle.effectiveDesiredVelocity, otherVehicles.Left.distance, otherVehicles.Left.vehicle.physics.velocity - physics.velocity)
 										: 0;
 
 									double currentAccelerationOfVehicleBehindMeOnOtherConnection = (otherVehicles.Left != null) ? otherVehicles.Left.vehicle.physics.acceleration : 0;
@@ -557,7 +577,7 @@ namespace CityTrafficSimulator.Vehicle
 										&& ((arcPos - lci.startArcPos) / lci.length >= (currentAccelerationOfVehicleBehindMeOnOtherConnection - forcedAccelerationOfVehicleBehindMeOnOtherConnection)))
 										{
 										// return to normal velocity
-										m_Physics.multiplierDesiredVelocity = 1;
+										m_Physics.multiplierTargetVelocity = 1;
 
 										// initiate the line change
 										InitiateLineChange(lcp, arcPos - lcp.start.arcPosition);
@@ -578,8 +598,8 @@ namespace CityTrafficSimulator.Vehicle
 										 && lowestAcceleration >= -0.1)				// currently not braking
 									{
 									// accelerate to get in front
-									m_Physics.multiplierDesiredVelocity = 1.75;
-									lowestAcceleration = CalculateAcceleration(physics.velocity, physics.effectiveDesiredVelocity, lookaheadDistance, physics.velocity);
+									m_Physics.multiplierTargetVelocity = 1.75;
+									lowestAcceleration = CalculateAcceleration(physics.velocity, effectiveDesiredVelocity, lookaheadDistance, physics.velocity);
 
 									m_State.SetLineChangeVehicleInteraction(this, otherVehicles.Left.vehicle, lcp.otherStart.nc, myArcPositionOnOtherConnection - m_Length);
 									}
@@ -601,7 +621,7 @@ namespace CityTrafficSimulator.Vehicle
 							double percentOfLCILeft = Math.Max(0.2, (lci.endArcPos - currentPosition - Constants.breakPointBeforeForcedLineChange) / (lci.length - Constants.breakPointBeforeForcedLineChange));
 
 							// slow down a bit
-							m_Physics.multiplierDesiredVelocity = Math.Max(1, 1.5 * percentOfLCILeft);
+							m_Physics.multiplierTargetVelocity = Math.Max(1, 1.5 * percentOfLCILeft);
 
 							// When reaching the end of the LineChangeInterval, check whether there are other possibilities to reach the target:
 							if (percentOfLCILeft < 0.5)
@@ -611,7 +631,7 @@ namespace CityTrafficSimulator.Vehicle
 								if (newRTT.SegmentCount() > 0 && newRTT.costs / m_WayToGo.costs < Constants.maxRatioForEnforcedLineChange)
 									{
 									m_WayToGo = newRTT;
-									m_Physics.multiplierDesiredVelocity = 1;
+									m_Physics.multiplierTargetVelocity = 1;
 									lineChangeNeeded = false;
 									lci = null;
 									}
@@ -619,7 +639,7 @@ namespace CityTrafficSimulator.Vehicle
 							// Line change still necessacy => stop at break point
 							if (lineChangeNeeded)
 								{
-								lowestAcceleration = CalculateAcceleration(physics.velocity, physics.effectiveDesiredVelocity, lci.endArcPos - Constants.breakPointBeforeForcedLineChange - arcPos, physics.velocity);
+								lowestAcceleration = CalculateAcceleration(physics.velocity, effectiveDesiredVelocity, lci.endArcPos - Constants.breakPointBeforeForcedLineChange - arcPos, physics.velocity);
 
 								if (! m_State.letVehicleChangeLine && percentOfLCILeft < 0.6)
 									{
@@ -632,7 +652,7 @@ namespace CityTrafficSimulator.Vehicle
 										// In addition, I need to get behind the vehicle in front of the vehicle which waits for me. Therefore I adapt the desired velocity
 										if (vd.Right != null)
 											{
-											m_Physics.multiplierDesiredVelocity = Math2.Clamp(Math2.Cubic((vd.Right.distance - s0) / (m_Length + 4 * s0)), 0.3, 1);
+											m_Physics.multiplierTargetVelocity = Math2.Clamp(Math2.Cubic((vd.Right.distance - s0) / (m_Length + 4 * s0)), 0.3, 1);
 											}
 										}
 									}
@@ -680,12 +700,12 @@ namespace CityTrafficSimulator.Vehicle
 
 										// calculate my necessary acceleration in case of a line change
 										double myAccelerationOnOtherConnection = (otherVehicles.Right != null)
-											? CalculateAcceleration(physics.velocity, physics.effectiveDesiredVelocity, otherVehicles.Right.vehicle.currentPosition - myArcPositionOnOtherConnection, physics.velocity - otherVehicles.Right.vehicle.physics.velocity)
-											: CalculateAcceleration(physics.velocity, physics.effectiveDesiredVelocity, GetDistanceToNextTrafficLightOnRoute(l, myArcPositionOnOtherConnection, Constants.lookaheadDistance, true), physics.velocity);
+											? CalculateAcceleration(physics.velocity, effectiveDesiredVelocity, otherVehicles.Right.vehicle.currentPosition - myArcPositionOnOtherConnection, physics.velocity - otherVehicles.Right.vehicle.physics.velocity)
+											: CalculateAcceleration(physics.velocity, effectiveDesiredVelocity, GetDistanceToNextTrafficLightOnRoute(l, myArcPositionOnOtherConnection, Constants.lookaheadDistance, true), physics.velocity);
 
 										// calculate the necessary acceleration of the vehicle behind in case of a line change
 										double forcedAccelerationOfVehicleBehindMeOnOtherConnection = (otherVehicles.Left != null)
-											? CalculateAcceleration(otherVehicles.Left.vehicle.physics.velocity, otherVehicles.Left.vehicle.physics.effectiveDesiredVelocity, otherVehicles.Left.distance, otherVehicles.Left.vehicle.physics.velocity - physics.velocity)
+											? CalculateAcceleration(otherVehicles.Left.vehicle.physics.velocity, otherVehicles.Left.vehicle.effectiveDesiredVelocity, otherVehicles.Left.distance, otherVehicles.Left.vehicle.physics.velocity - physics.velocity)
 											: 0;
 
 										double currentAccelerationOfVehicleBehindMeOnOtherConnection = (otherVehicles.Left != null) ? otherVehicles.Left.vehicle.physics.acceleration : 0;
@@ -758,7 +778,7 @@ namespace CityTrafficSimulator.Vehicle
 					// gucken, ob es mit ner Connection weitergeht
 					if ((currentNodeConnection.endNode.nextConnections.Count != 0) && (WayToGo.SegmentCount() > 0))
 						{
-						m_Physics.multiplierDesiredVelocity = 1;
+						m_Physics.multiplierTargetVelocity = 1;
 						m_State.UnsetLineChangeVehicleInteraction();
 
 						double startDistance = (currentPosition - currentNodeConnection.lineSegment.length);
@@ -1182,7 +1202,7 @@ namespace CityTrafficSimulator.Vehicle
 
 				while (alreadyCoveredDistance <= distance)
 					{
-					currentVelocity += CalculateAcceleration(currentVelocity, physics.effectiveDesiredVelocity);
+					currentVelocity += CalculateAcceleration(currentVelocity, effectiveDesiredVelocity);
 					alreadyCoveredDistance += currentVelocity;
 					alreadySpentTime++;
 					}
@@ -1278,26 +1298,17 @@ namespace CityTrafficSimulator.Vehicle
             /// <param name="a">Beschleunigung</param>
             public Physics(double d, double v, double a)
                 {
-                desiredVelocity = d;
+                targetVelocity = d;
                 velocity = v;
                 acceleration = a;
-				multiplierDesiredVelocity = 1;
+				multiplierTargetVelocity = 1;
                 }
 
 			/// <summary>
 			/// gewünschte Gecshwindigkeit des Autos 
 			/// </summary>
-			public double desiredVelocity;
+			public double targetVelocity;
 
-
-            /// <summary>
-            /// effektive gewünschte Gecshwindigkeit des Autos (mit Multiplikator multipliziert)
-            /// </summary>
-			public double effectiveDesiredVelocity
-				{
-				get { return desiredVelocity * multiplierDesiredVelocity; }
-				}
-			
             /// <summary>
             /// Geschwindigkeit des Fahrzeuges
             /// (sehr wahrscheinlich gemessen in Änderung der Position/Tick)
@@ -1309,13 +1320,12 @@ namespace CityTrafficSimulator.Vehicle
             /// (gemessen in Änderung der Geschwindigkeit/Tick)
             /// </summary>
             public double acceleration;
-
-
+			
 			/// <summary>
 			/// Multiplikator für die Wunschgeschwindigkeit.
 			/// Kann benutzt werden, um kurzzeitig schneller zu fahren (etwa um einen Spurwechsel zu machen)
 			/// </summary>
-			public double multiplierDesiredVelocity;
+			public double multiplierTargetVelocity;
             }
 
 
@@ -2026,7 +2036,7 @@ namespace CityTrafficSimulator.Vehicle
 					}
 				}
 
-			g.DrawString(hashcode.ToString() + " @ " + currentNodeConnection.lineSegment.PosToTime(currentPosition).ToString("0.##") + "t ," + currentPosition.ToString("####") + "dm - " + physics.velocity.ToString("##.#") + "m/s - Mult.: " + physics.multiplierDesiredVelocity.ToString("#.##") + "\nnoch " + WayToGo.SegmentCount() + " nodes zu befahren\n\n" + debugData.ToString(), debugFont, blackBrush, state.positionAbs + new Vector2(0, -10));
+			g.DrawString(hashcode.ToString() + " @ " + currentNodeConnection.lineSegment.PosToTime(currentPosition).ToString("0.##") + "t ," + currentPosition.ToString("####") + "dm - " + physics.velocity.ToString("##.#") + "m/s - Mult.: " + physics.multiplierTargetVelocity.ToString("#.##") + "\nnoch " + WayToGo.SegmentCount() + " nodes zu befahren\n\n" + debugData.ToString(), debugFont, blackBrush, state.positionAbs + new Vector2(0, -10));
 			}
 
 		#endregion

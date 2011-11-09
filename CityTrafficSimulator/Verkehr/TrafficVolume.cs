@@ -137,26 +137,6 @@ namespace CityTrafficSimulator.Verkehr
 
 		#region ITickable Member
 
-		private bool SpawnVehicle(IVehicle v)
-			{
-			LineNode start = startNodes.nodes[rnd.Next(startNodes.nodes.Count)];
-			if (start.nextConnections.Count > 0)
-				{
-				int foo = rnd.Next(start.nextConnections.Count);
-				NodeConnection nc = start.nextConnections[foo];
-
-				v.state = new IVehicle.State(nc, 0);
-				v.physics = new IVehicle.Physics(nc.targetVelocity, nc.targetVelocity, 0);
-				if (start.nextConnections[foo].AddVehicle(v))
-					{
-					v.targetNodes = destinationNodes.nodes;
-					return true;
-					}
-				}
-
-			return false;
-			}
-
 		/// <summary>
 		/// Notification that the world time has advanced by tickLength.
 		/// </summary>
@@ -169,37 +149,28 @@ namespace CityTrafficSimulator.Verkehr
 				int randomValue = trafficVolumeCars > 0 ? rnd.Next((int)Math.Ceiling(3600.0 / (tickLength * trafficVolumeCars))) : -1;
 				if (randomValue == 0)
 					{
-					queuedVehicles.Enqueue(new Car(new IVehicle.Physics()));
+					OnVehicleSpawned(new VehicleSpawnedEventArgs(new Car(new IVehicle.Physics()), this));
 					}
 
 				// enqueue trucks
 				randomValue = trafficVolumeTrucks > 0 ? rnd.Next((int)Math.Ceiling(3600.0 / (tickLength * trafficVolumeTrucks))) : -1;
 				if (randomValue == 0)
 					{
-					queuedVehicles.Enqueue(new Truck(new IVehicle.Physics()));
+					OnVehicleSpawned(new VehicleSpawnedEventArgs(new Truck(new IVehicle.Physics()), this));
 					}
 
 				// enqueue busses
 				randomValue = trafficVolumeBusses > 0 ? rnd.Next((int)Math.Ceiling(3600.0 / (tickLength * trafficVolumeBusses))) : -1;
 				if (randomValue == 0)
 					{
-					queuedVehicles.Enqueue(new Bus(new IVehicle.Physics()));
+					OnVehicleSpawned(new VehicleSpawnedEventArgs(new Bus(new IVehicle.Physics()), this));
 					}
 
 				// enqueue trams
 				randomValue = trafficVolumeTrams > 0 ? rnd.Next((int)Math.Ceiling(3600.0 / (tickLength * trafficVolumeTrams))) : -1;
 				if (randomValue == 0)
 					{
-					queuedVehicles.Enqueue(new Tram(new IVehicle.Physics()));
-					}
-				}
-
-			// spawn queued vehicles
-			if (queuedVehicles.Count > 0)
-				{
-				if (SpawnVehicle(queuedVehicles.Peek()))
-					{
-					queuedVehicles.Dequeue();
+					OnVehicleSpawned(new VehicleSpawnedEventArgs(new Tram(new IVehicle.Physics()), this));
 					}
 				}
 			}
@@ -252,6 +223,61 @@ namespace CityTrafficSimulator.Verkehr
 				{
 				if (bof.hashcode == destinationHash)
 					destinationNodes = bof;
+				}
+			}
+
+		#endregion
+
+		#region VehicleSpawned event
+
+		/// <summary>
+		/// EventArgs for a VehicleSpawned event
+		/// </summary>
+		public class VehicleSpawnedEventArgs : EventArgs
+			{
+			/// <summary>
+			/// The vehicle to spawn
+			/// </summary>
+			public IVehicle vehicleToSpawn;
+
+			/// <summary>
+			/// Corresponding TrafficVolume
+			/// </summary>
+			public TrafficVolume tv;
+
+			/// <summary>
+			/// Creates new VehicleSpawnedEventArgs
+			/// </summary>
+			/// <param name="v">The vehicle to spawn</param>
+			/// <param name="tv">Corresponding TrafficVolume</param>
+			public VehicleSpawnedEventArgs(IVehicle v, TrafficVolume tv)
+				{
+				this.vehicleToSpawn = v;
+				this.tv = tv;
+				}
+			}
+
+		/// <summary>
+		/// Delegate for the VehicleSpawned-EventHandler, which is called when a vehicle is to be spawned
+		/// </summary>
+		/// <param name="sender">Sneder of the event</param>
+		/// <param name="e">Event parameter</param>
+		public delegate void VehicleSpawnedEventHandler(object sender, VehicleSpawnedEventArgs e);
+
+		/// <summary>
+		/// The VehicleSpawned event occurs when a vehicle is to be spawned
+		/// </summary>
+		public event VehicleSpawnedEventHandler VehicleSpawned;
+
+		/// <summary>
+		/// Helper method to initiate the VehicleSpawned event
+		/// </summary>
+		/// <param name="e">Event parameters</param>
+		protected void OnVehicleSpawned(VehicleSpawnedEventArgs e)
+			{
+			if (VehicleSpawned != null)
+				{
+				VehicleSpawned(this, e);
 				}
 			}
 

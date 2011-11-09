@@ -49,7 +49,7 @@ namespace CityTrafficSimulator.Vehicle
 			s0 *= (rnd.NextDouble() + 0.5);
 			T *= (rnd.NextDouble() + 0.5);
 
-			m_Physics.desiredVelocity += ((rnd.NextDouble() - 0.5) * 4);
+			m_Physics.targetVelocity += ((rnd.NextDouble() - 0.5) * 4);
 			}
 	
 		/// <summary>
