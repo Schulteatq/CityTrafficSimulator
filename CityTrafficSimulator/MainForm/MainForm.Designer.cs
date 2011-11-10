@@ -117,6 +117,7 @@ namespace CityTrafficSimulator
 			this.thumbGrid = new CityTrafficSimulator.RechenkaestchenControl();
 			this.DaGrid = new CityTrafficSimulator.RechenkaestchenControl();
 			this.trafficLightTreeView = new CityTrafficSimulator.Timeline.TrafficLightTreeView(this.components);
+			this.cbRenderFps = new System.Windows.Forms.CheckBox();
 			this.pnlSimulationSetup.SuspendLayout();
 			((System.ComponentModel.ISupportInitialize)(this.stepsPerSecondSpinEdit)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this.simulationSpeedSpinEdit)).BeginInit();
@@ -344,6 +345,7 @@ namespace CityTrafficSimulator
 			// pnlRenderSetup
 			// 
 			this.pnlRenderSetup.AutoScroll = true;
+			this.pnlRenderSetup.Controls.Add(this.cbRenderFps);
 			this.pnlRenderSetup.Controls.Add(this.cbRenderLineChangePoints);
 			this.pnlRenderSetup.Controls.Add(this.label2);
 			this.pnlRenderSetup.Controls.Add(this.cbRenderIntersections);
@@ -966,6 +968,16 @@ namespace CityTrafficSimulator
 			this.trafficLightTreeView.TabIndex = 1;
 			this.trafficLightTreeView.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.trafficLightTreeView_AfterSelect);
 			// 
+			// cbRenderFps
+			// 
+			this.cbRenderFps.AutoSize = true;
+			this.cbRenderFps.Location = new System.Drawing.Point(6, 163);
+			this.cbRenderFps.Name = "cbRenderFps";
+			this.cbRenderFps.Size = new System.Drawing.Size(105, 17);
+			this.cbRenderFps.TabIndex = 23;
+			this.cbRenderFps.Text = "Performance/fps";
+			this.cbRenderFps.UseVisualStyleBackColor = true;
+			// 
 			// MainForm
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -1074,6 +1086,7 @@ namespace CityTrafficSimulator
 		private System.Windows.Forms.Panel pnlMainGrid;
 		private System.Windows.Forms.Panel pnlSimulationSetup;
 		private RechenkaestchenControl thumbGrid;
+		private System.Windows.Forms.CheckBox cbRenderFps;
 
         }
     }

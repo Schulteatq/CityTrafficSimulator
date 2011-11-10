@@ -503,6 +503,7 @@ namespace CityTrafficSimulator.Verkehr
 				if (tv.startNodes != null && tv.destinationNodes != null)
 					{
 					m_trafficVolumes.Add(tv);
+					tv.VehicleSpawned += new TrafficVolume.VehicleSpawnedEventHandler(newTV_VehicleSpawned);
 					}
 				else
 					{

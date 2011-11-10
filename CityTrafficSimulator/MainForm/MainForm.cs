@@ -205,7 +205,7 @@ namespace CityTrafficSimulator
 		public List<LineNode> fromLineNodes
 			{
 			get { return m_fromLineNodes; }
-			set { m_fromLineNodes = value; thumbGrid.Invalidate(); }
+			set { m_fromLineNodes = value; Invalidate(InvalidationLevel.ALL); }
 			}
 
 		/// <summary>
@@ -218,7 +218,7 @@ namespace CityTrafficSimulator
 		public List<LineNode> toLineNodes
 			{
 			get { return m_toLineNodes; }
-			set { m_toLineNodes = value; thumbGrid.Invalidate(); }
+			set { m_toLineNodes = value; Invalidate(InvalidationLevel.ALL); }
 			}
 
 
@@ -1278,20 +1278,23 @@ namespace CityTrafficSimulator
 					}
 
 				renderStopwatch.Stop();
-				e.Graphics.DrawString(
-					"thinking time: " + thinkStopwatch.ElapsedMilliseconds + "ms, possible thoughts per second: " + ((thinkStopwatch.ElapsedMilliseconds != 0) ? (1000 / thinkStopwatch.ElapsedMilliseconds).ToString() : "-"),
-					new Font("Arial", 10),
-					new SolidBrush(Color.Black),
-					-pnlMainGrid.AutoScrollPosition.X * zoomMultipliers[zoomComboBox.SelectedIndex, 1] + 8,
-					-pnlMainGrid.AutoScrollPosition.Y * zoomMultipliers[zoomComboBox.SelectedIndex, 1] + 40);
 
-				e.Graphics.DrawString(
-					"rendering time: " + renderStopwatch.ElapsedMilliseconds + "ms, possible fps: " + ((renderStopwatch.ElapsedMilliseconds != 0) ? (1000 / renderStopwatch.ElapsedMilliseconds).ToString() : "-"),
-					new Font("Arial", 10),
-					new SolidBrush(Color.Black),
-					-pnlMainGrid.AutoScrollPosition.X * zoomMultipliers[zoomComboBox.SelectedIndex, 1] + 8,
-					-pnlMainGrid.AutoScrollPosition.Y * zoomMultipliers[zoomComboBox.SelectedIndex, 1] + 56);
+				if (cbRenderFps.Checked)
+					{
+					e.Graphics.DrawString(
+						"thinking time: " + thinkStopwatch.ElapsedMilliseconds + "ms, possible thoughts per second: " + ((thinkStopwatch.ElapsedMilliseconds != 0) ? (1000 / thinkStopwatch.ElapsedMilliseconds).ToString() : "-"),
+						new Font("Arial", 10),
+						new SolidBrush(Color.Black),
+						-pnlMainGrid.AutoScrollPosition.X * zoomMultipliers[zoomComboBox.SelectedIndex, 1] + 8,
+						-pnlMainGrid.AutoScrollPosition.Y * zoomMultipliers[zoomComboBox.SelectedIndex, 1] + 40);
 
+					e.Graphics.DrawString(
+						"rendering time: " + renderStopwatch.ElapsedMilliseconds + "ms, possible fps: " + ((renderStopwatch.ElapsedMilliseconds != 0) ? (1000 / renderStopwatch.ElapsedMilliseconds).ToString() : "-"),
+						new Font("Arial", 10),
+						new SolidBrush(Color.Black),
+						-pnlMainGrid.AutoScrollPosition.X * zoomMultipliers[zoomComboBox.SelectedIndex, 1] + 8,
+						-pnlMainGrid.AutoScrollPosition.Y * zoomMultipliers[zoomComboBox.SelectedIndex, 1] + 56);
+					}
 				}
 			}
 
