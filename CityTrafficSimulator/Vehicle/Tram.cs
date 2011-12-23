@@ -43,6 +43,8 @@ namespace CityTrafficSimulator.Vehicle
 
 			// komfortable Bremsverzögerung
 			b = 1.0;
+
+			m_vehicleType = VehicleTypes.TRAM;
 			}
 
 		/// <summary>

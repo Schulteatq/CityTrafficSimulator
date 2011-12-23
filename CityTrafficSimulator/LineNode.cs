@@ -472,6 +472,28 @@ namespace CityTrafficSimulator
 						{
 						countOfParents = m_parent.countOfParents + 1;
 						}
+
+					// calculate length
+					length = (parent == null) ? 0 : parent.length;
+					if (parent != null)
+						{
+						if (!lineChangeNeeded)
+							{
+							length += parent.node.GetNodeConnectionTo(node).lineSegment.length;
+							}
+						else
+							{
+							if (parent.node.nextConnections.Count > 0)
+								{
+								double min = parent.node.nextConnections[0].GetLengthToLineNodeViaLineChange(node);
+								for (int i = 1; i < parent.node.nextConnections.Count; ++i)
+									{
+									min = Math.Min(min, parent.node.nextConnections[i].GetLengthToLineNodeViaLineChange(node));
+									}
+								}
+							// TODO: sinnvolle Länge berechnen
+							}
+						}
 					}
 				}
 
@@ -486,6 +508,11 @@ namespace CityTrafficSimulator
 			public int countOfParents { get; private set; }
 
 			/// <summary>
+			/// Sum of the length of from this node to the very first parent node
+			/// </summary>
+			public double length { get; private set; }
+
+			/// <summary>
 			/// legt einen neuen LinkedLineNode an
 			/// </summary>
 			/// <param name="node">der untersuchte Knoten</param>
@@ -496,37 +523,6 @@ namespace CityTrafficSimulator
                 this.node = node;
                 this.parent = parent;
 				this.lineChangeNeeded = lineChangeNeeded;
-				if (parent == null)
-					{
-					countOfParents = 0;
-					}
-				else
-					{
-					countOfParents = parent.countOfParents + 1;
-					}
-                }
-
-			/// <summary>
-			/// gibt die summierte Länge des Knotens und aller seiner Vorgängerknoten zurück
-			/// </summary>
-			/// <returns></returns>
-            public double GetLength()
-                {
-				double length = 0;
-				if (parent != null)
-					{
-					if (!lineChangeNeeded)
-						{
-						length = parent.node.GetNodeConnectionTo(node).lineSegment.length;
-						}
-					else
-						{
-						// TODO: sinnvolle Länge berechnen
-						}
-					}
-				
-
-				return (parent == null) ? length : length + parent.GetLength();
                 }
             }
 

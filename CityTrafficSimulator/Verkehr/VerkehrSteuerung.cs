@@ -830,6 +830,7 @@ namespace CityTrafficSimulator.Verkehr
 				if (start.nextConnections[foo].AddVehicle(e.vehicleToSpawn))
 					{
 					e.vehicleToSpawn.targetNodes = e.tv.destinationNodes.nodes;
+					e.vehicleToSpawn.VehicleDied += new IVehicle.VehicleDiedEventHandler(e.tv.SpawnedVehicleDied);
 					return true;
 					}
 				}

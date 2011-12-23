@@ -167,6 +167,7 @@ namespace CityTrafficSimulator.Vehicle
 				OnVehicleLeftNodeConnection(new VehicleLeftNodeConnectionEventArgs(new Interval<double>(statistics.arcPositionOfStartOnNodeConnection, currentPosition), new Interval<double>(statistics.startTimeOnNodeConnection, GlobalTime.Instance.currentTime)));
 				}
 			currentNodeConnection.RemoveVehicle(this);
+
 			
 			if (nextConnection != null)
 				{
@@ -176,14 +177,16 @@ namespace CityTrafficSimulator.Vehicle
 					// FIXME: this sometimes happens, even if it should not!
 					}
 
-				// set new state
-				m_State = new State(nextConnection, pos);
+				lastLineChangeCheck.Right -= currentNodeConnection.lineSegment.length;
 
 				// update statistics
 				m_statistics.totalMilage += currentPosition - statistics.arcPositionOfStartOnNodeConnection;
 				m_statistics.numNodeConnections++;
 				m_statistics.arcPositionOfStartOnNodeConnection = pos;
 				m_statistics.startTimeOnNodeConnection = GlobalTime.Instance.currentTime;
+
+				// set new state
+				m_State = new State(nextConnection, pos);
 
 				// add vehicle to new node connection
 				nextConnection.AddVehicleAt(this, pos);
@@ -227,6 +230,10 @@ namespace CityTrafficSimulator.Vehicle
 		/// </summary>
 		private double ratioProjectionOnTargetConnectionvsLCPLength = 0;
 
+		/// <summary>
+		/// Last check for voluntary line change (Left = world time, Right = arc pos)
+		/// </summary>
+		private Pair<double> lastLineChangeCheck = new Pair<double>();
 
 		/// <summary>
 		/// Initiiert einen Spurwechsel
@@ -253,7 +260,7 @@ namespace CityTrafficSimulator.Vehicle
 
 			// Neuen State schonmal auf die ZielNodeConnection setzen (currentNodeConnection, currentPosition)
 			RemoveFromCurrentNodeConnection(true, lcp.otherStart.nc, lcp.otherStart.arcPosition + arcPositionOffset * ratioProjectionOnTargetConnectionvsLCPLength);
-			m_WayToGo = CalculateShortestConenction(currentNodeConnection.endNode, targetNodes);
+			m_WayToGo = Routing.CalculateShortestConenction(currentNodeConnection.endNode, targetNodes, m_vehicleType);
 
 			m_statistics.numLineChanges++;
 			lineChangeNeeded = false;
@@ -267,7 +274,10 @@ namespace CityTrafficSimulator.Vehicle
 		private void FinishLineChange(double arcPositionOffset)
 			{
 			m_State.position = currentLineChangePoint.target.arcPosition + arcPositionOffset;
-			m_WayToGo = CalculateShortestConenction(currentNodeConnection.endNode, m_TargetNodes);
+			lastLineChangeCheck.Left = GlobalTime.Instance.currentTime;
+			lastLineChangeCheck.Right = currentPosition;
+
+			//m_WayToGo = CalculateShortestConenction(currentNodeConnection.endNode, m_TargetNodes);
 
 			currentlyChangingLine = false;
 
@@ -413,7 +423,7 @@ namespace CityTrafficSimulator.Vehicle
 			{
 			List<NodeConnection> route = new List<NodeConnection>();
 			route.Add(currentNodeConnection);
-			foreach (RouteSegment rs in WayToGo)
+			foreach (Routing.RouteSegment rs in WayToGo)
 				route.Add(rs.startConnection);
 
 			double acceleration = Think(route, currentPosition, false, tickLength);
@@ -536,6 +546,8 @@ namespace CityTrafficSimulator.Vehicle
 				if (lineChangeNeeded && !currentlyChangingLine)
 					{
 					thinkAboutLineChange = false;
+					lastLineChangeCheck.Left = GlobalTime.Instance.currentTime;
+					lastLineChangeCheck.Right = currentPosition;
 
 					// get current LineChangePoint and check, whether it's leading to our target
 					NodeConnection.LineChangePoint lcp = route[0].GetPrevLineChangePoint(arcPos);
@@ -626,7 +638,7 @@ namespace CityTrafficSimulator.Vehicle
 							// When reaching the end of the LineChangeInterval, check whether there are other possibilities to reach the target:
 							if (percentOfLCILeft < 0.5)
 								{
-								RouteToTarget newRTT = CalculateShortestConenction(route[0].endNode, m_TargetNodes);
+								Routing newRTT = Routing.CalculateShortestConenction(route[0].endNode, m_TargetNodes, m_vehicleType);
 								// The alternative route does not cost too much -> choose it
 								if (newRTT.SegmentCount() > 0 && newRTT.costs / m_WayToGo.costs < Constants.maxRatioForEnforcedLineChange)
 									{
@@ -647,7 +659,7 @@ namespace CityTrafficSimulator.Vehicle
 									if (vd.Left != null && vd.Left.vehicle.p >= p)
 										{
 										// tell the vehicle behind my back to wait for me
-										m_State.SetLineChangeVehicleInteraction(this, vd.Left.vehicle, lcp.otherStart.nc, myArcPositionOnOtherConnection - m_Length - vd.Left.vehicle.s0);
+										m_State.SetLineChangeVehicleInteraction(this, vd.Left.vehicle, lcp.otherStart.nc, myArcPositionOnOtherConnection - m_Length);
 
 										// In addition, I need to get behind the vehicle in front of the vehicle which waits for me. Therefore I adapt the desired velocity
 										if (vd.Right != null)
@@ -669,14 +681,19 @@ namespace CityTrafficSimulator.Vehicle
 
 				#region freiwillig
 
+				thinkAboutLineChange &= ((GlobalTime.Instance.currentTime - lastLineChangeCheck.Left > 1) || (currentPosition - lastLineChangeCheck.Right > 50));
+
 				if (thinkAboutLineChange && !currentlyChangingLine)
 					{
+					lastLineChangeCheck.Left = GlobalTime.Instance.currentTime;
+					lastLineChangeCheck.Right = currentPosition;
+
 					// get current LineChangePoint and check, whether it's reachable
 					NodeConnection.LineChangePoint lcp = route[0].GetPrevLineChangePoint(arcPos);
 					if ((lcp.target.nc != null) && (Math.Abs(arcPos - lcp.start.arcPosition) < Constants.maxDistanceToLineChangePoint * 0.67))
 						{
 						// check whether there is an alternative route that is not too costly
-						RouteToTarget alternativeRoute = CalculateShortestConenction(lcp.target.nc.endNode, targetNodes);
+						Routing alternativeRoute = Routing.CalculateShortestConenction(lcp.target.nc.endNode, targetNodes, m_vehicleType);
 						if (alternativeRoute.SegmentCount() > 0 && alternativeRoute.costs / WayToGo.costs < Constants.maxRatioForVoluntaryLineChange && !alternativeRoute.Top().lineChangeNeeded)
 							{
 							double myArcPositionOnOtherConnection = lcp.otherStart.arcPosition + (arcPos - lcp.start.arcPosition);
@@ -695,7 +712,7 @@ namespace CityTrafficSimulator.Vehicle
 										{
 										List<NodeConnection> l = new List<NodeConnection>();
 										l.Add(lcp.target.nc);
-										foreach (RouteSegment rs in alternativeRoute)
+										foreach (Routing.RouteSegment rs in alternativeRoute)
 											l.Add(rs.startConnection);
 
 										// calculate my necessary acceleration in case of a line change
@@ -787,7 +804,7 @@ namespace CityTrafficSimulator.Vehicle
 						// (dieser könnte dich geändert haben, weil dort plötzlich mehr Autos fahren)
 						if (currentNodeConnection.endNode.nextConnections.Count > 1)
 							{
-							m_WayToGo = CalculateShortestConenction(currentNodeConnection.endNode, targetNodes);
+							m_WayToGo = Routing.CalculateShortestConenction(currentNodeConnection.endNode, targetNodes, m_vehicleType);
 							if (m_WayToGo.SegmentCount() == 0 || m_WayToGo.Top() == null)
 								{
 								RemoveFromCurrentNodeConnection(true, null, 0);
@@ -798,7 +815,7 @@ namespace CityTrafficSimulator.Vehicle
 						visitedNodeConnections.AddFirst(currentNodeConnection);
 
 						// nächsten Wegpunkt extrahieren
-						RouteSegment rs = WayToGo.Pop();
+						Routing.RouteSegment rs = WayToGo.Pop();
 
 						if (rs == null)
 							{
@@ -1228,7 +1245,7 @@ namespace CityTrafficSimulator.Vehicle
 			set 
 				{ 
 				m_TargetNodes = value;
-				m_WayToGo = CalculateShortestConenction(currentNodeConnection.endNode, m_TargetNodes);
+				m_WayToGo = Routing.CalculateShortestConenction(currentNodeConnection.endNode, m_TargetNodes, m_vehicleType);
 				if (m_WayToGo.SegmentCount() == 0)
 					{
 					RemoveFromCurrentNodeConnection(false, null, 0);
@@ -1551,419 +1568,22 @@ namespace CityTrafficSimulator.Vehicle
 			}
         #endregion
 
-		#region A* Algorithmus
-
-
-		/// <summary>
-		/// Teilstück einer Wegroute. Entweder eine der endNode der aktuellen NodeConnection, der endNode einer parallelen NodeConnection, zu der ein Spurwechsel nötig ist
-		/// </summary>
-		public class RouteSegment
-			{
-			/// <summary>
-			/// NodeConnection auf der dieses RouteSegment beginnt (enden kann es auf einer andere, wenn ein Spurwechsel nötig ist)
-			/// </summary>
-			public NodeConnection startConnection;
-
-			/// <summary>
-			/// LineNode, der als nächstes angefahren werden soll
-			/// </summary>
-			public LineNode nextNode;
-
-			/// <summary>
-			/// Flag, ob dazu ein Spurwechsel nötig ist
-			/// </summary>
-			public bool lineChangeNeeded;
-
-			/// <summary>
-			/// Kosten dieses Teilstücks (mindestens Länge der NodeConnection, plus evtl. Strafkosten für teure Spurwechsel
-			/// </summary>
-			public double costs;
-
-
-			/// <summary>
-			/// Standardkonstruktor, erstellt eine neues Routen-Teilstück
-			/// </summary>
-			/// <param name="startConnection">NodeConnection auf der dieses RouteSegment beginnt (enden kann es auf einer andere, wenn ein Spurwechsel nötig ist)</param>
-			/// <param name="nextNode">LineNode, der als nächstes angefahren werden soll</param>
-			/// <param name="lineChangeNeeded">Flag, ob dazu ein Spurwechsel nötig ist</param>
-			/// <param name="costs">Kosten dieses Teilstücks (mindestens Länge der NodeConnection, plus evtl. Strafkosten für teure Spurwechsel</param>
-			public RouteSegment(NodeConnection startConnection, LineNode nextNode, bool lineChangeNeeded, double costs)
-				{
-				this.startConnection = startConnection;
-				this.nextNode = nextNode;
-				this.lineChangeNeeded = lineChangeNeeded;
-				this.costs = costs;
-				}
-			}
-
-
-		/// <summary>
-		/// Wegroute zu einem Zielknoten. Rückgabetyp des A*-Algorithmus
-		/// </summary>
-		public class RouteToTarget : IEnumerable<RouteSegment>
-			{
-			/// <summary>
-			/// Wegroute
-			/// </summary>
-			private LinkedList<RouteSegment> route;
-
-			/// <summary>
-			/// Kosten der gesamten Route
-			/// </summary>
-			public double costs;
-
-			/// <summary>
-			/// Anzahl der benötigten Spurwechsel
-			/// </summary>
-			public int countOfLineChanges;
-
-
-			/// <summary>
-			/// Standardkonstruktor, erstellt eine neue leere Wegroute zu einem Zielknoten
-			/// </summary>
-			public RouteToTarget()
-				{
-				route = new LinkedList<RouteSegment>();
-				costs = 0;
-				countOfLineChanges = 0;
-				}
-
-
-			/// <summary>
-			/// Pusht das übergebene RouteSegment auf den route-Stack und aktualisiert die Kosten und Anzahl benötigter Spurwechsel
-			/// </summary>
-			/// <param name="rs">einzufügendes RouteSegment</param>
-			public void Push(RouteSegment rs)
-				{
-				route.AddFirst(rs);
-				costs += rs.costs;
-				if (rs.lineChangeNeeded)
-					++countOfLineChanges;
-				}
-
-			/// <summary>
-			/// Poppt das oberste Element vom route-Stack und aktualisiert das length-Feld
-			/// </summary>
-			/// <returns>route.First.Value</returns>
-			public RouteSegment Pop()
-				{
-				if (route.Count > 0)
-					{
-					RouteSegment rs = route.First.Value;
-					costs -= rs.costs;
-					if (rs.lineChangeNeeded)
-						{
-						--countOfLineChanges;
-						}
-
-					route.RemoveFirst();
-					return rs;
-					}
-				else
-					{
-					return null;
-					}
-				}
-
-			/// <summary>
-			/// Liefert das oberste Element vom route-Stack zurück
-			/// </summary>
-			/// <returns>route.First.Value</returns>
-			public RouteSegment Top()
-				{
-				return route.First.Value;
-				}
-
-			/// <summary>
-			/// gibt die Anzahl der Elemente des route-Stacks zurück
-			/// </summary>
-			/// <returns>route.Count</returns>
-			public int SegmentCount()
-				{
-				return route.Count;
-				}
-
-			#region IEnumerable<RouteSegment> Member
-
-			/// <summary>
-			/// Gibt den Enumerator für foreach-Schleifen zurück
-			/// </summary>
-			/// <returns>route.GetEnumerator()</returns>
-			public IEnumerator<RouteSegment> GetEnumerator()
-				{
-				return route.GetEnumerator();
-				}
-
-			/// <summary>
-			/// Gibt den Enumerator für foreach-Schleifen zurück
-			/// </summary>
-			/// <returns>route.GetEnumerator()</returns>
-			System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
-				{
-				return route.GetEnumerator();
-				}
-
-			#endregion
-			}
-
-        private PriorityQueue<LineNode.LinkedLineNode, double> openlist = new PriorityQueue<LineNode.LinkedLineNode, double>();
-        private Stack<LineNode.LinkedLineNode> closedlist = new Stack<LineNode.LinkedLineNode>();
-
 		/// <summary>
 		/// Stack von den noch zu besuchenden NodeConnections
 		/// </summary>
-		private RouteToTarget m_WayToGo;
+		private Routing m_WayToGo;
 		/// <summary>
 		/// Stack von den noch zu besuchenden NodeConnections
 		/// </summary>
-		public RouteToTarget WayToGo
-            {
-            get { return m_WayToGo; }
-            }
-
-
-		/// <summary>
-		/// berechnet die minimale euklidische Entfernung von startNode zu einem der Knoten aus targetNodes
-		/// </summary>
-		/// <param name="startNode">Startknoten von dem aus die Entfernung berechnet werden soll</param>
-		/// <param name="targetNodes">Liste von LineNodes zu denen die Entfernung berechnet werden soll</param>
-		/// <returns>minimale euklidische Distanz</returns>
-		private double GetMinimumEuklidDistance(LineNode startNode, List<LineNode> targetNodes)
+		public Routing WayToGo
 			{
-			if (targetNodes.Count > 0)
-				{
-				double minValue = Vector2.GetDistance(startNode.position, targetNodes[0].position);
-
-				for (int i = 1; i < targetNodes.Count; i++)
-					{
-					double newDist = Vector2.GetDistance(startNode.position, targetNodes[i].position);
-					if (newDist < minValue)
-						{
-						minValue = newDist;
-						}
-					}
-
-				return minValue;
-				}
-			return 0;
+			get { return m_WayToGo; }
 			}
 
 		/// <summary>
-		/// Berechnet den kürzesten Weg zum targetNode und speichert diesen als Stack in WayToGo
-		/// Implementierung des A*-Algorithmus' frei nach Wikipedia :)
+		/// Type of this very vehicle
 		/// </summary>
-		/// <param name="startNode">Startknoten von dem aus der kürzeste Weg berechnet werden soll</param>
-		/// <param name="targetNodes">Liste von Zielknoten zu einem von denen der kürzeste Weg berechnet werden soll</param>
-        public RouteToTarget CalculateShortestConenction(LineNode startNode, List<LineNode> targetNodes)
-            {
-            openlist.Clear();
-            closedlist.Clear();
-			RouteToTarget toReturn = new RouteToTarget();
-			//Stack<RouteSegment> toReturn = new Stack<RouteSegment>();
-			
-
-            // Initialisierung der Open List, die Closed List ist noch leer
-            // (die Priorität bzw. der f Wert des Startknotens ist unerheblich)
-			openlist.Enqueue(new LineNode.LinkedLineNode(startNode, null, false), 0);
-
-            // diese Schleife wird durchlaufen bis entweder
-            // - die optimale Lösung gefunden wurde oder
-            // - feststeht, dass keine Lösung existiert
-            do
-                {
-                // Knoten mit dem geringsten (in diesem Fall größten) f Wert aus der Open List entfernen
-                PriorityQueueItem<LineNode.LinkedLineNode, double> currentNode = openlist.Dequeue();
-
-                // wurde das Ziel gefunden?
-                if (targetNodes.Contains(currentNode.Value.node))
-                    {
-					// nun noch die closedList in eine RouteToTarget umwandeln
-                    closedlist.Push(currentNode.Value);
-                    LineNode.LinkedLineNode endnode = closedlist.Pop();
-					LineNode.LinkedLineNode startnode = endnode.parent;
-					while (startnode != null)
-                        {
-						// einfacher/direkter Weg über eine NodeConnection
-						if (!endnode.lineChangeNeeded)
-							{
-							toReturn.Push(new RouteSegment(startnode.node.GetNodeConnectionTo(endnode.node), endnode.node, false, startnode.node.GetNodeConnectionTo(endnode.node).lineSegment.length));
-							}
-						// Spurwechsel nötig
-						else
-							{
-							NodeConnection formerConnection = startnode.parent.node.GetNodeConnectionTo(startnode.node);
-
-							double length = formerConnection.GetLengthToLineNodeViaLineChange(endnode.node) + Constants.lineChangePenalty;
-							// Anfangs-/ oder Endknoten des Spurwechsels ist eine Ampel => Kosten-Penalty, da hier verstärktes Verkehrsaufkommen zu erwarten ist
-							if ((endnode.node.tLight != null) || (startnode.node.tLight != null))
-								length += Constants.lineChangeBeforeTrafficLightPenalty;
-
-							toReturn.Push(new RouteSegment(formerConnection, endnode.node, true, length));
-
-							// TODO:	Erklären: hier wird irgendwas doppelt gemacht - ich meine mich zu Erinnern,
-							//			das das so soll, aber nicht warum. Bitte beizeiten analysieren und erklären
-							endnode = startnode;
-							startnode = startnode.parent;
-							}
-
-						endnode = startnode;
-						startnode = startnode.parent;
-                        }
-					return toReturn;
-					}
-
-				#region Nachfolgeknoten auf die Open List setzen
-				// Nachfolgeknoten auf die Open List setzen
-                // überprüft alle Nachfolgeknoten und fügt sie der Open List hinzu, wenn entweder
-                // - der Nachfolgeknoten zum ersten Mal gefunden wird oder
-				// - ein besserer Weg zu diesem Knoten gefunden wird
-
-				#region nächste LineNodes ohne Spurwechsel untersuchen
-				foreach (NodeConnection nc in currentNode.Value.node.nextConnections)
-                    {
-					// prüfen, ob ich auf diesem NodeConnection überhaupt fahren darf
-					if (! CheckNodeConnectionForSuitability(nc))
-						continue;
-
-                    LineNode.LinkedLineNode successor = new LineNode.LinkedLineNode(nc.endNode, null, false);
-                    bool nodeInClosedList = false;
-                    foreach (LineNode.LinkedLineNode lln in closedlist)
-						if (lln.node == successor.node)
-							{
-							nodeInClosedList = true;
-							continue;
-							}
-
-                    // wenn der Nachfolgeknoten bereits auf der Closed List ist - tue nichts
-                    if (!nodeInClosedList) 
-                        {
-						NodeConnection theConnection = currentNode.Value.node.GetNodeConnectionTo(successor.node);
-                        // f Wert für den neuen Weg berechnen: g Wert des Vorgängers plus die Kosten der
-                        // gerade benutzten Kante plus die geschätzten Kosten von Nachfolger bis Ziel
-						double f = currentNode.Value.GetLength()										// exakte Länge des bisher zurückgelegten Weges
-							+ theConnection.lineSegment.length;											// exakte Länge des gerade untersuchten Segmentes
-
-						if (currentNode.Value.countOfParents < 3)										// Stau kostet extra, aber nur, wenn innerhalb
-							{																			// der nächsten 2 Connections
-							f += theConnection.vehicles.Count * Constants.vehicleOnRoutePenalty; 
-							}
-						f += GetMinimumEuklidDistance(successor.node, targetNodes);						// Minimumweg zum Ziel (Luftlinie)
-                        f *= -1;
-
-
-						// gucke, ob der Node schon in der Liste drin ist und wenn ja, dann evtl. rausschmeißen
-						bool nodeInOpenlist = false;
-						foreach (PriorityQueueItem<LineNode.LinkedLineNode, double> pqi in openlist)
-							{
-							if (pqi.Value.node == successor.node)
-								{
-								if (f <= pqi.Priority)
-									nodeInOpenlist = true;
-								else
-									openlist.Remove(pqi.Value); // erst entfernen
-								break;
-								}
-							}
-
-                        if (! nodeInOpenlist)
-                            {
-                            // Vorgängerzeiger setzen
-                            successor.parent = currentNode.Value;
-                            openlist.Enqueue(successor, f); // dann neu einfügen
-                            }
-                        }
-					}
-				#endregion
-
-				#region nächste LineNodes mit Spurwechsel untersuchen
-
-				if (currentNode.Value.parent != null)
-					{
-					NodeConnection currentConnection = currentNode.Value.parent.node.GetNodeConnectionTo(currentNode.Value.node);
-					if (currentConnection != null)
-						{
-						foreach (LineNode ln in currentConnection.viaLineChangeReachableNodes)
-							{
-							// prüfen, ob ich diesen LineNode überhaupt anfahren darf
-							if (!CheckLineNodeForIncomingSuitability(ln))
-								continue;
-
-							// neuen LinkedLineNode erstellen
-							LineNode.LinkedLineNode successor = new LineNode.LinkedLineNode(ln, null, true);
-							bool nodeInClosedList = false;
-							foreach (LineNode.LinkedLineNode lln in closedlist)
-								if (lln.node == successor.node)
-									{
-									nodeInClosedList = true;
-									break;
-									}
-
-							// wenn der Nachfolgeknoten bereits auf der Closed List ist - tue nichts
-							if (!nodeInClosedList)
-								{
-								// passendes LineChangeInterval finden
-								NodeConnection.LineChangeInterval lci;
-								currentConnection.lineChangeIntervals.TryGetValue(ln.hashcode, out lci);
-
-								if (lci.length < Constants.minimumLineChangeLength)
-									break;
-
-								// f-Wert für den neuen Weg berechnen: g Wert des Vorgängers plus die Kosten der
-								// gerade benutzten Kante plus die geschätzten Kosten von Nachfolger bis Ziel
-								double f = currentNode.Value.parent.GetLength();										// exakte Länge des bisher zurückgelegten Weges
-								f += currentConnection.GetLengthToLineNodeViaLineChange(successor.node);
-
-								// Kostenanteil, für den Spurwechsel dazuaddieren
-								f += (lci.length < 2 * Constants.minimumLineChangeLength) ? 2 * Constants.lineChangePenalty : Constants.lineChangePenalty;
-
-								// Anfangs-/ oder Endknoten des Spurwechsels ist eine Ampel => Kosten-Penalty, da hier verstärktes Verkehrsaufkommen zu erwarten ist
-								if ((lci.targetNode.tLight != null) || (currentConnection.startNode.tLight != null)) 
-									f += Constants.lineChangeBeforeTrafficLightPenalty;
-
-								f += GetMinimumEuklidDistance(successor.node, targetNodes);						// Minimumweg zum Ziel (Luftlinie)
-								f *= -1;
-
-
-								// gucke, ob der Node schon in der Liste drin ist und wenn ja, dann evtl. rausschmeißen
-								bool nodeInOpenlist = false;
-								foreach (PriorityQueueItem<LineNode.LinkedLineNode, double> pqi in openlist)
-									{
-									if (pqi.Value.node == successor.node)
-										{
-										if (f <= pqi.Priority)
-											nodeInOpenlist = true;
-										else
-											openlist.Remove(pqi.Value); // erst entfernen
-										break;
-										}
-									}
-
-								if (!nodeInOpenlist)
-									{
-									// Vorgängerzeiger setzen
-									successor.parent = currentNode.Value;
-									openlist.Enqueue(successor, f); // dann neu einfügen
-									}
-								}
-							}
-						}
-					}
-
-
-				#endregion
-
-				#endregion
-
-				// der aktuelle Knoten ist nun abschließend untersucht
-                closedlist.Push(currentNode.Value);
-                } 
-            while (openlist.Count != 0);
-
-			// Es wurde kein Weg gefunden - dann lassen wir das Auto sich selbst zerstören:
-			return toReturn;
-            }
-
-        #endregion
+		protected VehicleTypes m_vehicleType;
 
 		#region IDrawable Member
 
@@ -2023,7 +1643,7 @@ namespace CityTrafficSimulator.Vehicle
 				{
 				g.DrawBezier(prevNodeConnectionsPen, prevNC.lineSegment.p0, prevNC.lineSegment.p1, prevNC.lineSegment.p2, prevNC.lineSegment.p3);
 				}
-			foreach (RouteSegment rs in WayToGo)
+			foreach (Routing.RouteSegment rs in WayToGo)
 				{
 				if (!rs.lineChangeNeeded)
 					{

@@ -50,6 +50,7 @@ namespace CityTrafficSimulator.Vehicle
 			T *= (rnd.NextDouble() + 0.5);
 
 			m_Physics.targetVelocity += ((rnd.NextDouble() - 0.5) * 4);
+			m_vehicleType = VehicleTypes.CAR;
 			}
 	
 		/// <summary>

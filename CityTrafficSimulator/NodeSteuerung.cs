@@ -718,7 +718,9 @@ namespace CityTrafficSimulator
 										double diff = arcPositionTarget - nc2.lineSegment.length;
 										foreach (NodeConnection nextNc in nc2.endNode.nextConnections)
 											{
-											if (nextNc.enableIncomingLineChange && (nextNc.carsAllowed || nextNc.busAllowed) && nc != nextNc)
+											if (   (diff <= nextNc.lineSegment.length)
+												&& (nextNc.enableIncomingLineChange && (nextNc.carsAllowed || nextNc.busAllowed))
+												&& (nc != nextNc))
 												{
 												NodeConnection.SpecificPosition target = new NodeConnection.SpecificPosition(diff, nextNc);
 												nc.AddLineChangePoint(new NodeConnection.LineChangePoint(start, target, otherStart));
@@ -762,8 +764,13 @@ namespace CityTrafficSimulator
 										double diff = arcPositionTarget - nc2.lineSegment.length;
 										foreach (NodeConnection nextNc in nc2.endNode.nextConnections)
 											{
-											NodeConnection.SpecificPosition target = new NodeConnection.SpecificPosition(diff, nextNc);
-											nc.AddLineChangePoint(new NodeConnection.LineChangePoint(start, target, otherStart));
+											if ((diff <= nextNc.lineSegment.length)
+												&& (nextNc.enableIncomingLineChange && (nextNc.carsAllowed || nextNc.busAllowed))
+												&& (nc != nextNc))
+												{
+												NodeConnection.SpecificPosition target = new NodeConnection.SpecificPosition(diff, nextNc);
+												nc.AddLineChangePoint(new NodeConnection.LineChangePoint(start, target, otherStart));
+												}
 											}
 										}
 

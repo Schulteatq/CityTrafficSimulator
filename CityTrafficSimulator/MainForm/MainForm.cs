@@ -23,6 +23,7 @@ using System.ComponentModel;
 using System.Data;
 using System.Drawing;
 using System.Drawing.Drawing2D;
+using System.Globalization;
 using System.Text;
 using System.Windows.Forms;
 using System.IO;
@@ -148,6 +149,8 @@ namespace CityTrafficSimulator
 		#endregion
 
 		#region Variablen / Properties
+		private Image[,] satelliteImages;
+
 		private Random rnd = new Random();
 
 		private bool dockToGrid = false;
@@ -1201,6 +1204,25 @@ namespace CityTrafficSimulator
 				e.Graphics.DrawImage(resampledBackgroundImage, new Point(0, 0));
 				}
 
+			if (satelliteImages != null)
+				{
+				int x, y = 0;
+				for (int i = 0; i < satelliteImages.GetLength(0); ++i)
+					{
+					x = 0;
+					for (int j = 0; j < satelliteImages.GetLength(1); ++j)
+						{
+						if (satelliteImages[i, j] != null)
+							{
+							e.Graphics.DrawImage(satelliteImages[i, j], new Point(x, y));
+							x += satelliteImages[i, j].Width;
+							}
+						}
+					if (satelliteImages[i, 0] != null)
+						y += satelliteImages[i, 0].Height;
+					}
+				}
+
 			e.Graphics.Transform = new Matrix(zoomMultipliers[zoomComboBox.SelectedIndex, 0], 0, 0, zoomMultipliers[zoomComboBox.SelectedIndex, 0], 0, 0);
 
 
@@ -1961,6 +1983,77 @@ namespace CityTrafficSimulator
 
 			trafficLightTreeView.Size = new System.Drawing.Size(w - 6, h - 3 - 23 - 6 - 3);
 			freeNodeButton.Location = new System.Drawing.Point(w - 85 - 3, h - 26);
+			}
+
+		/// <summary>
+		/// Function to download Image from website
+		/// </summary>
+		/// <param name="_URL">URL address to download image</param>
+		/// <returns>Image</returns>
+		public Image DownloadImage(string _URL)
+			{
+			Image _tmpImage = null;
+
+			try
+				{
+				// Open a connection
+				System.Net.HttpWebRequest _HttpWebRequest = (System.Net.HttpWebRequest)System.Net.HttpWebRequest.Create(_URL);
+
+				_HttpWebRequest.AllowWriteStreamBuffering = true;
+
+				// You can also specify additional header values like the user agent or the referer: (Optional)
+				_HttpWebRequest.UserAgent = "Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 5.1)";
+				//_HttpWebRequest.Referer = "http://www.google.com/";
+
+				// set timeout for 20 seconds (Optional)
+				_HttpWebRequest.Timeout = 3000;
+
+				// Request response:
+				System.Net.WebResponse _WebResponse = _HttpWebRequest.GetResponse();
+
+				// Open data stream:
+				System.IO.Stream _WebStream = _WebResponse.GetResponseStream();
+
+				// convert webstream to image
+				_tmpImage = Image.FromStream(_WebStream);
+
+				// Cleanup
+				_WebResponse.Close();
+				_WebResponse.Close();
+				}
+			catch (Exception _Exception)
+				{
+				// Error
+				Console.WriteLine("Exception caught in process: {0}", _Exception.ToString());
+				return null;
+				}
+
+			return _tmpImage;
+			}
+
+		private void btnSetWorldCoordinates_Click(object sender, EventArgs e)
+			{
+			string baseUrl = @"http://maps.google.com/maps/api/staticmap?zoom=19&size=635x628&sensor=false&maptype=satellite&center=";
+			CultureInfo ci = new CultureInfo("en-US");
+			int numx = 10;
+			int numy = 10;
+			satelliteImages = new Image[numx, numy];
+
+			for (int i = 0; i < numx; ++i)
+				{
+				for (int j = 0; j < numy; ++j)
+					{
+					satelliteImages[i,j] = DownloadImage(baseUrl + (spinLatitude.Value - (0.001m * i)).ToString(ci) + "," + (spinLongitude.Value + (0.0017m * j)).ToString(ci));
+					if (satelliteImages[i,j] != null)
+						satelliteImages[i, j] = ResizeBitmap(new Bitmap(satelliteImages[i, j]), (int)(satelliteImages[i, j].Width * 1.739), (int)(satelliteImages[i, j].Height * 1.739));
+					}
+				}
+// 				satelliteImages[0, 0] = DownloadImage(baseUrl + spinLatitude.Value.ToString(ci) + "," + spinLongitude.Value.ToString(ci));
+// 			satelliteImages[1, 0] = DownloadImage(baseUrl + (spinLatitude.Value - 0.001m).ToString(ci) + "," + spinLongitude.Value.ToString(ci));
+// 			satelliteImages[0, 1] = DownloadImage(baseUrl + spinLatitude.Value.ToString(ci) + "," + (spinLongitude.Value + 0.0017m).ToString(ci));
+// 			satelliteImages[1, 1] = DownloadImage(baseUrl + (spinLatitude.Value - 0.001m).ToString(ci) + "," + (spinLongitude.Value + 0.0017m).ToString(ci));
+
+
 			}
 
 		}

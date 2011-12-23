@@ -35,6 +35,7 @@ namespace CityTrafficSimulator.Vehicle
 
 			m_Physics = p;
 			m_Color = Color.FromArgb(rnd.Next(256), rnd.Next(256), rnd.Next(256));
+			m_vehicleType = VehicleTypes.BUS;
 
 			// maximale Beschleunigung
 			a = 0.9;

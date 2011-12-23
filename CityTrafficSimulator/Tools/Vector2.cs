@@ -111,7 +111,7 @@ namespace CityTrafficSimulator
 		/// <returns>v*d</returns>
         public static Vector2 operator *(Vector2 v, double d)
             {
-            return new Vector2(v.X * d, v.Y * d);
+            return new Vector2(v.x * d, v.y * d);
             }
 
 		/// <summary>
@@ -122,7 +122,7 @@ namespace CityTrafficSimulator
 		/// <returns>v*d</returns>
 		public static Vector2 operator *(double d, Vector2 v)
             {
-            return new Vector2(v.X * d, v.Y * d);
+            return new Vector2(v.x * d, v.y * d);
             }
 
 		/// <summary>
@@ -133,7 +133,7 @@ namespace CityTrafficSimulator
 		/// <returns>Skalarprodukt: dot(v1, v2) </returns>
         public static double operator *(Vector2 v1, Vector2 v2)
             {
-            return v1.X * v2.X + v1.Y * v2.Y;
+            return v1.x * v2.x + v1.y * v2.y;
             }
 
 		/// <summary>
@@ -144,7 +144,7 @@ namespace CityTrafficSimulator
 		/// <returns>v1 + v2</returns>
         public static Vector2 operator +(Vector2 v1, Vector2 v2)
             {
-            return new Vector2(v1.X + v2.X, v1.Y + v2.Y);
+            return new Vector2(v1.x + v2.x, v1.y + v2.y);
             }
 
 		/// <summary>
@@ -155,7 +155,7 @@ namespace CityTrafficSimulator
 		/// <returns>v1 - v2</returns>
         public static Vector2 operator -(Vector2 v1, Vector2 v2)
             {
-            return new Vector2(v1.X - v2.X, v1.Y - v2.Y);
+            return new Vector2(v1.x - v2.x, v1.y - v2.y);
             }
         #endregion
         
@@ -164,7 +164,7 @@ namespace CityTrafficSimulator
 		/// </summary>
         public double Abs
             {
-            get { return Math.Sqrt(X * X + Y * Y); }
+            get { return Math.Sqrt(x * x + y * y); }
             }
 
 		/// <summary>
@@ -172,7 +172,7 @@ namespace CityTrafficSimulator
 		/// </summary>
         public Vector2 RotatedClockwise
             {
-            get { return new Vector2(Y, -1 * X); }
+            get { return new Vector2(y, -1 * x); }
             }
 
 		/// <summary>
@@ -180,7 +180,7 @@ namespace CityTrafficSimulator
 		/// </summary>
 		public Vector2 RotatedCounterClockwise
 			{
-			get { return new Vector2(-Y, X); }
+			get { return new Vector2(-y, x); }
 			}
 
 		/// <summary>
@@ -238,7 +238,7 @@ namespace CityTrafficSimulator
 		/// <returns>einen Point mit den Koordinaten von v</returns>
         public static implicit operator System.Drawing.Point(Vector2 v)
             {
-            return new System.Drawing.Point((int)v.X, (int)v.Y);
+            return new System.Drawing.Point((int)v.x, (int)v.y);
             }
 
 		/// <summary>
@@ -248,7 +248,7 @@ namespace CityTrafficSimulator
 		/// <returns>einen PointF mit den Koordinaten von v</returns>
 		public static implicit operator System.Drawing.PointF(Vector2 v)
             {
-			return new System.Drawing.PointF((float)v.X, (float)v.Y);
+			return new System.Drawing.PointF((float)v.x, (float)v.y);
             }
 
 		/// <summary>
@@ -258,7 +258,7 @@ namespace CityTrafficSimulator
 		/// <returns>Size mit den Dimensionen der Koordinaten von v</returns>
 		public static implicit operator System.Drawing.Size(Vector2 v)
 			{
-			return new System.Drawing.Size((int)v.X, (int)v.Y);
+			return new System.Drawing.Size((int)v.x, (int)v.y);
 			}
 
 		/// <summary>
@@ -268,7 +268,7 @@ namespace CityTrafficSimulator
 		/// <returns>SizeF mit den Dimensionen der Koordinaten von v</returns>
 		public static implicit operator System.Drawing.SizeF(Vector2 v)
 			{
-			return new System.Drawing.SizeF((float)v.X, (float)v.Y);
+			return new System.Drawing.SizeF((float)v.x, (float)v.y);
 			}
 
 		/// <summary>

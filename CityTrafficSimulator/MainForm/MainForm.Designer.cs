@@ -70,6 +70,7 @@ namespace CityTrafficSimulator
 			this.LadenButton = new System.Windows.Forms.Button();
 			this.infoEdit = new System.Windows.Forms.TextBox();
 			this.pnlRenderSetup = new System.Windows.Forms.Panel();
+			this.cbRenderFps = new System.Windows.Forms.CheckBox();
 			this.cbRenderLineChangePoints = new System.Windows.Forms.CheckBox();
 			this.label2 = new System.Windows.Forms.Label();
 			this.cbRenderIntersections = new System.Windows.Forms.CheckBox();
@@ -86,6 +87,10 @@ namespace CityTrafficSimulator
 			this.pnlSignalAssignment = new System.Windows.Forms.Panel();
 			this.freeNodeButton = new System.Windows.Forms.Button();
 			this.pnlCanvasSetup = new System.Windows.Forms.Panel();
+			this.groupBox1 = new System.Windows.Forms.GroupBox();
+			this.spinLongitude = new System.Windows.Forms.NumericUpDown();
+			this.spinLatitude = new System.Windows.Forms.NumericUpDown();
+			this.btnSetWorldCoordinates = new System.Windows.Forms.Button();
 			this.groupBox2 = new System.Windows.Forms.GroupBox();
 			this.label10 = new System.Windows.Forms.Label();
 			this.label9 = new System.Windows.Forms.Label();
@@ -117,7 +122,6 @@ namespace CityTrafficSimulator
 			this.thumbGrid = new CityTrafficSimulator.RechenkaestchenControl();
 			this.DaGrid = new CityTrafficSimulator.RechenkaestchenControl();
 			this.trafficLightTreeView = new CityTrafficSimulator.Timeline.TrafficLightTreeView(this.components);
-			this.cbRenderFps = new System.Windows.Forms.CheckBox();
 			this.pnlSimulationSetup.SuspendLayout();
 			((System.ComponentModel.ISupportInitialize)(this.stepsPerSecondSpinEdit)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this.simulationSpeedSpinEdit)).BeginInit();
@@ -126,6 +130,9 @@ namespace CityTrafficSimulator
 			this.pnlRenderSetup.SuspendLayout();
 			this.pnlSignalAssignment.SuspendLayout();
 			this.pnlCanvasSetup.SuspendLayout();
+			this.groupBox1.SuspendLayout();
+			((System.ComponentModel.ISupportInitialize)(this.spinLongitude)).BeginInit();
+			((System.ComponentModel.ISupportInitialize)(this.spinLatitude)).BeginInit();
 			this.groupBox2.SuspendLayout();
 			((System.ComponentModel.ISupportInitialize)(this.canvasHeigthSpinEdit)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this.canvasWidthSpinEdit)).BeginInit();
@@ -154,7 +161,7 @@ namespace CityTrafficSimulator
 			this.pnlSimulationSetup.Controls.Add(this.simulationSpeedSpinEdit);
 			this.pnlSimulationSetup.Location = new System.Drawing.Point(795, 14);
 			this.pnlSimulationSetup.Name = "pnlSimulationSetup";
-			this.pnlSimulationSetup.Size = new System.Drawing.Size(307, 200);
+			this.pnlSimulationSetup.Size = new System.Drawing.Size(307, 203);
 			this.pnlSimulationSetup.TabIndex = 9;
 			// 
 			// stepsPerSecondSpinEdit
@@ -364,6 +371,16 @@ namespace CityTrafficSimulator
 			this.pnlRenderSetup.Size = new System.Drawing.Size(307, 189);
 			this.pnlRenderSetup.TabIndex = 4;
 			// 
+			// cbRenderFps
+			// 
+			this.cbRenderFps.AutoSize = true;
+			this.cbRenderFps.Location = new System.Drawing.Point(6, 163);
+			this.cbRenderFps.Name = "cbRenderFps";
+			this.cbRenderFps.Size = new System.Drawing.Size(105, 17);
+			this.cbRenderFps.TabIndex = 23;
+			this.cbRenderFps.Text = "Performance/fps";
+			this.cbRenderFps.UseVisualStyleBackColor = true;
+			// 
 			// cbRenderLineChangePoints
 			// 
 			this.cbRenderLineChangePoints.AutoSize = true;
@@ -544,12 +561,71 @@ namespace CityTrafficSimulator
 			// pnlCanvasSetup
 			// 
 			this.pnlCanvasSetup.AutoScroll = true;
+			this.pnlCanvasSetup.Controls.Add(this.groupBox1);
 			this.pnlCanvasSetup.Controls.Add(this.groupBox2);
 			this.pnlCanvasSetup.Controls.Add(this.HintergrundbildGroupBox);
 			this.pnlCanvasSetup.Location = new System.Drawing.Point(795, 223);
 			this.pnlCanvasSetup.Name = "pnlCanvasSetup";
-			this.pnlCanvasSetup.Size = new System.Drawing.Size(307, 203);
+			this.pnlCanvasSetup.Size = new System.Drawing.Size(307, 311);
 			this.pnlCanvasSetup.TabIndex = 5;
+			// 
+			// groupBox1
+			// 
+			this.groupBox1.Controls.Add(this.spinLongitude);
+			this.groupBox1.Controls.Add(this.spinLatitude);
+			this.groupBox1.Controls.Add(this.btnSetWorldCoordinates);
+			this.groupBox1.Location = new System.Drawing.Point(3, 192);
+			this.groupBox1.Name = "groupBox1";
+			this.groupBox1.Size = new System.Drawing.Size(273, 116);
+			this.groupBox1.TabIndex = 24;
+			this.groupBox1.TabStop = false;
+			this.groupBox1.Text = "groupBox1";
+			// 
+			// spinLongitude
+			// 
+			this.spinLongitude.DecimalPlaces = 4;
+			this.spinLongitude.Increment = new decimal(new int[] {
+            1,
+            0,
+            0,
+            262144});
+			this.spinLongitude.Location = new System.Drawing.Point(147, 47);
+			this.spinLongitude.Name = "spinLongitude";
+			this.spinLongitude.Size = new System.Drawing.Size(120, 20);
+			this.spinLongitude.TabIndex = 3;
+			this.spinLongitude.Value = new decimal(new int[] {
+            9986,
+            0,
+            0,
+            196608});
+			// 
+			// spinLatitude
+			// 
+			this.spinLatitude.DecimalPlaces = 4;
+			this.spinLatitude.Increment = new decimal(new int[] {
+            1,
+            0,
+            0,
+            262144});
+			this.spinLatitude.Location = new System.Drawing.Point(147, 19);
+			this.spinLatitude.Name = "spinLatitude";
+			this.spinLatitude.Size = new System.Drawing.Size(120, 20);
+			this.spinLatitude.TabIndex = 2;
+			this.spinLatitude.Value = new decimal(new int[] {
+            53592,
+            0,
+            0,
+            196608});
+			// 
+			// btnSetWorldCoordinates
+			// 
+			this.btnSetWorldCoordinates.Location = new System.Drawing.Point(192, 73);
+			this.btnSetWorldCoordinates.Name = "btnSetWorldCoordinates";
+			this.btnSetWorldCoordinates.Size = new System.Drawing.Size(75, 23);
+			this.btnSetWorldCoordinates.TabIndex = 1;
+			this.btnSetWorldCoordinates.Text = "Set";
+			this.btnSetWorldCoordinates.UseVisualStyleBackColor = true;
+			this.btnSetWorldCoordinates.Click += new System.EventHandler(this.btnSetWorldCoordinates_Click);
 			// 
 			// groupBox2
 			// 
@@ -968,16 +1044,6 @@ namespace CityTrafficSimulator
 			this.trafficLightTreeView.TabIndex = 1;
 			this.trafficLightTreeView.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.trafficLightTreeView_AfterSelect);
 			// 
-			// cbRenderFps
-			// 
-			this.cbRenderFps.AutoSize = true;
-			this.cbRenderFps.Location = new System.Drawing.Point(6, 163);
-			this.cbRenderFps.Name = "cbRenderFps";
-			this.cbRenderFps.Size = new System.Drawing.Size(105, 17);
-			this.cbRenderFps.TabIndex = 23;
-			this.cbRenderFps.Text = "Performance/fps";
-			this.cbRenderFps.UseVisualStyleBackColor = true;
-			// 
 			// MainForm
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -1001,6 +1067,9 @@ namespace CityTrafficSimulator
 			this.pnlRenderSetup.PerformLayout();
 			this.pnlSignalAssignment.ResumeLayout(false);
 			this.pnlCanvasSetup.ResumeLayout(false);
+			this.groupBox1.ResumeLayout(false);
+			((System.ComponentModel.ISupportInitialize)(this.spinLongitude)).EndInit();
+			((System.ComponentModel.ISupportInitialize)(this.spinLatitude)).EndInit();
 			this.groupBox2.ResumeLayout(false);
 			this.groupBox2.PerformLayout();
 			((System.ComponentModel.ISupportInitialize)(this.canvasHeigthSpinEdit)).EndInit();
@@ -1087,6 +1156,10 @@ namespace CityTrafficSimulator
 		private System.Windows.Forms.Panel pnlSimulationSetup;
 		private RechenkaestchenControl thumbGrid;
 		private System.Windows.Forms.CheckBox cbRenderFps;
+		private System.Windows.Forms.GroupBox groupBox1;
+		private System.Windows.Forms.Button btnSetWorldCoordinates;
+		private System.Windows.Forms.NumericUpDown spinLongitude;
+		private System.Windows.Forms.NumericUpDown spinLatitude;
 
         }
     }

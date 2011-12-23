@@ -41,7 +41,7 @@ namespace CityTrafficSimulator
 		/// <summary>
 		/// maximale Entfernung, die ein LineChangePoint entfernt sein darf, damit er benutzt wird
 		/// </summary>
-		public const double maxDistanceToLineChangePoint = 32;
+		public const double maxDistanceToLineChangePoint = 28;
 
 
 		/// <summary>
@@ -63,12 +63,12 @@ namespace CityTrafficSimulator
 		/// <summary>
 		/// pauschale Kosten bei der Wegberechnung für einen Spurwechsel
 		/// </summary>
-		public const double lineChangePenalty = 1024;
+		public const double lineChangePenalty = 1536;
 
 		/// <summary>
 		/// pauschale Kosten bei der Wegberechnung für einen Spurwechsel direkt vor einer Ampel
 		/// </summary>
-		public const double lineChangeBeforeTrafficLightPenalty = lineChangePenalty;
+		public const double lineChangeBeforeTrafficLightPenalty = lineChangePenalty * 4;
 
 
 		/// <summary>
@@ -85,7 +85,7 @@ namespace CityTrafficSimulator
 		/// <summary>
 		/// pauschale Kosten bei der Wegberechnung für Fahrzeug was auf dem geplanten Weg fährt
 		/// </summary>
-		public const double vehicleOnRoutePenalty = 64;
+		public const double vehicleOnRoutePenalty = 48;
 
 		/// <summary>
 		/// minimale Länge eines LineChangeIntervals, damit es für die Wegberechnung berücksichtigt wird
@@ -96,6 +96,5 @@ namespace CityTrafficSimulator
 		/// distance to end of LineChangeInterval where the vehicle shal stop in case of a forced line change
 		/// </summary>
 		public const double breakPointBeforeForcedLineChange = 48;
-
 		}
 	}

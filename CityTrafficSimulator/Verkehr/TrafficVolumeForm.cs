@@ -195,6 +195,18 @@ namespace CityTrafficSimulator.Verkehr
 				spinBusVolume.Enabled = true;
 				spinTramVolume.Enabled = true;
 				ignoreUpdateEvent = false;
+
+				double milage = (m_currentVolume.statistics.sumMilage / m_currentVolume.statistics.numVehiclesReachedDestination) / 10;
+				double tt = m_currentVolume.statistics.sumTravelTime / m_currentVolume.statistics.numVehiclesReachedDestination;
+				if (m_currentVolume.statistics.numVehicles == 0)
+					{
+					milage = 0;
+					tt = 1;
+					}
+				lblNumVehicles.Text = "Total Vehicles: " + m_currentVolume.statistics.numVehicles + " (" + m_currentVolume.statistics.numVehiclesReachedDestination + " reached Destination)";
+				lblMilage.Text = "Average Milage: " + milage + "m";
+				lblTravelTime.Text = "Average Travel Time: " + tt + "s";
+				lblVelocity.Text = "Average Milage: " + (milage / tt) + "m/s";
 				}
 			else
 				{
@@ -203,6 +215,10 @@ namespace CityTrafficSimulator.Verkehr
 				spinTruckVolume.Enabled = false;
 				spinBusVolume.Enabled = false;
 				spinTramVolume.Enabled = false;
+				lblNumVehicles.Text = "Total Vehicles: 0";
+				lblMilage.Text = "Average Milage: 0m";
+				lblTravelTime.Text = "Average Travel Time: 0s";
+				lblVelocity.Text = "Average Milage: 0m/s";
 				}
 			ignoreUpdateEvent = false;
 			}

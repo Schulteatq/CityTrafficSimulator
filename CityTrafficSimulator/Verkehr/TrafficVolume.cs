@@ -107,10 +107,49 @@ namespace CityTrafficSimulator.Verkehr
 			set { m_trafficVolumeTrams = value; }
 			}
 
+		#region Statistics
+
 		/// <summary>
-		/// Queue of vehicles which have been created but could not be put on network because network was full
+		/// Statistics Record for TrafficVolumes
 		/// </summary>
-		private Queue<IVehicle> queuedVehicles = new Queue<IVehicle>();
+		public struct Statistics
+			{
+			/// <summary>
+			/// Total spawned and died vehicles of this TrafficVolume
+			/// </summary>
+			public int numVehicles;
+
+			/// <summary>
+			/// Total number of vehicles that reached its destination
+			/// </summary>
+			public int numVehiclesReachedDestination;
+
+			/// <summary>
+			/// Sum of total travel time
+			/// </summary>
+			public double sumTravelTime;
+
+			/// <summary>
+			/// Sum of total milage
+			/// </summary>
+			public double sumMilage;
+			}
+
+		/// <summary>
+		/// Statistics record of this TrafficVolume
+		/// </summary>
+		private TrafficVolume.Statistics m_statistics;
+		/// <summary>
+		/// Statistics record of this TrafficVolume
+		/// </summary>
+		public TrafficVolume.Statistics statistics
+			{
+			get { return m_statistics; }
+			}
+
+
+		#endregion
+
 
 		#region Konstruktoren
 
@@ -202,6 +241,22 @@ namespace CityTrafficSimulator.Verkehr
 			{
 			// Nothing to do here
 			}
+
+		/// <summary>
+		/// To be called, when a vehicle which was spawned by this TrafficVolume has died
+		/// </summary>
+		/// <param name="sender">sender</param>
+		/// <param name="e">VehicleDiedEventArgs</param>
+		public void SpawnedVehicleDied(object sender, IVehicle.VehicleDiedEventArgs e)
+			{
+			++m_statistics.numVehicles;
+			if (e.reachedDestination)
+				++m_statistics.numVehiclesReachedDestination;
+			m_statistics.sumMilage += e.milage;
+			m_statistics.sumTravelTime += e.totalTimeInNetwork;
+			}
+
+
 
 		#endregion
 

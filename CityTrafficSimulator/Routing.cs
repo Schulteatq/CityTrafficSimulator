@@ -264,7 +264,7 @@ namespace CityTrafficSimulator
 						NodeConnection theConnection = currentNode.Value.node.GetNodeConnectionTo(successor.node);
 						// f Wert für den neuen Weg berechnen: g Wert des Vorgängers plus die Kosten der
 						// gerade benutzten Kante plus die geschätzten Kosten von Nachfolger bis Ziel
-						double f = currentNode.Value.GetLength()										// exakte Länge des bisher zurückgelegten Weges
+						double f = currentNode.Value.length												// exakte Länge des bisher zurückgelegten Weges
 							+ theConnection.lineSegment.length;											// exakte Länge des gerade untersuchten Segmentes
 
 						if (currentNode.Value.countOfParents < 3)										// Stau kostet extra, aber nur, wenn innerhalb
@@ -272,6 +272,7 @@ namespace CityTrafficSimulator
 							f += theConnection.vehicles.Count * Constants.vehicleOnRoutePenalty;
 							}
 						f += GetMinimumEuklidDistance(successor.node, targetNodes);						// Minimumweg zum Ziel (Luftlinie)
+						f *= 14 / theConnection.targetVelocity;
 						f *= -1;
 
 
@@ -334,7 +335,7 @@ namespace CityTrafficSimulator
 
 								// f-Wert für den neuen Weg berechnen: g Wert des Vorgängers plus die Kosten der
 								// gerade benutzten Kante plus die geschätzten Kosten von Nachfolger bis Ziel
-								double f = currentNode.Value.parent.GetLength();										// exakte Länge des bisher zurückgelegten Weges
+								double f = currentNode.Value.parent.length;										// exakte Länge des bisher zurückgelegten Weges
 								f += currentConnection.GetLengthToLineNodeViaLineChange(successor.node);
 
 								// Kostenanteil, für den Spurwechsel dazuaddieren
