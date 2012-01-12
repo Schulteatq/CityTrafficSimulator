@@ -427,8 +427,19 @@ namespace CityTrafficSimulator
 			if (trafficLightForm.selectedEntry != null)
 				{
 				TrafficLight tl = trafficLightForm.selectedEntry as TrafficLight;
+				LineNode tmp = (m_selectedLineNodes.Count == 1) ? tmp = m_selectedLineNodes[0] : null;
 				m_selectedLineNodes.Clear();
 				m_selectedLineNodes.AddRange(tl.assignedNodes);
+				selectedLineNodesMovingOffset.Clear();
+
+				foreach (LineNode ln in m_selectedLineNodes)
+					{
+					if (tmp != null && ln != tmp)
+						selectedLineNodesMovingOffset.Add(ln.position - tmp.position);
+					else
+						selectedLineNodesMovingOffset.Add(new Vector2(0, 0));
+					}
+
 				DaGrid.Invalidate();
 				}
 			}
@@ -742,14 +753,14 @@ namespace CityTrafficSimulator
 									}
 								else
 									{
+									// bei nur einem Punkt brauchen wir keine MovingOffsets
+									selectedLineNodesMovingOffset.Clear();
+									selectedLineNodesMovingOffset.Add(new Vector2(0, 0));
+
 									// Häßlicher Workaround, um Settermethode für selectedLineNodes aufzurufen
 									List<LineNode> foo = new List<LineNode>();
  									foo.Add(ln);
 									selectedLineNodes = foo;
-
-									// bei nur einem Punkt brauchen wir keine MovingOffsets
-									selectedLineNodesMovingOffset.Clear();
-									selectedLineNodesMovingOffset.Add(new Vector2(0, 0));
 
 									howToDrag = DragNDrop.MOVE_NODES;
 									}
