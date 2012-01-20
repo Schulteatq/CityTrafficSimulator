@@ -543,7 +543,7 @@ namespace CityTrafficSimulator.Vehicle
 				#region Forced line changes
 
 				// our route forces to perform a line change
-				if (lineChangeNeeded && !currentlyChangingLine)
+				if (lineChangeNeeded && !currentlyChangingLine && lci != null)
 					{
 					thinkAboutLineChange = false;
 					lastLineChangeCheck.Left = GlobalTime.Instance.currentTime;
@@ -826,15 +826,10 @@ namespace CityTrafficSimulator.Vehicle
 							{
 							// ist ein Spurwechsel nötig, so die entsprechenden Felder füllen
 							if (rs.lineChangeNeeded)
-								{
-								lineChangeNeeded = true;
 								rs.startConnection.lineChangeIntervals.TryGetValue(rs.nextNode.hashcode, out lci);
-								}
 							else
-								{
-								lineChangeNeeded = false;
 								lci = null;
-								}
+							lineChangeNeeded = (lci != null);
 
 							LinkedListNode<IVehicle> lln = rs.startConnection.GetVehicleListNodeBehindArcPosition(startDistance);
 							if (lln == null || lln.Value.currentPosition - lln.Value.length >= startDistance)

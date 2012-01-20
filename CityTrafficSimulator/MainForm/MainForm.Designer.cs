@@ -62,6 +62,8 @@ namespace CityTrafficSimulator
 			this.killAllVehiclesButton = new System.Windows.Forms.Button();
 			this.simulationSpeedSpinEdit = new System.Windows.Forms.NumericUpDown();
 			this.pnlMainGrid = new System.Windows.Forms.Panel();
+			this.thumbGrid = new CityTrafficSimulator.RechenkaestchenControl();
+			this.DaGrid = new CityTrafficSimulator.RechenkaestchenControl();
 			this.pnlNetworkInfo = new System.Windows.Forms.Panel();
 			this.SpeichernButton = new System.Windows.Forms.Button();
 			this.label7 = new System.Windows.Forms.Label();
@@ -86,6 +88,7 @@ namespace CityTrafficSimulator
 			this.cbRenderLineNodesDebug = new System.Windows.Forms.CheckBox();
 			this.pnlSignalAssignment = new System.Windows.Forms.Panel();
 			this.freeNodeButton = new System.Windows.Forms.Button();
+			this.trafficLightTreeView = new CityTrafficSimulator.Timeline.TrafficLightTreeView(this.components);
 			this.pnlCanvasSetup = new System.Windows.Forms.Panel();
 			this.groupBox1 = new System.Windows.Forms.GroupBox();
 			this.spinLongitude = new System.Windows.Forms.NumericUpDown();
@@ -119,9 +122,6 @@ namespace CityTrafficSimulator
 			this.statusLabel = new System.Windows.Forms.ToolStripStatusLabel();
 			this.button1 = new System.Windows.Forms.Button();
 			this.button2 = new System.Windows.Forms.Button();
-			this.thumbGrid = new CityTrafficSimulator.RechenkaestchenControl();
-			this.DaGrid = new CityTrafficSimulator.RechenkaestchenControl();
-			this.trafficLightTreeView = new CityTrafficSimulator.Timeline.TrafficLightTreeView(this.components);
 			this.pnlSimulationSetup.SuspendLayout();
 			((System.ComponentModel.ISupportInitialize)(this.stepsPerSecondSpinEdit)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this.simulationSpeedSpinEdit)).BeginInit();
@@ -275,6 +275,52 @@ namespace CityTrafficSimulator
 			this.pnlMainGrid.Name = "pnlMainGrid";
 			this.pnlMainGrid.Size = new System.Drawing.Size(1090, 651);
 			this.pnlMainGrid.TabIndex = 8;
+			// 
+			// thumbGrid
+			// 
+			this.thumbGrid.BackColor = System.Drawing.Color.White;
+			this.thumbGrid.CellHeight = 0;
+			this.thumbGrid.CellSize = new System.Drawing.Size(0, 0);
+			this.thumbGrid.CellWidth = 0;
+			this.thumbGrid.Dimension = new System.Drawing.Point(0, 0);
+			this.thumbGrid.DrawGrid = false;
+			this.thumbGrid.Location = new System.Drawing.Point(626, 418);
+			this.thumbGrid.Max_X = 0;
+			this.thumbGrid.Max_Y = 0;
+			this.thumbGrid.Name = "thumbGrid";
+			this.thumbGrid.Size = new System.Drawing.Size(139, 127);
+			this.thumbGrid.TabIndex = 15;
+			this.thumbGrid.MouseLeave += new System.EventHandler(this.thumbGrid_MouseLeave);
+			this.thumbGrid.Paint += new System.Windows.Forms.PaintEventHandler(this.thumbGrid_Paint);
+			this.thumbGrid.MouseMove += new System.Windows.Forms.MouseEventHandler(this.thumbGrid_MouseMove);
+			this.thumbGrid.MouseDown += new System.Windows.Forms.MouseEventHandler(this.thumbGrid_MouseDown);
+			this.thumbGrid.Resize += new System.EventHandler(this.thumbGrid_Resize);
+			this.thumbGrid.MouseUp += new System.Windows.Forms.MouseEventHandler(this.thumbGrid_MouseUp);
+			// 
+			// DaGrid
+			// 
+			this.DaGrid.AllowDrop = true;
+			this.DaGrid.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+			this.DaGrid.AutoValidate = System.Windows.Forms.AutoValidate.Disable;
+			this.DaGrid.BackColor = System.Drawing.SystemColors.ButtonFace;
+			this.DaGrid.CellHeight = 16;
+			this.DaGrid.CellSize = new System.Drawing.Size(16, 16);
+			this.DaGrid.CellWidth = 16;
+			this.DaGrid.Dimension = new System.Drawing.Point(64, 64);
+			this.DaGrid.DrawGrid = false;
+			this.DaGrid.Location = new System.Drawing.Point(0, 0);
+			this.DaGrid.Max_X = 64;
+			this.DaGrid.Max_Y = 64;
+			this.DaGrid.Name = "DaGrid";
+			this.DaGrid.Size = new System.Drawing.Size(100, 100);
+			this.DaGrid.TabIndex = 3;
+			this.DaGrid.Paint += new System.Windows.Forms.PaintEventHandler(this.DaGrid_Paint);
+			this.DaGrid.MouseMove += new System.Windows.Forms.MouseEventHandler(this.DaGrid_MouseMove);
+			this.DaGrid.Leave += new System.EventHandler(this.DaGrid_Leave);
+			this.DaGrid.MouseDown += new System.Windows.Forms.MouseEventHandler(this.DaGrid_MouseDown);
+			this.DaGrid.Enter += new System.EventHandler(this.DaGrid_Enter);
+			this.DaGrid.MouseUp += new System.Windows.Forms.MouseEventHandler(this.DaGrid_MouseUp);
+			this.DaGrid.KeyDown += new System.Windows.Forms.KeyEventHandler(this.DaGrid_KeyDown);
 			// 
 			// pnlNetworkInfo
 			// 
@@ -557,6 +603,15 @@ namespace CityTrafficSimulator
 			this.freeNodeButton.Text = "Free Node";
 			this.freeNodeButton.UseVisualStyleBackColor = true;
 			this.freeNodeButton.Click += new System.EventHandler(this.freeNodeButton_Click);
+			// 
+			// trafficLightTreeView
+			// 
+			this.trafficLightTreeView.Location = new System.Drawing.Point(3, 3);
+			this.trafficLightTreeView.Name = "trafficLightTreeView";
+			this.trafficLightTreeView.Size = new System.Drawing.Size(261, 127);
+			this.trafficLightTreeView.steuerung = null;
+			this.trafficLightTreeView.TabIndex = 1;
+			this.trafficLightTreeView.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.trafficLightTreeView_AfterSelect);
 			// 
 			// pnlCanvasSetup
 			// 
@@ -989,61 +1044,6 @@ namespace CityTrafficSimulator
 			this.button2.Text = "Laden";
 			this.button2.UseVisualStyleBackColor = true;
 			// 
-			// thumbGrid
-			// 
-			this.thumbGrid.BackColor = System.Drawing.Color.White;
-			this.thumbGrid.CellHeight = 0;
-			this.thumbGrid.CellSize = new System.Drawing.Size(0, 0);
-			this.thumbGrid.CellWidth = 0;
-			this.thumbGrid.Dimension = new System.Drawing.Point(0, 0);
-			this.thumbGrid.DrawGrid = false;
-			this.thumbGrid.Location = new System.Drawing.Point(626, 418);
-			this.thumbGrid.Max_X = 0;
-			this.thumbGrid.Max_Y = 0;
-			this.thumbGrid.Name = "thumbGrid";
-			this.thumbGrid.Size = new System.Drawing.Size(139, 127);
-			this.thumbGrid.TabIndex = 15;
-			this.thumbGrid.MouseLeave += new System.EventHandler(this.thumbGrid_MouseLeave);
-			this.thumbGrid.Paint += new System.Windows.Forms.PaintEventHandler(this.thumbGrid_Paint);
-			this.thumbGrid.MouseMove += new System.Windows.Forms.MouseEventHandler(this.thumbGrid_MouseMove);
-			this.thumbGrid.MouseDown += new System.Windows.Forms.MouseEventHandler(this.thumbGrid_MouseDown);
-			this.thumbGrid.Resize += new System.EventHandler(this.thumbGrid_Resize);
-			this.thumbGrid.MouseUp += new System.Windows.Forms.MouseEventHandler(this.thumbGrid_MouseUp);
-			// 
-			// DaGrid
-			// 
-			this.DaGrid.AllowDrop = true;
-			this.DaGrid.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-			this.DaGrid.AutoValidate = System.Windows.Forms.AutoValidate.Disable;
-			this.DaGrid.BackColor = System.Drawing.SystemColors.ButtonFace;
-			this.DaGrid.CellHeight = 16;
-			this.DaGrid.CellSize = new System.Drawing.Size(16, 16);
-			this.DaGrid.CellWidth = 16;
-			this.DaGrid.Dimension = new System.Drawing.Point(64, 64);
-			this.DaGrid.DrawGrid = false;
-			this.DaGrid.Location = new System.Drawing.Point(0, 0);
-			this.DaGrid.Max_X = 64;
-			this.DaGrid.Max_Y = 64;
-			this.DaGrid.Name = "DaGrid";
-			this.DaGrid.Size = new System.Drawing.Size(100, 100);
-			this.DaGrid.TabIndex = 3;
-			this.DaGrid.Paint += new System.Windows.Forms.PaintEventHandler(this.DaGrid_Paint);
-			this.DaGrid.MouseMove += new System.Windows.Forms.MouseEventHandler(this.DaGrid_MouseMove);
-			this.DaGrid.Leave += new System.EventHandler(this.DaGrid_Leave);
-			this.DaGrid.MouseDown += new System.Windows.Forms.MouseEventHandler(this.DaGrid_MouseDown);
-			this.DaGrid.Enter += new System.EventHandler(this.DaGrid_Enter);
-			this.DaGrid.MouseUp += new System.Windows.Forms.MouseEventHandler(this.DaGrid_MouseUp);
-			this.DaGrid.KeyDown += new System.Windows.Forms.KeyEventHandler(this.DaGrid_KeyDown);
-			// 
-			// trafficLightTreeView
-			// 
-			this.trafficLightTreeView.Location = new System.Drawing.Point(3, 3);
-			this.trafficLightTreeView.Name = "trafficLightTreeView";
-			this.trafficLightTreeView.Size = new System.Drawing.Size(261, 127);
-			this.trafficLightTreeView.steuerung = null;
-			this.trafficLightTreeView.TabIndex = 1;
-			this.trafficLightTreeView.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.trafficLightTreeView_AfterSelect);
-			// 
 			// MainForm
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -1055,6 +1055,7 @@ namespace CityTrafficSimulator
 			this.Name = "MainForm";
 			this.Text = "CityTrafficSimulator";
 			this.Load += new System.EventHandler(this.Form1_Load);
+			this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.MainForm_FormClosed);
 			this.ResizeEnd += new System.EventHandler(this.Form1_ResizeEnd);
 			this.pnlSimulationSetup.ResumeLayout(false);
 			this.pnlSimulationSetup.PerformLayout();

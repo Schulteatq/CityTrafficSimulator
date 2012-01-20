@@ -64,8 +64,6 @@ namespace CityTrafficSimulator
 			{
 			// Setup main canvas
 			_dockingManager.InnerControl = pnlMainGrid;
-			_dockingManager.ContentHiding += new DockingManager.ContentHidingHandler(_dockingManager_ContentHiding);
-			statusleiste.Visible = false;
 
 			// Setup right docks: Most setup panels
 			Content connectionContent = _dockingManager.Contents.Add(pnlConnectionSetup, "Connection Setup");
@@ -106,6 +104,13 @@ namespace CityTrafficSimulator
 			WindowContent bottomDock = _dockingManager.AddContentWithState(tlfContent, State.DockBottom);
 			_dockingManager.AddContentToWindowContent(tvfContent, bottomDock);
 
+			if (File.Exists("GUILayout.xml"))
+				{
+				_dockingManager.LoadConfigFromFile("GUILayout.xml");
+				}
+
+			_dockingManager.ContentHiding += new DockingManager.ContentHidingHandler(_dockingManager_ContentHiding);
+			statusleiste.Visible = false;
 			}
 
 		void _dockingManager_ContentHiding(Content c, CancelEventArgs cea)
@@ -2065,6 +2070,11 @@ namespace CityTrafficSimulator
 // 			satelliteImages[1, 1] = DownloadImage(baseUrl + (spinLatitude.Value - 0.001m).ToString(ci) + "," + (spinLongitude.Value + 0.0017m).ToString(ci));
 
 
+			}
+
+		private void MainForm_FormClosed(object sender, FormClosedEventArgs e)
+			{
+			_dockingManager.SaveConfigToFile("GUILayout.xml");
 			}
 
 		}
