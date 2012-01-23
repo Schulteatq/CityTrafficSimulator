@@ -80,6 +80,8 @@ namespace CityTrafficSimulator
 			SetContentDefaultSettings(simContent, pnlSimulationSetup.Size);
 			Content thumbContent = _dockingManager.Contents.Add(thumbGrid, "Thumbnail View");
 			SetContentDefaultSettings(thumbContent, new Size(150, 150));
+			Content statisticsContent = _dockingManager.Contents.Add(pnlStatistics, "Connection Statistics");
+			SetContentDefaultSettings(statisticsContent, new Size(196, 196));
 			
 			WindowContent dock0 = _dockingManager.AddContentWithState(connectionContent, State.DockRight);
 			_dockingManager.AddContentToWindowContent(signalContent, dock0);
@@ -90,6 +92,7 @@ namespace CityTrafficSimulator
 			WindowContent dock2 = _dockingManager.AddContentToZone(thumbContent, dock0.ParentZone, 2) as WindowContent;
 			_dockingManager.AddContentToWindowContent(viewContent, dock2); 
 			_dockingManager.AddContentToWindowContent(canvasContent, dock2);
+			_dockingManager.AddContentToWindowContent(statisticsContent, dock2);
 
 
 			// Setup bottom docks: TrafficLightForm, TrafficVolumeForm, pnlTimeline
@@ -324,6 +327,7 @@ namespace CityTrafficSimulator
 					trafficLightTreeView.SelectedNode = null;
 					trafficLightForm.selectedEntry = null;
 					}
+				pnlStatistics.Invalidate();
 				}
 			}
 
@@ -352,6 +356,7 @@ namespace CityTrafficSimulator
 					spinTargetVelocity.Value = (decimal)m_selectedNodeConnection.targetVelocity;
 
 					selectedLineNodes.Clear();
+					pnlStatistics.Invalidate();
 					}
 				}
 			}
@@ -397,6 +402,7 @@ namespace CityTrafficSimulator
 
 			trafficLightTreeView.steuerung = timelineSteuerung;
 			timelineSteuerung.CurrentTimeChanged += new TimelineSteuerung.CurrentTimeChangedEventHandler(timelineSteuerung_CurrentTimeChanged);
+			timelineSteuerung.MaxTimeChanged += new TimelineSteuerung.MaxTimeChangedEventHandler(timelineSteuerung_MaxTimeChanged);
 			trafficLightForm.SelectedEntryChanged += new TrafficLightForm.SelectedEntryChangedEventHandler(trafficLightForm_SelectedEntryChanged);
 
 			zoomComboBox.SelectedIndex = 7;
@@ -424,7 +430,17 @@ namespace CityTrafficSimulator
 			renderOptionsThumbnail.renderLineNodeDebugData = false;
 			renderOptionsThumbnail.renderNodeConnectionDebugData = false;
 			renderOptionsThumbnail.renderVehicleDebugData = false;
+			}
 
+		void timelineSteuerung_MaxTimeChanged(object sender, EventArgs e)
+			{
+			UpdateSimulationParameters();
+			}
+
+		void UpdateSimulationParameters()
+			{
+			GlobalTime.Instance.UpdateSimulationParameters(timelineSteuerung.maxTime, (double)stepsPerSecondSpinEdit.Value);
+			nodeSteuerung.ResetAverageVelocities();
 			}
 
 		private void trafficLightForm_SelectedEntryChanged(object sender, TrafficLightForm.SelectedEntryChangedEventArgs e)
@@ -1473,10 +1489,11 @@ namespace CityTrafficSimulator
 					timelineSteuerung.Clear();
 
 					// Laden
-					List<Auftrag> fahrauftraege = XmlSaver.LoadFromFile(ofd.FileName, nodeSteuerung, timelineSteuerung, trafficVolumeSteuerung);
+					XmlSaver.LoadFromFile(ofd.FileName, nodeSteuerung, timelineSteuerung, trafficVolumeSteuerung);
 
 					titleEdit.Text = nodeSteuerung.title;
 					infoEdit.Text = nodeSteuerung.infoText;
+					nodeSteuerung.ResetAverageVelocities();
 
 					// neuzeichnen
 					Invalidate(InvalidationLevel.ALL);
@@ -1902,6 +1919,7 @@ namespace CityTrafficSimulator
 		private void stepsPerSecondSpinEdit_ValueChanged(object sender, EventArgs e)
 			{
 			timer1.Interval = (int)(1000 / stepsPerSecondSpinEdit.Value / simulationSpeedSpinEdit.Value);
+			UpdateSimulationParameters();
 			}
 
 		private void freeNodeButton_Click(object sender, EventArgs e)
@@ -2075,6 +2093,75 @@ namespace CityTrafficSimulator
 		private void MainForm_FormClosed(object sender, FormClosedEventArgs e)
 			{
 			_dockingManager.SaveConfigToFile("GUILayout.xml");
+			}
+
+		private void pnlStatistics_Paint(object sender, PaintEventArgs e)
+			{
+			// gather NodeConnections for evaluating the statistics
+			List<NodeConnection> connections = new List<NodeConnection>();
+			if (selectedLineNodes.Count > 0)
+				{
+				foreach (LineNode ln in selectedLineNodes)
+					{
+					connections.AddRange(ln.nextConnections);
+					}
+				}
+			else if (selectedNodeConnection != null)
+				{
+				connections.Add(selectedNodeConnection);
+				}
+
+			// check whether there's something to do
+			if (connections.Count > 0)
+				{
+				int numBuckets = connections[0].statistics.Length;
+				int maxInt = 1;
+				double maxFloat = 1;
+
+				// merge statistical data into one record
+				NodeConnection.Statistics[] merged = new NodeConnection.Statistics[numBuckets];
+				for (int i = 0; i < numBuckets; ++i)
+					{
+					foreach (NodeConnection nc in connections)
+						{
+						merged[i].numVehicles += nc.statistics[i].numVehicles;
+						merged[i].numStoppedVehicles += nc.statistics[i].numStoppedVehicles;
+						merged[i].sumOfVehicleVelocities += nc.statistics[i].sumOfVehicleVelocities;
+						}
+					maxInt = Math.Max(maxInt, merged[i].numVehicles);
+					if (merged[i].numVehicles > 0)
+						maxFloat = Math.Max(maxFloat, merged[i].sumOfVehicleVelocities / merged[i].numVehicles);
+					}
+
+				Pen blackPen = new Pen(Color.Black, 1.5f);
+				Brush grayBrush = new SolidBrush(Color.LightGray);
+				Brush redBrush = new SolidBrush(Color.Orange);
+
+				// calculate data extent and derive transormation matrices
+				maxFloat *= 1.2;
+				maxInt *= 2;
+				Matrix velocityMatrix = new Matrix((float)pnlStatistics.Width / numBuckets, 0, 0, (float)pnlStatistics.Height / (float)-maxFloat, 0, pnlStatistics.Height - 5);
+				Matrix numVehicleMatrix = new Matrix((float)pnlStatistics.Width / numBuckets, 0, 0, (float)pnlStatistics.Height / -maxInt, 0, pnlStatistics.Height - 5);
+
+				// render data
+				for (int i = 1; i < numBuckets; ++i)
+					{
+					NodeConnection.Statistics s1 = merged[i];
+					NodeConnection.Statistics s2 = merged[i-1];
+
+					e.Graphics.SmoothingMode = SmoothingMode.HighSpeed;
+					e.Graphics.Transform = numVehicleMatrix;
+					e.Graphics.FillRectangle(grayBrush, i - 1, 0, 1, s1.numVehicles);
+					e.Graphics.FillRectangle(redBrush, i - 1, 0, 1, s1.numStoppedVehicles);
+
+					e.Graphics.SmoothingMode = SmoothingMode.HighQuality;
+					e.Graphics.Transform = velocityMatrix;
+					float val1 = (s1.numVehicles == 0 ? 0 : (float)s1.sumOfVehicleVelocities / s1.numVehicles);
+					float val2 = (s2.numVehicles == 0 ? 0 : (float)s2.sumOfVehicleVelocities / s2.numVehicles);
+
+					e.Graphics.DrawLine(blackPen, i - 1, val1, i, val2);
+					}
+				}
 			}
 
 		}

@@ -240,6 +240,12 @@ namespace CityTrafficSimulator
 			}
 
 
+		/// <summary>
+		/// Average speed distribution
+		/// </summary>
+		[XmlIgnore]
+		public NodeConnection.Statistics[] statistics { get; private set; }
+
 
 		#endregion
 
@@ -391,6 +397,7 @@ namespace CityTrafficSimulator
 			};
 
 			m_intersections = new SortedLinkedList<Intersection>(intersectionComparer);
+			statistics = new Statistics[1];
 			}
 
 		/// <summary>
@@ -446,6 +453,7 @@ namespace CityTrafficSimulator
 				};
 
 			m_intersections = new SortedLinkedList<Intersection>(intersectionComparer);
+			statistics = new Statistics[1];
 			}
 
 		#endregion
@@ -1099,6 +1107,33 @@ namespace CityTrafficSimulator
 		#region Statistiken
 
 		/// <summary>
+		/// Resets the statistics array.
+		/// </summary>
+		/// <param name="numBuckets">Needed array size fr </param>
+		public void ResetStatistics(int numBuckets)
+			{
+			statistics = new Statistics[numBuckets];
+			}
+
+		/// <summary>
+		/// Calculates the current statistics of the vehicles on this NodeConnection and stores it in the given bucket of the statistics array. 
+		/// </summary>
+		/// <param name="bucketNumber">statistics array bucket number to store average velocity in</param>
+		public void GatherStatistics(int bucketNumber)
+			{
+			statistics[bucketNumber].numVehicles = vehicles.Count;
+			statistics[bucketNumber].sumOfVehicleVelocities = 0;
+			statistics[bucketNumber].numStoppedVehicles = 0;
+
+			foreach (IVehicle v in vehicles)
+				{
+				statistics[bucketNumber].sumOfVehicleVelocities += v.physics.velocity;
+				if (v.isStopped)
+					++(statistics[bucketNumber].numStoppedVehicles);
+				}
+			}
+
+		/// <summary>
 		/// gibt die Durchschnittsgeschwindigkeit der auf dieser Connection fahrenden Autos in m/s zurück
 		/// </summary>
 		/// <returns>Durchschnittsgeschwindigkeit in m/s</returns>
@@ -1385,6 +1420,27 @@ namespace CityTrafficSimulator
 				this.startArcPos = startArcPos;
 				this.endArcPos = endArcPos;
 				}
+			}
+
+		/// <summary>
+		/// Single NodeConnection statistics record.
+		/// </summary>
+		public struct Statistics
+			{
+			/// <summary>
+			/// current number of vehicles
+			/// </summary>
+			public int numVehicles;
+
+			/// <summary>
+			/// sum of vehicle velocities
+			/// </summary>
+			public double sumOfVehicleVelocities;
+
+			/// <summary>
+			/// number of stopped vehicles
+			/// </summary>
+			public int numStoppedVehicles;
 			}
 
 		#endregion

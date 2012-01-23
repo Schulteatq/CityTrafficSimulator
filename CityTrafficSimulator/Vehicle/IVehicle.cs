@@ -92,6 +92,11 @@ namespace CityTrafficSimulator.Vehicle
 			/// Bogenlängenposition, bei der dieses Auto auf dieser Linie gestartet ist
 			/// </summary>
 			public double arcPositionOfStartOnNodeConnection;
+
+			/// <summary>
+			/// number of times this vehicle stopped
+			/// </summary>
+			public int numStops;
 			}
 
 		/// <summary>
@@ -194,12 +199,7 @@ namespace CityTrafficSimulator.Vehicle
 			else
 				{
 				// evoke VehicleDied event
-				OnVehicleDied(new VehicleDiedEventArgs(
-					targetNodes.Contains(currentNodeConnection.endNode),
-					statistics.totalMilage,
-					GlobalTime.Instance.currentTime - statistics.startTime,
-					statistics.numNodeConnections,
-					statistics.numLineChanges));
+				OnVehicleDied(new VehicleDiedEventArgs(m_statistics, targetNodes.Contains(currentNodeConnection.endNode)));
 				}
 			}
 
@@ -387,6 +387,11 @@ namespace CityTrafficSimulator.Vehicle
             {
             get { return state.currentNodeConnection; }
             }
+
+		/// <summary>
+		/// checks whether this vehicle is currently stopped
+		/// </summary>
+		public bool isStopped = false;
 
 		/// <summary>
 		/// Flag, ob auf der aktuellen NodeConnection ein Spurwechsel nötig ist
@@ -777,6 +782,19 @@ namespace CityTrafficSimulator.Vehicle
 					m_Physics.velocity = 0;
 
 				double arcLengthToMove = (physics.velocity * tickLength * 10);
+
+				if (m_Physics.velocity < 0.1)
+					{
+					if (!isStopped)
+						{
+						++m_statistics.numStops;
+						}
+					isStopped = true;
+					}
+				else
+					{
+					isStopped = false;
+					}
 
 				// wenn ich gerade am Spurwechseln bin, sollte ich das erstmal behandeln
 				if (currentlyChangingLine)
@@ -1721,45 +1739,24 @@ namespace CityTrafficSimulator.Vehicle
 		public class VehicleDiedEventArgs : EventArgs
 			{
 			/// <summary>
+			/// Statistics record of the died vehicle
+			/// </summary>
+			public IVehicle.Statistics vehicleStatistics;
+
+			/// <summary>
 			/// Flag, whether the vehicle reached its destination or not
 			/// </summary>
 			public bool reachedDestination;
 
 			/// <summary>
-			/// Total milage in network (arc length as unit)
-			/// </summary>
-			public double milage;
-
-			/// <summary>
-			/// Total time in network
-			/// </summary>
-			public double totalTimeInNetwork;
-
-			/// <summary>
-			/// Number of used NodeConnections
-			/// </summary>
-			public int numNodeConnections;
-
-			/// <summary>
-			/// Number of performed line changes
-			/// </summary>
-			public int numLineChanges;
-
-			/// <summary>
 			/// Creates new VehicleDiedEventArgs
 			/// </summary>
+			/// <param name="vehicleStatistics">Statistics record of the died vehicle</param>
 			/// <param name="reachedDestination">Flag, whether the vehicle reached its destination or not</param>
-			/// <param name="milage">Total milage in network (arc length as unit)</param>
-			/// <param name="totalTimeInNetwork">Total time in network</param>
-			/// <param name="numNodeConnections">Number of used NodeConnections</param>
-			/// <param name="numLineChanges">Number of performed line changes</param>
-			public VehicleDiedEventArgs(bool reachedDestination, double milage, double totalTimeInNetwork, int numNodeConnections, int numLineChanges)
+			public VehicleDiedEventArgs(IVehicle.Statistics vehicleStatistics, bool reachedDestination)
 				{
+				this.vehicleStatistics = vehicleStatistics;
 				this.reachedDestination = reachedDestination;
-				this.milage = milage;
-				this.totalTimeInNetwork = totalTimeInNetwork;
-				this.numNodeConnections = numNodeConnections;
-				this.numLineChanges = numLineChanges;
 				}
 
 			}

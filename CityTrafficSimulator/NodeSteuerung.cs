@@ -999,6 +999,18 @@ namespace CityTrafficSimulator
 			return null;
 			}
 
+		/// <summary>
+		/// Resets the average velocities array of each NodeConnection.
+		/// </summary>
+		public void ResetAverageVelocities()
+			{
+			int numBuckets = (int)(GlobalTime.Instance.cycleTime * GlobalTime.Instance.ticksPerSecond);
+			foreach (NodeConnection nc in m_connections)
+				{
+				nc.ResetStatistics(numBuckets);
+				}
+			}
+
 
 		#endregion
 
@@ -1436,6 +1448,12 @@ namespace CityTrafficSimulator
 			foreach (LineNode ln in nodes)
 				{
 				ln.Tick(tickLength);
+				}
+
+			int bucketNumber = GlobalTime.Instance.currentCycleTick;
+			foreach (NodeConnection nc in m_connections)
+				{
+				nc.GatherStatistics(bucketNumber);
 				}
 			}
 

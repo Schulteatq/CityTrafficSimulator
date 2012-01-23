@@ -125,6 +125,11 @@ namespace CityTrafficSimulator.Verkehr
 			public int numVehiclesReachedDestination;
 
 			/// <summary>
+			/// Total number of stops of all vehicles;
+			/// </summary>
+			public int numStops;
+
+			/// <summary>
 			/// Sum of total travel time
 			/// </summary>
 			public double sumTravelTime;
@@ -252,8 +257,9 @@ namespace CityTrafficSimulator.Verkehr
 			++m_statistics.numVehicles;
 			if (e.reachedDestination)
 				++m_statistics.numVehiclesReachedDestination;
-			m_statistics.sumMilage += e.milage;
-			m_statistics.sumTravelTime += e.totalTimeInNetwork;
+			m_statistics.numStops += e.vehicleStatistics.numStops;
+			m_statistics.sumMilage += e.vehicleStatistics.totalMilage;
+			m_statistics.sumTravelTime += GlobalTime.Instance.currentTime - e.vehicleStatistics.startTime;
 			}
 
 

@@ -45,6 +45,11 @@
 			this.btnRemoveStartNode = new System.Windows.Forms.Button();
 			this.btnRemoveDestinationNode = new System.Windows.Forms.Button();
 			this.btnAddDestinationNode = new System.Windows.Forms.Button();
+			this.groupBox3 = new System.Windows.Forms.GroupBox();
+			this.lblNumVehicles = new System.Windows.Forms.Label();
+			this.lblTravelTime = new System.Windows.Forms.Label();
+			this.lblVelocity = new System.Windows.Forms.Label();
+			this.lblMilage = new System.Windows.Forms.Label();
 			this.groupBox2 = new System.Windows.Forms.GroupBox();
 			this.label11 = new System.Windows.Forms.Label();
 			this.label10 = new System.Windows.Forms.Label();
@@ -65,14 +70,11 @@
 			this.spinTramVolume = new System.Windows.Forms.NumericUpDown();
 			this.spinBusVolume = new System.Windows.Forms.NumericUpDown();
 			this.spinCarsVolume = new System.Windows.Forms.NumericUpDown();
-			this.groupBox3 = new System.Windows.Forms.GroupBox();
-			this.lblMilage = new System.Windows.Forms.Label();
-			this.lblVelocity = new System.Windows.Forms.Label();
-			this.lblTravelTime = new System.Windows.Forms.Label();
-			this.lblNumVehicles = new System.Windows.Forms.Label();
+			this.lblNumStops = new System.Windows.Forms.Label();
 			this.splitContainer1.Panel1.SuspendLayout();
 			this.splitContainer1.Panel2.SuspendLayout();
 			this.splitContainer1.SuspendLayout();
+			this.groupBox3.SuspendLayout();
 			this.groupBox2.SuspendLayout();
 			((System.ComponentModel.ISupportInitialize)(this.spinTramsTargetVelocity)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this.spinBussesTargetVelocity)).BeginInit();
@@ -84,7 +86,6 @@
 			((System.ComponentModel.ISupportInitialize)(this.spinTramVolume)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this.spinBusVolume)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this.spinCarsVolume)).BeginInit();
-			this.groupBox3.SuspendLayout();
 			this.SuspendLayout();
 			// 
 			// splitContainer1
@@ -120,7 +121,7 @@
 			this.splitContainer1.Panel2.Controls.Add(this.groupBox3);
 			this.splitContainer1.Panel2.Controls.Add(this.groupBox2);
 			this.splitContainer1.Panel2.Controls.Add(this.groupBox1);
-			this.splitContainer1.Size = new System.Drawing.Size(890, 431);
+			this.splitContainer1.Size = new System.Drawing.Size(890, 459);
 			this.splitContainer1.SplitterDistance = 600;
 			this.splitContainer1.TabIndex = 0;
 			// 
@@ -271,6 +272,56 @@
 			this.btnAddDestinationNode.Text = "Add";
 			this.btnAddDestinationNode.UseVisualStyleBackColor = true;
 			this.btnAddDestinationNode.Click += new System.EventHandler(this.btnAddDestinationNode_Click);
+			// 
+			// groupBox3
+			// 
+			this.groupBox3.Controls.Add(this.lblNumStops);
+			this.groupBox3.Controls.Add(this.lblNumVehicles);
+			this.groupBox3.Controls.Add(this.lblTravelTime);
+			this.groupBox3.Controls.Add(this.lblVelocity);
+			this.groupBox3.Controls.Add(this.lblMilage);
+			this.groupBox3.Location = new System.Drawing.Point(3, 293);
+			this.groupBox3.Name = "groupBox3";
+			this.groupBox3.Size = new System.Drawing.Size(250, 153);
+			this.groupBox3.TabIndex = 23;
+			this.groupBox3.TabStop = false;
+			this.groupBox3.Text = "Statistics";
+			// 
+			// lblNumVehicles
+			// 
+			this.lblNumVehicles.AutoSize = true;
+			this.lblNumVehicles.Location = new System.Drawing.Point(6, 21);
+			this.lblNumVehicles.Name = "lblNumVehicles";
+			this.lblNumVehicles.Size = new System.Drawing.Size(86, 13);
+			this.lblNumVehicles.TabIndex = 3;
+			this.lblNumVehicles.Text = "Total Vehicles: 0";
+			// 
+			// lblTravelTime
+			// 
+			this.lblTravelTime.AutoSize = true;
+			this.lblTravelTime.Location = new System.Drawing.Point(6, 73);
+			this.lblTravelTime.Name = "lblTravelTime";
+			this.lblTravelTime.Size = new System.Drawing.Size(123, 13);
+			this.lblTravelTime.TabIndex = 2;
+			this.lblTravelTime.Text = "Average Travel Time: 0s";
+			// 
+			// lblVelocity
+			// 
+			this.lblVelocity.AutoSize = true;
+			this.lblVelocity.Location = new System.Drawing.Point(6, 99);
+			this.lblVelocity.Name = "lblVelocity";
+			this.lblVelocity.Size = new System.Drawing.Size(117, 13);
+			this.lblVelocity.TabIndex = 1;
+			this.lblVelocity.Text = "Average Velocity: 0m/s";
+			// 
+			// lblMilage
+			// 
+			this.lblMilage.AutoSize = true;
+			this.lblMilage.Location = new System.Drawing.Point(6, 47);
+			this.lblMilage.Name = "lblMilage";
+			this.lblMilage.Size = new System.Drawing.Size(101, 13);
+			this.lblMilage.TabIndex = 0;
+			this.lblMilage.Text = "Average Milage: 0m";
 			// 
 			// groupBox2
 			// 
@@ -557,60 +608,20 @@
 			this.spinCarsVolume.TabIndex = 21;
 			this.spinCarsVolume.ValueChanged += new System.EventHandler(this.spinCarsVolume_ValueChanged);
 			// 
-			// groupBox3
+			// lblNumStops
 			// 
-			this.groupBox3.Controls.Add(this.lblNumVehicles);
-			this.groupBox3.Controls.Add(this.lblTravelTime);
-			this.groupBox3.Controls.Add(this.lblVelocity);
-			this.groupBox3.Controls.Add(this.lblMilage);
-			this.groupBox3.Location = new System.Drawing.Point(3, 293);
-			this.groupBox3.Name = "groupBox3";
-			this.groupBox3.Size = new System.Drawing.Size(250, 126);
-			this.groupBox3.TabIndex = 23;
-			this.groupBox3.TabStop = false;
-			this.groupBox3.Text = "Statistics";
-			// 
-			// lblMilage
-			// 
-			this.lblMilage.AutoSize = true;
-			this.lblMilage.Location = new System.Drawing.Point(6, 47);
-			this.lblMilage.Name = "lblMilage";
-			this.lblMilage.Size = new System.Drawing.Size(101, 13);
-			this.lblMilage.TabIndex = 0;
-			this.lblMilage.Text = "Average Milage: 0m";
-			// 
-			// lblVelocity
-			// 
-			this.lblVelocity.AutoSize = true;
-			this.lblVelocity.Location = new System.Drawing.Point(6, 99);
-			this.lblVelocity.Name = "lblVelocity";
-			this.lblVelocity.Size = new System.Drawing.Size(117, 13);
-			this.lblVelocity.TabIndex = 1;
-			this.lblVelocity.Text = "Average Velocity: 0m/s";
-			// 
-			// lblTravelTime
-			// 
-			this.lblTravelTime.AutoSize = true;
-			this.lblTravelTime.Location = new System.Drawing.Point(6, 73);
-			this.lblTravelTime.Name = "lblTravelTime";
-			this.lblTravelTime.Size = new System.Drawing.Size(123, 13);
-			this.lblTravelTime.TabIndex = 2;
-			this.lblTravelTime.Text = "Average Travel Time: 0s";
-			// 
-			// lblNumVehicles
-			// 
-			this.lblNumVehicles.AutoSize = true;
-			this.lblNumVehicles.Location = new System.Drawing.Point(6, 21);
-			this.lblNumVehicles.Name = "lblNumVehicles";
-			this.lblNumVehicles.Size = new System.Drawing.Size(86, 13);
-			this.lblNumVehicles.TabIndex = 3;
-			this.lblNumVehicles.Text = "Total Vehicles: 0";
+			this.lblNumStops.AutoSize = true;
+			this.lblNumStops.Location = new System.Drawing.Point(6, 125);
+			this.lblNumStops.Name = "lblNumStops";
+			this.lblNumStops.Size = new System.Drawing.Size(141, 13);
+			this.lblNumStops.TabIndex = 4;
+			this.lblNumStops.Text = "Average Number of Stops: 0";
 			// 
 			// TrafficVolumeForm
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-			this.ClientSize = new System.Drawing.Size(890, 431);
+			this.ClientSize = new System.Drawing.Size(890, 459);
 			this.ControlBox = false;
 			this.Controls.Add(this.splitContainer1);
 			this.Name = "TrafficVolumeForm";
@@ -619,6 +630,8 @@
 			this.splitContainer1.Panel1.PerformLayout();
 			this.splitContainer1.Panel2.ResumeLayout(false);
 			this.splitContainer1.ResumeLayout(false);
+			this.groupBox3.ResumeLayout(false);
+			this.groupBox3.PerformLayout();
 			this.groupBox2.ResumeLayout(false);
 			this.groupBox2.PerformLayout();
 			((System.ComponentModel.ISupportInitialize)(this.spinTramsTargetVelocity)).EndInit();
@@ -632,8 +645,6 @@
 			((System.ComponentModel.ISupportInitialize)(this.spinTramVolume)).EndInit();
 			((System.ComponentModel.ISupportInitialize)(this.spinBusVolume)).EndInit();
 			((System.ComponentModel.ISupportInitialize)(this.spinCarsVolume)).EndInit();
-			this.groupBox3.ResumeLayout(false);
-			this.groupBox3.PerformLayout();
 			this.ResumeLayout(false);
 
 			}
@@ -682,5 +693,6 @@
 		private System.Windows.Forms.Label lblVelocity;
 		private System.Windows.Forms.Label lblMilage;
 		private System.Windows.Forms.Label lblNumVehicles;
+		private System.Windows.Forms.Label lblNumStops;
 		}
 	}

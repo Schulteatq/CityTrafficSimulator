@@ -207,6 +207,7 @@ namespace CityTrafficSimulator.Verkehr
 				lblMilage.Text = "Average Milage: " + milage + "m";
 				lblTravelTime.Text = "Average Travel Time: " + tt + "s";
 				lblVelocity.Text = "Average Milage: " + (milage / tt) + "m/s";
+				lblNumStops.Text = "Average Number of Stops: " + ((float)m_currentVolume.statistics.numStops / m_currentVolume.statistics.numVehicles);
 				}
 			else
 				{
@@ -219,6 +220,7 @@ namespace CityTrafficSimulator.Verkehr
 				lblMilage.Text = "Average Milage: 0m";
 				lblTravelTime.Text = "Average Travel Time: 0s";
 				lblVelocity.Text = "Average Milage: 0m/s";
+				lblNumStops.Text = "Average Number of Stops: 0";
 				}
 			ignoreUpdateEvent = false;
 			}
