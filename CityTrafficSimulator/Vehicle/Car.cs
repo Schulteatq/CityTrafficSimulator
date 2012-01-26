@@ -33,7 +33,7 @@ namespace CityTrafficSimulator.Vehicle
             {
 			length = rnd.Next(28, 45);
 
-			m_Physics = p;
+			_physics = p;
 
 			// etwas Zufall:
 			a *= (rnd.NextDouble() + 0.5);
@@ -41,10 +41,10 @@ namespace CityTrafficSimulator.Vehicle
 			s0 *= (rnd.NextDouble() + 0.5);
 			T *= (rnd.NextDouble() + 0.5);
 
-			m_Physics.targetVelocity += ((rnd.NextDouble() - 0.5) * 4);
+			_physics.targetVelocity += ((rnd.NextDouble() - 0.5) * 4);
 
-			m_Color = Color.FromArgb(rnd.Next(256), rnd.Next(256), rnd.Next(256));
-			m_vehicleType = VehicleTypes.CAR;
+			_color = Color.FromArgb(rnd.Next(256), rnd.Next(256), rnd.Next(256));
+			_vehicleType = VehicleTypes.CAR;
 			}
         
 		/// <summary>

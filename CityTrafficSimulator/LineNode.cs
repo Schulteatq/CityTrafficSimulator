@@ -53,14 +53,14 @@ namespace CityTrafficSimulator
         /// <summary>
         /// absolute Position des LineNodes in Weltkoordinaten
         /// </summary>
-        private Vector2 m_Position;
+        private Vector2 _position;
 		/// <summary>
 		/// absolute Position des LineNodes in Weltkoordinaten
 		/// </summary>
         public Vector2 position
             {
-            get { return m_Position; }
-            set { m_Position = value; UpdateNodeConnections(true); UpdateNodeGraphics(); }
+            get { return _position; }
+            set { _position = value; UpdateNodeConnections(true); UpdateNodeGraphics(); }
             }
 		/// <summary>
 		/// Quadrat der Kantenlänge 8 um die absolute Position des LineNodes in Weltkoordinaten
@@ -74,18 +74,18 @@ namespace CityTrafficSimulator
 		/// <summary>
 		/// Einflugvektor
 		/// </summary>
-        private Vector2 m_In;
+        private Vector2 _in;
 		/// <summary>
 		/// Ausflugvektor
 		/// </summary>
-        private Vector2 m_Out;
+        private Vector2 _out;
 		/// <summary>
 		/// relativer Einflugvektor
 		/// </summary>
         public Vector2 inSlope
             {
-            get { return m_In; }
-            set { m_In = value; UpdateNodeConnections(true); UpdateNodeGraphics(); }
+            get { return _in; }
+            set { _in = value; UpdateNodeConnections(true); UpdateNodeGraphics(); }
             }
 		/// <summary>
 		/// absolute Position des Einflugvektorankers in Weltkoordinaten
@@ -93,8 +93,8 @@ namespace CityTrafficSimulator
         [XmlIgnore]
         public Vector2 inSlopeAbs
             {
-            get { return position + m_In; }
-            set { m_In = value - position; UpdateNodeConnections(true); UpdateNodeGraphics(); }
+            get { return position + _in; }
+            set { _in = value - position; UpdateNodeConnections(true); UpdateNodeGraphics(); }
             }
 		/// <summary>
 		/// Quadrat der Kantenlänge 8 um die absolute Position des Einflugvektorankers in Weltkoordinaten
@@ -109,8 +109,8 @@ namespace CityTrafficSimulator
         /// </summary>
         public Vector2 outSlope
             {
-            get { return m_Out; }
-            set { m_Out = value; UpdateNodeConnections(true); UpdateNodeGraphics(); }
+            get { return _out; }
+            set { _out = value; UpdateNodeConnections(true); UpdateNodeGraphics(); }
             }
 		/// <summary>
 		/// Quadrat der Kantenlänge 8 um die absolute Position des Ausflugvektorankers in Weltkoordinaten
@@ -125,8 +125,8 @@ namespace CityTrafficSimulator
         [XmlIgnore]
 		public Vector2 outSlopeAbs
             {
-            get { return position + m_Out; }
-            set { m_Out = value - position; UpdateNodeConnections(true); UpdateNodeGraphics(); }
+            get { return position + _out; }
+            set { _out = value - position; UpdateNodeConnections(true); UpdateNodeGraphics(); }
             }
         #endregion
 
@@ -135,11 +135,11 @@ namespace CityTrafficSimulator
 		/// <summary>
 		/// vorherige NodeConnections
 		/// </summary>
-        private List<NodeConnection> m_nextConnections = new List<NodeConnection>(); // Vorheriger Knoten
+        private List<NodeConnection> _nextConnections = new List<NodeConnection>(); // Vorheriger Knoten
 		/// <summary>
 		/// nachfolgende NodeConnections
 		/// </summary>
-        private List<NodeConnection> m_prevConnections = new List<NodeConnection>(); // Nachfolgender Knoten
+        private List<NodeConnection> _prevConnections = new List<NodeConnection>(); // Nachfolgender Knoten
 
 		/// <summary>
 		/// nachfolgende NodeConnections
@@ -147,7 +147,7 @@ namespace CityTrafficSimulator
 		[XmlIgnore]
 		public List<NodeConnection> nextConnections
             {
-            get { return m_nextConnections; } 
+            get { return _nextConnections; } 
             }
 		/// <summary>
 		/// vorherige NodeConnections
@@ -155,7 +155,7 @@ namespace CityTrafficSimulator
 		[XmlIgnore]
 		public List<NodeConnection> prevConnections
             {
-            get { return m_prevConnections; } 
+            get { return _prevConnections; } 
             }
 
 
@@ -166,7 +166,7 @@ namespace CityTrafficSimulator
 		/// <returns>erstbeste NodeConnection in nextConnections mit (nc.endNode == lineNode) oder null</returns>
         public NodeConnection GetNodeConnectionTo(LineNode lineNode)
             {
-            foreach (NodeConnection lc in m_nextConnections)
+            foreach (NodeConnection lc in _nextConnections)
                 {
                 if (lc.endNode == lineNode)
                     {
@@ -182,14 +182,14 @@ namespace CityTrafficSimulator
 		/// <param name="doRecursive">soll die Aktualisierung auch bei den prevNodes durchgeführt werden</param>
         public void UpdateNodeConnections(bool doRecursive)
             {
-            foreach (NodeConnection lc in m_nextConnections)
+            foreach (NodeConnection lc in _nextConnections)
                 {
                 lc.lineSegment = null;
                 lc.lineSegment = new LineSegment(0, this.position, this.outSlopeAbs, lc.endNode.inSlopeAbs, lc.endNode.position);
                 }
             if (doRecursive)
                 {
-                foreach (NodeConnection lc in m_prevConnections)
+                foreach (NodeConnection lc in _prevConnections)
                     {
                     lc.startNode.UpdateNodeConnections(false);
                     }
@@ -248,13 +248,13 @@ namespace CityTrafficSimulator
 		/// <summary>
 		/// ein GraphicsPath, der die wichtigen Grafiken des Knotens Enthält (Ankerpunkte etc)
 		/// </summary>
-        private System.Drawing.Drawing2D.GraphicsPath[] m_NodeGraphics = new System.Drawing.Drawing2D.GraphicsPath[4];
+        private System.Drawing.Drawing2D.GraphicsPath[] _nodeGraphics = new System.Drawing.Drawing2D.GraphicsPath[4];
 		/// <summary>
 		/// ein GraphicsPath, der die wichtigen Grafiken des Knotens Enthält (Ankerpunkte etc)
 		/// </summary>
         public System.Drawing.Drawing2D.GraphicsPath[] nodeGraphics
             {
-            get { return m_NodeGraphics; }
+            get { return _nodeGraphics; }
             }
 
         /// <summary>
@@ -265,13 +265,13 @@ namespace CityTrafficSimulator
             if ((position != null) && (inSlope != null) && (outSlope != null))
                 {
                 // Linien zu den Stützpunkten
-                m_NodeGraphics[0] = new System.Drawing.Drawing2D.GraphicsPath(new PointF[] { inSlopeAbs, position }, new byte[] { 1, 1 });
-                m_NodeGraphics[1] = new System.Drawing.Drawing2D.GraphicsPath(new PointF[] { outSlopeAbs, position }, new byte[] { 1, 1 });
+                _nodeGraphics[0] = new System.Drawing.Drawing2D.GraphicsPath(new PointF[] { inSlopeAbs, position }, new byte[] { 1, 1 });
+                _nodeGraphics[1] = new System.Drawing.Drawing2D.GraphicsPath(new PointF[] { outSlopeAbs, position }, new byte[] { 1, 1 });
 
                 // Stützpunkte
                 System.Drawing.Drawing2D.GraphicsPath inPoint = new System.Drawing.Drawing2D.GraphicsPath();
                 inPoint.AddEllipse(inSlopeRect);
-                m_NodeGraphics[2] = inPoint;
+                _nodeGraphics[2] = inPoint;
 
                 System.Drawing.Drawing2D.GraphicsPath outPoint = new System.Drawing.Drawing2D.GraphicsPath();
 				// wir versuchen ein Dreieck zu zeichnen *lol*
@@ -283,7 +283,7 @@ namespace CityTrafficSimulator
 						(6*dir.RotateCounterClockwise(Math.PI * 4 / 3)) + outSlopeAbs,
 						(6*dir) + outSlopeAbs
 					});
-                m_NodeGraphics[3] = outPoint;
+                _nodeGraphics[3] = outPoint;
                 }
             }
 
@@ -297,7 +297,7 @@ namespace CityTrafficSimulator
         public int GetCountOfLastVehiclesBefore()
             {
             int count = 0;
-            foreach (NodeConnection nc in m_prevConnections)
+            foreach (NodeConnection nc in _prevConnections)
                 {
                 if (nc.vehicles.Count != 0)
                     {
@@ -317,14 +317,14 @@ namespace CityTrafficSimulator
 		/// <param name="tickLength">Länge eines Ticks in Sekunden (berechnet sich mit 1/#Ticks pro Sekunde)</param>
 		public void Tick(double tickLength)
             {
-            foreach (NodeConnection nc in this.m_nextConnections)
+            foreach (NodeConnection nc in this._nextConnections)
                 {
                 foreach (IVehicle v in nc.vehicles)
                     {
                     v.Think(tickLength);
                     }
                 }
-			foreach (NodeConnection nc in this.m_nextConnections)
+			foreach (NodeConnection nc in this._nextConnections)
 				{
 				nc.RemoveAllVehiclesInRemoveList();
 
@@ -343,7 +343,7 @@ namespace CityTrafficSimulator
 		/// </summary>
 		public void Reset()
 			{
-			foreach (NodeConnection nc in this.m_nextConnections)
+			foreach (NodeConnection nc in this._nextConnections)
 				{
 				foreach (IVehicle v in nc.vehicles)
 					{
@@ -362,9 +362,9 @@ namespace CityTrafficSimulator
 		public void PrepareForSave()
             {
 			// TODO: ist das hier wirklich nötig? macht das nicht die NodeSteuerung?
-            foreach (NodeConnection nc in m_nextConnections)
+            foreach (NodeConnection nc in _nextConnections)
                 nc.PrepareForSave();
-            foreach (NodeConnection nc in m_prevConnections)
+            foreach (NodeConnection nc in _prevConnections)
                 nc.PrepareForSave();
 
 			if (tLight != null)

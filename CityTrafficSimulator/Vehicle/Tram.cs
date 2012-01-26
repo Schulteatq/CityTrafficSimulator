@@ -35,8 +35,8 @@ namespace CityTrafficSimulator.Vehicle
 			{
 			length = (rnd.Next(2) == 0) ? 250 : 400;
 
-			m_Physics = p;
-			m_Color = Color.FromArgb(rnd.Next(256), rnd.Next(256), rnd.Next(256));
+			_physics = p;
+			_color = Color.FromArgb(rnd.Next(256), rnd.Next(256), rnd.Next(256));
 
 			// maximale Beschleunigung
 			a = 1.0;
@@ -44,7 +44,7 @@ namespace CityTrafficSimulator.Vehicle
 			// komfortable Bremsverzögerung
 			b = 1.0;
 
-			m_vehicleType = VehicleTypes.TRAM;
+			_vehicleType = VehicleTypes.TRAM;
 			}
 
 		/// <summary>
@@ -89,7 +89,7 @@ namespace CityTrafficSimulator.Vehicle
 				}
 
 			// 25-Meter-Zug
-			if (m_Length == 250)
+			if (_length == 250)
 				{
 				Vector2[] positions = {
 					state.positionAbs,

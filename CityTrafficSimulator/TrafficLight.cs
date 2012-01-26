@@ -53,29 +53,29 @@ namespace CityTrafficSimulator
 		/// <summary>
 		/// aktueller Status der Ampel
 		/// </summary>
-		private State m_TrafficLightState;
+		private State _trafficLightState;
 		/// <summary>
 		/// aktueller Status der Ampel
 		/// </summary>
 		[XmlIgnore]
         public State trafficLightState
             {
-            get { return m_TrafficLightState; }
-			set { m_TrafficLightState = value; }
+            get { return _trafficLightState; }
+			set { _trafficLightState = value; }
             }
 
 		/// <summary>
 		/// Elternknoten
 		/// </summary>
         [XmlIgnore]
-        private LineNode m_Parent;
+        private LineNode _parent;
 		/// <summary>
 		/// Elternknoten
 		/// </summary>
         [XmlIgnore]
         public LineNode parent
             {
-            get { return m_Parent; }
+            get { return _parent; }
             }
 
 
@@ -83,7 +83,7 @@ namespace CityTrafficSimulator
 		/// Liste von LineNodes denen dieses TrafficLight zugeordnet ist
 		/// </summary>
 		[XmlIgnore]
-		private List<LineNode> m_assignedNodes = new List<LineNode>();
+		private List<LineNode> _assignedNodes = new List<LineNode>();
 
 		/// <summary>
 		/// Liste von LineNodes denen dieses TrafficLight zugeordnet ist
@@ -91,7 +91,7 @@ namespace CityTrafficSimulator
 		[XmlIgnore]
 		public List<LineNode> assignedNodes
 			{
-			get { return m_assignedNodes; }
+			get { return _assignedNodes; }
 			}
 
 		#region Hashcodes
@@ -148,7 +148,7 @@ namespace CityTrafficSimulator
 			{
 			hashcode = hashcodeIndex++;
 
-			this.m_Parent = parent;
+			this._parent = parent;
 
 			// Initial Event anlegen
 			this.defaultAction = SwitchToRed;
@@ -178,7 +178,7 @@ namespace CityTrafficSimulator
 			base.PrepareForSave();
 
 			assignedNodesHashes.Clear();
-			foreach (LineNode ln in m_assignedNodes)
+			foreach (LineNode ln in _assignedNodes)
 				{
 				assignedNodesHashes.Add(ln.GetHashCode());
 				}
@@ -211,7 +211,7 @@ namespace CityTrafficSimulator
 					{
 					if (ln.GetHashCode() == hash)
 						{
-						m_assignedNodes.Add(ln);
+						_assignedNodes.Add(ln);
 						ln.tLight = this;
 						break;
 						}
@@ -239,7 +239,7 @@ namespace CityTrafficSimulator
 		/// <param name="ln">anzumeldender LineNode</param>
 		public void AddAssignedLineNode(LineNode ln)
 			{
-			m_assignedNodes.Add(ln);
+			_assignedNodes.Add(ln);
 			ln.tLight = this;
 			}
 
@@ -253,7 +253,7 @@ namespace CityTrafficSimulator
 			if (ln != null)
 				{
 				ln.tLight = null;
-				return m_assignedNodes.Remove(ln);
+				return _assignedNodes.Remove(ln);
 				}
 			return false;
 			}
@@ -281,9 +281,9 @@ namespace CityTrafficSimulator
 			{
 			base.Dispose();
 
-			while (m_assignedNodes.Count > 0)
+			while (_assignedNodes.Count > 0)
 				{
-				RemoveAssignedLineNode(m_assignedNodes[0]);
+				RemoveAssignedLineNode(_assignedNodes[0]);
 				}
 			}
 

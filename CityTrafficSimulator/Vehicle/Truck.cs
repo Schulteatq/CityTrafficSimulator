@@ -33,8 +33,8 @@ namespace CityTrafficSimulator.Vehicle
 			{
 			length = (rnd.Next(2) == 0) ? 100 : 165;
 
-			m_Physics = p;
-			m_Color = Color.FromArgb(rnd.Next(256), rnd.Next(256), rnd.Next(256));
+			_physics = p;
+			_color = Color.FromArgb(rnd.Next(256), rnd.Next(256), rnd.Next(256));
 
 			// maximale Beschleunigung
 			a = 0.6;
@@ -49,8 +49,8 @@ namespace CityTrafficSimulator.Vehicle
 			s0 *= (rnd.NextDouble() + 0.5);
 			T *= (rnd.NextDouble() + 0.5);
 
-			m_Physics.targetVelocity += ((rnd.NextDouble() - 0.5) * 4);
-			m_vehicleType = VehicleTypes.CAR;
+			_physics.targetVelocity += ((rnd.NextDouble() - 0.5) * 4);
+			_vehicleType = VehicleTypes.CAR;
 			}
 	
 		/// <summary>
@@ -92,7 +92,7 @@ namespace CityTrafficSimulator.Vehicle
 			GraphicsPath back = new GraphicsPath();
 
 			// LKW
-			if (m_Length == 100)
+			if (_length == 100)
 				{
 				Vector2[] positions = {
 					state.positionAbs,

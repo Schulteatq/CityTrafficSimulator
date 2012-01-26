@@ -38,42 +38,42 @@ namespace CityTrafficSimulator.Timeline
 		/// <summary>
 		/// Titel dieser Gruppe
 		/// </summary>
-		private string m_title;
+		private string _title;
 		/// <summary>
 		/// Titel dieser Gruppe
 		/// </summary>
 		public string title
 			{
-			get { return m_title; }
-			set { m_title = value; OnGroupChanged(); }
+			get { return _title; }
+			set { _title = value; OnGroupChanged(); }
 			}
 
 
 		/// <summary>
 		/// Flag, ob diese TimelineGroup zusammengefaltet ist (Anzeige)
 		/// </summary>
-		private bool m_collapsed;
+		private bool _collapsed;
 		/// <summary>
 		/// Flag, ob diese TimelineGroup zusammengefaltet ist (Anzeige)
 		/// </summary>
 		public bool collapsed
 			{
-			get { return m_collapsed; }
-			set { m_collapsed = value; OnGroupChanged(); }
+			get { return _collapsed; }
+			set { _collapsed = value; OnGroupChanged(); }
 			}
 
 
 		/// <summary>
 		/// Liste von den zu dieser TimelineGroup gehörenden TimelineEntries
 		/// </summary>
-		private List<TimelineEntry> m_entries = new List<TimelineEntry>();
+		private List<TimelineEntry> _entries = new List<TimelineEntry>();
 		/// <summary>
 		/// Liste von den zu dieser TimelineGroup gehörenden TimelineEntries
 		/// </summary>
 		public List<TimelineEntry> entries
 			{
-			get { return m_entries; }
-			set { m_entries = value; }
+			get { return _entries; }
+			set { _entries = value; }
 			}
 
 
@@ -97,8 +97,8 @@ namespace CityTrafficSimulator.Timeline
 		/// <param name="collapsed">Flag, ob diese TimelineGroup zusammengefaltet ist (Anzeige)</param>
 		public TimelineGroup(string title, bool collapsed)
 			{
-			this.m_title = title;
-			this.m_collapsed = collapsed;
+			this._title = title;
+			this._collapsed = collapsed;
 			}
 
 
@@ -108,7 +108,7 @@ namespace CityTrafficSimulator.Timeline
 		/// <param name="entryToAdd">TimelineEntry welcher eingefügt werden soll</param>
 		public void AddEntry(TimelineEntry entryToAdd)
 			{
-			m_entries.Add(entryToAdd);
+			_entries.Add(entryToAdd);
 			}
 
 
@@ -118,7 +118,7 @@ namespace CityTrafficSimulator.Timeline
 		/// <returns>this.title</returns>
 		public override string ToString()
 			{
-			return m_title;
+			return _title;
 			}
 
 		#endregion
@@ -159,7 +159,7 @@ namespace CityTrafficSimulator.Timeline
 		/// </summary>
 		public virtual void PrepareForSave()
 			{
-			foreach (TimelineEntry te in m_entries)
+			foreach (TimelineEntry te in _entries)
 				{
 				te.PrepareForSave();
 				}
@@ -172,7 +172,7 @@ namespace CityTrafficSimulator.Timeline
 		/// <param name="nodesList">Liste aller LineNodes</param>
 		public virtual void RecoverFromLoad(int saveVersion, List<LineNode> nodesList)
 			{
-			foreach (TimelineEntry te in m_entries)
+			foreach (TimelineEntry te in _entries)
 				{
 				te.parentGroup = this;
 				te.RecoverFromLoad(saveVersion, nodesList);

@@ -58,53 +58,53 @@ namespace CityTrafficSimulator.Verkehr
 		/// <summary>
 		/// Car traffic volume in vehicles/hour
 		/// </summary>
-		private int m_trafficVolumeCars;
+		private int _trafficVolumeCars;
 		/// <summary>
 		/// Car traffic volume in vehicles/hour
 		/// </summary>
 		public int trafficVolumeCars
 			{
-			get { return m_trafficVolumeCars; }
-			set { m_trafficVolumeCars = value; }
+			get { return _trafficVolumeCars; }
+			set { _trafficVolumeCars = value; }
 			}
 
 		/// <summary>
 		/// Truck traffic volume in vehicles/hour
 		/// </summary>
-		private int m_trafficVolumeTrucks;
+		private int _trafficVolumeTrucks;
 		/// <summary>
 		/// Truck traffic volume in vehicles/hour
 		/// </summary>
 		public int trafficVolumeTrucks
 			{
-			get { return m_trafficVolumeTrucks; }
-			set { m_trafficVolumeTrucks = value; }
+			get { return _trafficVolumeTrucks; }
+			set { _trafficVolumeTrucks = value; }
 			}
 
 		/// <summary>
 		/// Bus traffic volume in vehicles/hour
 		/// </summary>
-		private int m_trafficVolumeBusses;
+		private int _trafficVolumeBusses;
 		/// <summary>
 		/// Bus traffic volume in vehicles/hour
 		/// </summary>
 		public int trafficVolumeBusses
 			{
-			get { return m_trafficVolumeBusses; }
-			set { m_trafficVolumeBusses = value; }
+			get { return _trafficVolumeBusses; }
+			set { _trafficVolumeBusses = value; }
 			}
 
 		/// <summary>
 		/// Tram traffic volume in vehicles/hour
 		/// </summary>
-		private int m_trafficVolumeTrams;
+		private int _trafficVolumeTrams;
 		/// <summary>
 		/// Tram traffic volume in vehicles/hour
 		/// </summary>
 		public int trafficVolumeTrams
 			{
-			get { return m_trafficVolumeTrams; }
-			set { m_trafficVolumeTrams = value; }
+			get { return _trafficVolumeTrams; }
+			set { _trafficVolumeTrams = value; }
 			}
 
 		#region Statistics
@@ -143,13 +143,13 @@ namespace CityTrafficSimulator.Verkehr
 		/// <summary>
 		/// Statistics record of this TrafficVolume
 		/// </summary>
-		private TrafficVolume.Statistics m_statistics;
+		private TrafficVolume.Statistics _statistics;
 		/// <summary>
 		/// Statistics record of this TrafficVolume
 		/// </summary>
 		public TrafficVolume.Statistics statistics
 			{
-			get { return m_statistics; }
+			get { return _statistics; }
 			}
 
 
@@ -167,10 +167,10 @@ namespace CityTrafficSimulator.Verkehr
 			{
 			this.startNodes = start;
 			this.destinationNodes = destination;
-			this.m_trafficVolumeCars = 0;
-			this.m_trafficVolumeTrucks = 0;
-			this.m_trafficVolumeBusses = 0;
-			this.m_trafficVolumeTrams = 0;
+			this._trafficVolumeCars = 0;
+			this._trafficVolumeTrucks = 0;
+			this._trafficVolumeBusses = 0;
+			this._trafficVolumeTrams = 0;
 			}
 
 		/// <summary>
@@ -189,10 +189,10 @@ namespace CityTrafficSimulator.Verkehr
 		/// <param name="trams">Tram traffic volume in vehicles/hour</param>
 		public void SetTrafficVolume(int cars, int trucks, int busses, int trams)
 			{
-			this.m_trafficVolumeCars = cars;
-			this.m_trafficVolumeTrucks = trucks;
-			this.m_trafficVolumeBusses = busses;
-			this.m_trafficVolumeTrams = trams;
+			this._trafficVolumeCars = cars;
+			this._trafficVolumeTrucks = trucks;
+			this._trafficVolumeBusses = busses;
+			this._trafficVolumeTrams = trams;
 			}
 
 		#endregion
@@ -254,12 +254,12 @@ namespace CityTrafficSimulator.Verkehr
 		/// <param name="e">VehicleDiedEventArgs</param>
 		public void SpawnedVehicleDied(object sender, IVehicle.VehicleDiedEventArgs e)
 			{
-			++m_statistics.numVehicles;
+			++_statistics.numVehicles;
 			if (e.reachedDestination)
-				++m_statistics.numVehiclesReachedDestination;
-			m_statistics.numStops += e.vehicleStatistics.numStops;
-			m_statistics.sumMilage += e.vehicleStatistics.totalMilage;
-			m_statistics.sumTravelTime += GlobalTime.Instance.currentTime - e.vehicleStatistics.startTime;
+				++_statistics.numVehiclesReachedDestination;
+			_statistics.numStops += e.vehicleStatistics.numStops;
+			_statistics.sumMilage += e.vehicleStatistics.totalMilage;
+			_statistics.sumTravelTime += GlobalTime.Instance.currentTime - e.vehicleStatistics.startTime;
 			}
 
 

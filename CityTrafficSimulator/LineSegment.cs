@@ -49,13 +49,13 @@ namespace CityTrafficSimulator
         /// <summary>
 		/// Intervall in dem sich die Bogenlänge befindet (nur lesen)
         /// </summary>
-        private Interval<double> m_posInterval;
+        private Interval<double> _posInterval;
 		/// <summary>
 		/// Intervall in dem sich die Bogenlänge befindet (nur lesen)
 		/// </summary>
         public Interval<double> posInterval
             {
-            get { return m_posInterval; }
+            get { return _posInterval; }
             }
 	
 
@@ -63,19 +63,19 @@ namespace CityTrafficSimulator
 		/// <summary>
 		/// erster Stützpunkt
 		/// </summary>
-        private Vector2 m_p0;
+        private Vector2 _p0;
 		/// <summary>
 		/// zweiter Stützpunkt
 		/// </summary>
-        private Vector2 m_p1;
+        private Vector2 _p1;
 		/// <summary>
 		/// dritter Stützpunkt
 		/// </summary>
-        private Vector2 m_p2;
+        private Vector2 _p2;
 		/// <summary>
 		/// vierter Stützpunkt
 		/// </summary>
-        private Vector2 m_p3;
+        private Vector2 _p3;
 
 
 		/// <summary>
@@ -83,32 +83,32 @@ namespace CityTrafficSimulator
 		/// </summary>
         public Vector2 p0
             {
-            get { return m_p0; }
-            set { m_p0 = value; }
+            get { return _p0; }
+            set { _p0 = value; }
             }
 		/// <summary>
 		/// zweiter Stützpunkt
 		/// </summary>
         public Vector2 p1
             {
-            get { return m_p1; }
-            set { m_p1 = value; }
+            get { return _p1; }
+            set { _p1 = value; }
             }
 		/// <summary>
 		/// dritter Stützpunkt
 		/// </summary>
         public Vector2 p2
             {
-            get { return m_p2; }
-            set { m_p2 = value; }
+            get { return _p2; }
+            set { _p2 = value; }
             }
 		/// <summary>
 		/// vierter Stützpunkt
 		/// </summary>
         public Vector2 p3
             {
-            get { return m_p3; }
-            set { m_p3 = value; }
+            get { return _p3; }
+            set { _p3 = value; }
             }
         #endregion
 
@@ -116,14 +116,14 @@ namespace CityTrafficSimulator
         /// <summary>
         /// Euklidische Länge des Segmentes
         /// </summary>
-        private double m_Length = 0;
+        private double _length = 0;
 		/// <summary>
 		/// Euklidische Länge des Segmentes
 		/// </summary>
         public double length
             {
-            get { return m_Length; }
-            set { m_Length = value; }
+            get { return _length; }
+            set { _length = value; }
             }
         #endregion
         
@@ -158,15 +158,15 @@ namespace CityTrafficSimulator
                 lengthList[i] = sum;
                 }
             this.length = lengthList[lengthList.Length - 1];
-            this.m_posInterval = new Interval<double>(arcPosStart, length);
+            this._posInterval = new Interval<double>(arcPosStart, length);
 
-			m_BoundingRectangle = new RectangleF(
+			_boundingRectangle = new RectangleF(
 				(float)Math.Min(p0.X, (Math.Min(p1.X, Math.Min(p2.X, p3.X)))),
 				(float)Math.Min(p0.Y, (Math.Min(p1.Y, Math.Min(p2.Y, p3.Y)))),
 				0,
 				0);
-			m_BoundingRectangle.Width = (float)Math.Max(p0.X, (Math.Max(p1.X, Math.Max(p2.X, p3.X)))) - m_BoundingRectangle.X;
-			m_BoundingRectangle.Height = (float)Math.Max(p0.Y, (Math.Max(p1.Y, Math.Max(p2.Y, p3.Y)))) - m_BoundingRectangle.Y;
+			_boundingRectangle.Width = (float)Math.Max(p0.X, (Math.Max(p1.X, Math.Max(p2.X, p3.X)))) - _boundingRectangle.X;
+			_boundingRectangle.Height = (float)Math.Max(p0.Y, (Math.Max(p1.Y, Math.Max(p2.Y, p3.Y)))) - _boundingRectangle.Y;
 			}
 
         #endregion
@@ -271,7 +271,7 @@ namespace CityTrafficSimulator
 		public double TimeToArcPosition(double time)
 			{
 			if (time >= 1)
-				return m_Length;
+				return _length;
 			else
 				{
 				int index = (int)Math.Floor(time * feinheit);
@@ -295,7 +295,7 @@ namespace CityTrafficSimulator
 		/// <param name="pen">zu benutzender Stift</param>
         public void Draw(Graphics g, Pen pen)
             {
-			g.DrawBezier(pen, m_p0, m_p1, m_p2, m_p3);
+			g.DrawBezier(pen, _p0, _p1, _p2, _p3);
             }
 
 
@@ -326,13 +326,13 @@ namespace CityTrafficSimulator
 		/// <summary>
 		/// BoundingBox der Bézierkurve
 		/// </summary>
-		private RectangleF m_BoundingRectangle;
+		private RectangleF _boundingRectangle;
 		/// <summary>
 		/// BoundingBox der Bézierkurve
 		/// </summary>
 		public RectangleF boundingRectangle
 			{
-			get { return m_BoundingRectangle; }
+			get { return _boundingRectangle; }
 			}
 
 		/// <summary>
@@ -343,10 +343,10 @@ namespace CityTrafficSimulator
 		public RectangleF GetBounds(float pixelsToAdd)
 			{
 			return new RectangleF(
-				m_BoundingRectangle.X - pixelsToAdd, 
-				m_BoundingRectangle.Y - pixelsToAdd, 
-				m_BoundingRectangle.Width + 2*pixelsToAdd, 
-				m_BoundingRectangle.Height + 2*pixelsToAdd);
+				_boundingRectangle.X - pixelsToAdd, 
+				_boundingRectangle.Y - pixelsToAdd, 
+				_boundingRectangle.Width + 2*pixelsToAdd, 
+				_boundingRectangle.Height + 2*pixelsToAdd);
 			}
 
 		/// <summary>

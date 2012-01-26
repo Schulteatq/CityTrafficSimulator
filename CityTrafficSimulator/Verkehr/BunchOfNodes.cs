@@ -51,29 +51,29 @@ namespace CityTrafficSimulator.Verkehr
 		/// <summary>
 		/// Name dieser Ansammlung von LineNodes
 		/// </summary>
-		private string m_title;
+		private string _title;
 		/// <summary>
 		/// Name dieser Ansammlung von LineNodes
 		/// </summary> 
 		public string title
 			{
-			get { return m_title; }
-			set { m_title = value; }
+			get { return _title; }
+			set { _title = value; }
 			}
 
 		/// <summary>
 		/// Liste der teilnehmenden LineNodes
 		/// </summary>
 		[XmlIgnore]
-		private List<LineNode> m_nodes = new List<LineNode>();
+		private List<LineNode> _nodes = new List<LineNode>();
 		/// <summary>
 		/// Liste der teilnehmenden LineNodes
 		/// </summary>
 		[XmlIgnore]
 		public List<LineNode> nodes
 			{
-			get { return m_nodes; }
-			set { m_nodes = value; }
+			get { return _nodes; }
+			set { _nodes = value; }
 			}
 
 		#endregion
@@ -89,8 +89,8 @@ namespace CityTrafficSimulator.Verkehr
 			{
 			hashcode = hashcodeIndex++;
 
-			this.m_nodes = nodes;
-			this.m_title = title;
+			this._nodes = nodes;
+			this._title = title;
 			}
 
 		/// <summary>
@@ -106,7 +106,7 @@ namespace CityTrafficSimulator.Verkehr
 		/// <returns>this.title</returns>
 		public override string ToString()
 			{
-			return m_title;
+			return _title;
 			}
 
 		#endregion
@@ -125,7 +125,7 @@ namespace CityTrafficSimulator.Verkehr
 		public void PrepareForSave()
 			{
 			nodeHashes.Clear();
-			foreach (LineNode ln in m_nodes)
+			foreach (LineNode ln in _nodes)
 				nodeHashes.Add(ln.GetHashCode());
 			}
 
@@ -140,7 +140,7 @@ namespace CityTrafficSimulator.Verkehr
 			foreach (LineNode ln in nodesList)
 				{
 				if (nodeHashes.Contains(ln.GetHashCode()))
-					m_nodes.Add(ln);
+					_nodes.Add(ln);
 				}
 			}
 

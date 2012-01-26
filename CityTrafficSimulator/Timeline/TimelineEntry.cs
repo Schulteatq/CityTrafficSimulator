@@ -45,76 +45,76 @@ namespace CityTrafficSimulator.Timeline
 		/// <summary>
 		/// Liste von Events die ausgeführt werden sollen
 		/// </summary>
-		protected MyLinkedList<TimelineEvent> m_events = new MyLinkedList<TimelineEvent>();
+		protected MyLinkedList<TimelineEvent> _events = new MyLinkedList<TimelineEvent>();
 		/// <summary>
 		/// Liste von Events die ausgeführt werden sollen
 		/// </summary>
 		public MyLinkedList<TimelineEvent> events
 			{
-			get { return m_events; }
+			get { return _events; }
 			}
 
 		/// <summary>
 		/// Standardevent der ausgeführt werden soll, wenn sonst nix is
 		/// </summary>
-		private TimelineEvent.EventAction m_defaultAction;
+		private TimelineEvent.EventAction _defaultAction;
 		/// <summary>
 		/// Standardevent der ausgeführt werden soll, wenn sonst nix is
 		/// </summary>
 		[XmlIgnore]
 		public TimelineEvent.EventAction defaultAction
 			{
-			get { return m_defaultAction; }
-			set { m_defaultAction = value; }
+			get { return _defaultAction; }
+			set { _defaultAction = value; }
 			}
 
 
 		/// <summary>
 		/// Name des TimelineEntries
 		/// </summary>
-		protected String m_name;
+		protected String _name;
 		/// <summary>
 		/// Name des TimelineEntries
 		/// </summary>
 		public virtual String name
 			{
-			get { return m_name; }
-			set { m_name = value; OnEntryChanged(new EntryChangedEventArgs(this)); }
+			get { return _name; }
+			set { _name = value; OnEntryChanged(new EntryChangedEventArgs(this)); }
 			}
 
 		/// <summary>
 		/// Länge des TimelineEntries
 		/// </summary>
-		protected double m_maxTime;
+		protected double _maxTime;
 		/// <summary>
 		/// Länge des TimelineEntries
 		/// </summary>
 		public double maxTime
 			{
-			get { return m_maxTime; }
-			set { m_maxTime = value; AdaptEventsToMaxTime(); }
+			get { return _maxTime; }
+			set { _maxTime = value; AdaptEventsToMaxTime(); }
 			}
 
 		/// <summary>
 		/// Farbe durch die das Event repräsentiert werden soll
 		/// </summary>
-		private Color m_color;
+		private Color _color;
 		/// <summary>
 		/// Farbe durch die das Event repräsentiert werden soll
 		/// </summary>
 		[XmlIgnore]
 		public Color color
 			{
-			get { return m_color; }
-			set { m_color = value; OnEntryChanged(new EntryChangedEventArgs(this)); }
+			get { return _color; }
+			set { _color = value; OnEntryChanged(new EntryChangedEventArgs(this)); }
 			}
 		/// <summary>
 		/// Farbe im ARGB-Format (Für Serialisierung benötigt)
 		/// </summary>
 		public int argbColor
 			{
-			get { return m_color.ToArgb(); }
-			set { m_color = Color.FromArgb(value); OnEntryChanged(new EntryChangedEventArgs(this)); }
+			get { return _color.ToArgb(); }
+			set { _color = Color.FromArgb(value); OnEntryChanged(new EntryChangedEventArgs(this)); }
 			}
 
 		#endregion
@@ -181,7 +181,7 @@ namespace CityTrafficSimulator.Timeline
 		/// <param name="eventToRemove">zu entfernendes TimelineEvent</param>
 		public void RemoveEvent(TimelineEvent eventToRemove)
 			{
-			m_events.Remove(eventToRemove);
+			_events.Remove(eventToRemove);
 			OnEntryChanged(new EntryChangedEventArgs(this));
 			}
 
@@ -363,13 +363,13 @@ namespace CityTrafficSimulator.Timeline
 			{
 			List<TimelineEvent> eventsToDelete = new List<TimelineEvent>();
 
-			foreach (TimelineEvent te in m_events)
+			foreach (TimelineEvent te in _events)
 				{
-				if (te.eventTime < m_maxTime && te.eventTime + te.eventLength > m_maxTime)
+				if (te.eventTime < _maxTime && te.eventTime + te.eventLength > _maxTime)
 					{
-					te.eventLength = m_maxTime - te.eventTime;
+					te.eventLength = _maxTime - te.eventTime;
 					}
-				else if (te.eventTime >= m_maxTime)
+				else if (te.eventTime >= _maxTime)
 					{
 					eventsToDelete.Add(te);
 					}
@@ -377,7 +377,7 @@ namespace CityTrafficSimulator.Timeline
 
 			foreach (TimelineEvent te in eventsToDelete)
 				{
-				m_events.Remove(te);
+				_events.Remove(te);
 				}
 
 			OnEntryChanged(new EntryChangedEventArgs(this));
@@ -448,7 +448,7 @@ namespace CityTrafficSimulator.Timeline
 		/// </summary>
 		public virtual void PrepareForSave()
 			{
-			foreach (TimelineEvent te in m_events)
+			foreach (TimelineEvent te in _events)
 				{
 				te.PrepareForSave();
 				}
@@ -461,7 +461,7 @@ namespace CityTrafficSimulator.Timeline
 		/// <param name="nodesList">Liste aller LineNodes</param>
 		public virtual void RecoverFromLoad(int saveVersion, List<LineNode> nodesList)
 			{
-			foreach (TimelineEvent te in m_events)
+			foreach (TimelineEvent te in _events)
 				{
 				te.RecoverFromLoad(saveVersion, nodesList);
 				}

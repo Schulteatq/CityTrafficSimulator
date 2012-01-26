@@ -33,9 +33,9 @@ namespace CityTrafficSimulator.Vehicle
 			{
 			length = (rnd.Next(2) == 0) ? 120 : 180;
 
-			m_Physics = p;
-			m_Color = Color.FromArgb(rnd.Next(256), rnd.Next(256), rnd.Next(256));
-			m_vehicleType = VehicleTypes.BUS;
+			_physics = p;
+			_color = Color.FromArgb(rnd.Next(256), rnd.Next(256), rnd.Next(256));
+			_vehicleType = VehicleTypes.BUS;
 
 			// maximale Beschleunigung
 			a = 0.9;
@@ -83,7 +83,7 @@ namespace CityTrafficSimulator.Vehicle
 			GraphicsPath back = new GraphicsPath();
 
 			// Solobus
-			if (m_Length == 120)
+			if (_length == 120)
 				{
 				Vector2[] positions = {
 					state.positionAbs,

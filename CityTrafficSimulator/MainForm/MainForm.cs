@@ -114,6 +114,11 @@ namespace CityTrafficSimulator
 
 			_dockingManager.ContentHiding += new DockingManager.ContentHidingHandler(_dockingManager_ContentHiding);
 			statusleiste.Visible = false;
+
+			if (!statisticsContent.Visible)
+				{
+				statisticsContent.BringToFront();
+				}
 			}
 
 		void _dockingManager_ContentHiding(Content c, CancelEventArgs cea)
@@ -591,6 +596,7 @@ namespace CityTrafficSimulator
 									m_selectedLineNodes[0],
 									nodesToAdd[0],
 									(int)nodeConnectionPrioritySpinEdit.Value,
+									(double)spinTargetVelocity.Value,
 									carsAllowedCheckBox.Checked,
 									busAllowedCheckBox.Checked,
 									tramAllowedCheckBox.Checked,
@@ -616,6 +622,7 @@ namespace CityTrafficSimulator
 										m_selectedLineNodes[i],
 										nodesToAdd[i],
 										(int)nodeConnectionPrioritySpinEdit.Value,
+										(double)spinTargetVelocity.Value,
 										carsAllowedCheckBox.Checked,
 										busAllowedCheckBox.Checked,
 										tramAllowedCheckBox.Checked,
@@ -641,6 +648,7 @@ namespace CityTrafficSimulator
 									nodesToAdd[0],
 									m_selectedLineNodes[0],
 									(int)nodeConnectionPrioritySpinEdit.Value,
+									(double)spinTargetVelocity.Value,
 									carsAllowedCheckBox.Checked,
 									busAllowedCheckBox.Checked,
 									tramAllowedCheckBox.Checked,
@@ -666,6 +674,7 @@ namespace CityTrafficSimulator
 										nodesToAdd[i],
 										m_selectedLineNodes[i],
 										(int)nodeConnectionPrioritySpinEdit.Value,
+										(double)spinTargetVelocity.Value,
 										carsAllowedCheckBox.Checked,
 										busAllowedCheckBox.Checked,
 										tramAllowedCheckBox.Checked,
@@ -710,7 +719,8 @@ namespace CityTrafficSimulator
 								nodeSteuerung.Connect(
 									ln, 
 									nodeToConnectTo, 
-									(int)nodeConnectionPrioritySpinEdit.Value, 
+									(int)nodeConnectionPrioritySpinEdit.Value,
+									(double)spinTargetVelocity.Value,
 									carsAllowedCheckBox.Checked, 
 									busAllowedCheckBox.Checked, 
 									tramAllowedCheckBox.Checked, 
@@ -788,7 +798,6 @@ namespace CityTrafficSimulator
 								}
 							else
 								{
-								selectedLineNodes = new List<LineNode>();
 								howToDrag = DragNDrop.DRAG_RUBBERBAND;
 
 								daGridRubberband.Location = clickedPosition;
@@ -955,13 +964,27 @@ namespace CityTrafficSimulator
 							daGridRubberband.Height *= -1;
 							}
 
-						selectedLineNodes = nodeSteuerung.GetLineNodesAt(daGridRubberband);
+						if ((Control.ModifierKeys & Keys.Shift) == Keys.Shift)
+							{
+							List<LineNode> tmp = nodeSteuerung.GetLineNodesAt(daGridRubberband);
+							foreach (LineNode ln in selectedLineNodes)
+								{
+								if (!tmp.Contains(ln))
+									tmp.Add(ln);
+								}
+							selectedLineNodes = tmp;
+							}
+						else
+							{
+							selectedLineNodes = nodeSteuerung.GetLineNodesAt(daGridRubberband);
+							}
 						}
 					else 
 						{
+						selectedLineNodes = new List<LineNode>();
 						selectedNodeConnection = nodeSteuerung.GetNodeConnectionAt(clickedPosition);
 						selectedVehicle = nodeSteuerung.GetVehicleAt(clickedPosition);
-						} 
+						}
 					break;
 				default:
 					break;
@@ -1742,7 +1765,7 @@ namespace CityTrafficSimulator
 			{
 			foreach (NodeConnection nc in nodeSteuerung.connections)
 				{
-				if (nc.enableOutgoingLineChange)
+				if (nc.enableOutgoingLineChange && (nc.carsAllowed || nc.busAllowed))
 					{
 					nodeSteuerung.RemoveLineChangePoints(nc, true, false);
 					nodeSteuerung.FindLineChangePoints(nc, Constants.maxDistanceToLineChangePoint, Constants.maxDistanceToParallelConnection);
@@ -1825,7 +1848,7 @@ namespace CityTrafficSimulator
 			if (m_selectedNodeConnection != null)
 				{
 				m_selectedNodeConnection.enableOutgoingLineChange = enableOutgoingLineChangeCheckBox.Checked;
-				if (enableOutgoingLineChangeCheckBox.Checked)
+				if (enableOutgoingLineChangeCheckBox.Checked && (m_selectedNodeConnection.carsAllowed || m_selectedNodeConnection.busAllowed))
 					{
 					nodeSteuerung.FindLineChangePoints(m_selectedNodeConnection, Constants.maxDistanceToLineChangePoint, Constants.maxDistanceToParallelConnection);
 					}

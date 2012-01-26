@@ -102,13 +102,13 @@ namespace CityTrafficSimulator.Vehicle
 		/// <summary>
 		/// Statistics record of this vehicle
 		/// </summary>
-		protected IVehicle.Statistics m_statistics = new IVehicle.Statistics();
+		protected IVehicle.Statistics _statistics = new IVehicle.Statistics();
 		/// <summary>
 		/// Statistics record of this vehicle
 		/// </summary>
 		public IVehicle.Statistics statistics
 			{
-			get { return m_statistics; }
+			get { return _statistics; }
 			}
 
 		#endregion
@@ -149,8 +149,8 @@ namespace CityTrafficSimulator.Vehicle
 		public IVehicle()
 			{
 			hashcode = hashcodeIndex++;
-			m_statistics.startTime = GlobalTime.Instance.currentTime;
-			m_statistics.startTimeOnNodeConnection = GlobalTime.Instance.currentTime;
+			_statistics.startTime = GlobalTime.Instance.currentTime;
+			_statistics.startTimeOnNodeConnection = GlobalTime.Instance.currentTime;
 			}
 
 		#endregion
@@ -165,7 +165,7 @@ namespace CityTrafficSimulator.Vehicle
 		/// <param name="nextArcPosition">arc position on nextConnection where vehicle shall respawn</param>
 		private void RemoveFromCurrentNodeConnection(bool logConnectionStatistics, NodeConnection nextConnection, double nextArcPosition)
 			{
-			m_State.UnsetLineChangeVehicleInteraction();
+			_state.UnsetLineChangeVehicleInteraction();
 
 			if (logConnectionStatistics)
 				{
@@ -185,13 +185,13 @@ namespace CityTrafficSimulator.Vehicle
 				lastLineChangeCheck.Right -= currentNodeConnection.lineSegment.length;
 
 				// update statistics
-				m_statistics.totalMilage += currentPosition - statistics.arcPositionOfStartOnNodeConnection;
-				m_statistics.numNodeConnections++;
-				m_statistics.arcPositionOfStartOnNodeConnection = pos;
-				m_statistics.startTimeOnNodeConnection = GlobalTime.Instance.currentTime;
+				_statistics.totalMilage += currentPosition - statistics.arcPositionOfStartOnNodeConnection;
+				_statistics.numNodeConnections++;
+				_statistics.arcPositionOfStartOnNodeConnection = pos;
+				_statistics.startTimeOnNodeConnection = GlobalTime.Instance.currentTime;
 
 				// set new state
-				m_State = new State(nextConnection, pos);
+				_state = new State(nextConnection, pos);
 
 				// add vehicle to new node connection
 				nextConnection.AddVehicleAt(this, pos);
@@ -199,7 +199,7 @@ namespace CityTrafficSimulator.Vehicle
 			else
 				{
 				// evoke VehicleDied event
-				OnVehicleDied(new VehicleDiedEventArgs(m_statistics, targetNodes.Contains(currentNodeConnection.endNode)));
+				OnVehicleDied(new VehicleDiedEventArgs(_statistics, targetNodes.Contains(currentNodeConnection.endNode)));
 				}
 			}
 
@@ -243,7 +243,7 @@ namespace CityTrafficSimulator.Vehicle
 		private void InitiateLineChange(NodeConnection.LineChangePoint lcp, double arcPositionOffset)
 			{
 			// einem evtl. ausgebremsten Fahrzeug sagen, dass es nicht mehr extra für mich abbremsen braucht
-			m_State.UnsetLineChangeVehicleInteraction();
+			_state.UnsetLineChangeVehicleInteraction();
 
 			// sich merken, dass das IVehicle gerade am Spurwechseln ist
 			currentlyChangingLine = true;
@@ -260,9 +260,9 @@ namespace CityTrafficSimulator.Vehicle
 
 			// Neuen State schonmal auf die ZielNodeConnection setzen (currentNodeConnection, currentPosition)
 			RemoveFromCurrentNodeConnection(true, lcp.otherStart.nc, lcp.otherStart.arcPosition + arcPositionOffset * ratioProjectionOnTargetConnectionvsLCPLength);
-			m_WayToGo = Routing.CalculateShortestConenction(currentNodeConnection.endNode, targetNodes, m_vehicleType);
+			_wayToGo = Routing.CalculateShortestConenction(currentNodeConnection.endNode, targetNodes, _vehicleType);
 
-			m_statistics.numLineChanges++;
+			_statistics.numLineChanges++;
 			lineChangeNeeded = false;
 			lci = null;
 			}
@@ -273,7 +273,7 @@ namespace CityTrafficSimulator.Vehicle
 		/// <param name="arcPositionOffset">Bogenlänge über die das Fahrzeug bereits über die Länge des LCP hinaus ist</param>
 		private void FinishLineChange(double arcPositionOffset)
 			{
-			m_State.position = currentLineChangePoint.target.arcPosition + arcPositionOffset;
+			_state.position = currentLineChangePoint.target.arcPosition + arcPositionOffset;
 			lastLineChangeCheck.Left = GlobalTime.Instance.currentTime;
 			lastLineChangeCheck.Right = currentPosition;
 
@@ -283,10 +283,10 @@ namespace CityTrafficSimulator.Vehicle
 
 			lineChangeNeeded = false;
 			lci = null;
-			m_Physics.multiplierTargetVelocity = 1;
+			_physics.multiplierTargetVelocity = 1;
 
 			// Tell other vehicle that waits for me, that I'm finished. Kinda redundant, but safe is safe.
-			m_State.UnsetLineChangeVehicleInteraction();
+			_state.UnsetLineChangeVehicleInteraction();
 			}
 
 
@@ -303,40 +303,40 @@ namespace CityTrafficSimulator.Vehicle
 		/// <summary>
 		/// Länge des Fahrzeuges
 		/// </summary>
-		protected double m_Length = 40;
+		protected double _length = 40;
 		/// <summary>
 		/// Länge des Fahrzeuges
 		/// </summary>
 		public double length
 			{
-			get { return m_Length; }
-			set { m_Length = value; }
+			get { return _length; }
+			set { _length = value; }
 			}
 
 		/// <summary>
 		/// Farbe des Autos
 		/// </summary>
-		protected Color m_Color = Color.Black;
+		protected Color _color = Color.Black;
 		/// <summary>
 		/// Farbe des Autos
 		/// </summary>
 		public Color color
 			{
-			get { return m_Color; }
+			get { return _color; }
 			}
 
 
 		/// <summary>
 		/// Physik des Fahrzeuges
 		/// </summary>
-		protected IVehicle.Physics m_Physics;
+		protected IVehicle.Physics _physics;
 		/// <summary>
 		/// Physik des Fahrzeuges
 		/// </summary>
         public IVehicle.Physics physics
             {
-            get { return m_Physics; }
-			set { m_Physics = value; }
+            get { return _physics; }
+			set { _physics = value; }
             }
 
 		/// <summary>
@@ -347,7 +347,7 @@ namespace CityTrafficSimulator.Vehicle
 			{
 			get 
 				{ 
-				return Math.Min(m_Physics.targetVelocity, (currentNodeConnection != null) ? currentNodeConnection.targetVelocity : 0); 
+				return Math.Min(_physics.targetVelocity, (currentNodeConnection != null) ? currentNodeConnection.targetVelocity : 0); 
 				}
 			}
 
@@ -356,20 +356,20 @@ namespace CityTrafficSimulator.Vehicle
 		/// </summary>
 		public double effectiveDesiredVelocity
 			{
-			get { return targetVelocity * m_Physics.multiplierTargetVelocity; }
+			get { return targetVelocity * _physics.multiplierTargetVelocity; }
 			}
 
 		/// <summary>
 		/// aktueller State des Fahrezeuges
 		/// </summary>
-        protected IVehicle.State m_State;
+        protected IVehicle.State _state;
 		/// <summary>
 		/// aktueller State des Fahrezeuges
 		/// </summary>
         public IVehicle.State state
             {
-            get { return m_State; }
-			set { m_State = value; }
+            get { return _state; }
+			set { _state = value; }
             }
 
 		/// <summary>
@@ -428,7 +428,7 @@ namespace CityTrafficSimulator.Vehicle
 			{
 			List<NodeConnection> route = new List<NodeConnection>();
 			route.Add(currentNodeConnection);
-			foreach (Routing.RouteSegment rs in WayToGo)
+			foreach (Routing.RouteSegment rs in wayToGo)
 				route.Add(rs.startConnection);
 
 			double acceleration = Think(route, currentPosition, false, tickLength);
@@ -458,9 +458,9 @@ namespace CityTrafficSimulator.Vehicle
 			#region LineChangeVehicleInteraction
 
 			// if necessary, wait for other vehicle to change line
-			if (m_State.letVehicleChangeLine)
+			if (_state.letVehicleChangeLine)
 				{
-				lookaheadDistance = Math.Max(0, m_State.tailPositionOfOtherVehicle - currentPosition);
+				lookaheadDistance = Math.Max(0, _state.tailPositionOfOtherVehicle - currentPosition);
 				thinkAboutLineChange = false;
 				lowestAcceleration = CalculateAcceleration(physics.velocity, effectiveDesiredVelocity, lookaheadDistance, physics.velocity);
 				}
@@ -594,7 +594,7 @@ namespace CityTrafficSimulator.Vehicle
 										&& ((arcPos - lci.startArcPos) / lci.length >= (currentAccelerationOfVehicleBehindMeOnOtherConnection - forcedAccelerationOfVehicleBehindMeOnOtherConnection)))
 										{
 										// return to normal velocity
-										m_Physics.multiplierTargetVelocity = 1;
+										_physics.multiplierTargetVelocity = 1;
 
 										// initiate the line change
 										InitiateLineChange(lcp, arcPos - lcp.start.arcPosition);
@@ -615,10 +615,10 @@ namespace CityTrafficSimulator.Vehicle
 										 && lowestAcceleration >= -0.1)				// currently not braking
 									{
 									// accelerate to get in front
-									m_Physics.multiplierTargetVelocity = 1.75;
+									_physics.multiplierTargetVelocity = 1.75;
 									lowestAcceleration = CalculateAcceleration(physics.velocity, effectiveDesiredVelocity, lookaheadDistance, physics.velocity);
 
-									m_State.SetLineChangeVehicleInteraction(this, otherVehicles.Left.vehicle, lcp.otherStart.nc, myArcPositionOnOtherConnection - m_Length);
+									_state.SetLineChangeVehicleInteraction(this, otherVehicles.Left.vehicle, lcp.otherStart.nc, myArcPositionOnOtherConnection - _length);
 									}
 								// There is no way to perform a line change now => slow down
 								else
@@ -638,17 +638,17 @@ namespace CityTrafficSimulator.Vehicle
 							double percentOfLCILeft = Math.Max(0.2, (lci.endArcPos - currentPosition - Constants.breakPointBeforeForcedLineChange) / (lci.length - Constants.breakPointBeforeForcedLineChange));
 
 							// slow down a bit
-							m_Physics.multiplierTargetVelocity = Math.Max(1, 1.5 * percentOfLCILeft);
+							_physics.multiplierTargetVelocity = Math.Max(1, 1.5 * percentOfLCILeft);
 
 							// When reaching the end of the LineChangeInterval, check whether there are other possibilities to reach the target:
 							if (percentOfLCILeft < 0.5)
 								{
-								Routing newRTT = Routing.CalculateShortestConenction(route[0].endNode, m_TargetNodes, m_vehicleType);
+								Routing newRTT = Routing.CalculateShortestConenction(route[0].endNode, _targetNodes, _vehicleType);
 								// The alternative route does not cost too much -> choose it
-								if (newRTT.SegmentCount() > 0 && newRTT.costs / m_WayToGo.costs < Constants.maxRatioForEnforcedLineChange)
+								if (newRTT.SegmentCount() > 0 && newRTT.costs / _wayToGo.costs < Constants.maxRatioForEnforcedLineChange)
 									{
-									m_WayToGo = newRTT;
-									m_Physics.multiplierTargetVelocity = 1;
+									_wayToGo = newRTT;
+									_physics.multiplierTargetVelocity = 1;
 									lineChangeNeeded = false;
 									lci = null;
 									}
@@ -658,18 +658,18 @@ namespace CityTrafficSimulator.Vehicle
 								{
 								lowestAcceleration = CalculateAcceleration(physics.velocity, effectiveDesiredVelocity, lci.endArcPos - Constants.breakPointBeforeForcedLineChange - arcPos, physics.velocity);
 
-								if (! m_State.letVehicleChangeLine && percentOfLCILeft < 0.6)
+								if (! _state.letVehicleChangeLine && percentOfLCILeft < 0.6)
 									{
-									Pair<VehicleDistance> vd = lcp.otherStart.nc.GetVehiclesAroundArcPosition(myArcPositionOnOtherConnection - ( (m_Length + s0)), Constants.lookaheadDistance);
+									Pair<VehicleDistance> vd = lcp.otherStart.nc.GetVehiclesAroundArcPosition(myArcPositionOnOtherConnection - ( (_length + s0)), Constants.lookaheadDistance);
 									if (vd.Left != null && vd.Left.vehicle.p >= p)
 										{
 										// tell the vehicle behind my back to wait for me
-										m_State.SetLineChangeVehicleInteraction(this, vd.Left.vehicle, lcp.otherStart.nc, myArcPositionOnOtherConnection - m_Length);
+										_state.SetLineChangeVehicleInteraction(this, vd.Left.vehicle, lcp.otherStart.nc, myArcPositionOnOtherConnection - _length);
 
 										// In addition, I need to get behind the vehicle in front of the vehicle which waits for me. Therefore I adapt the desired velocity
 										if (vd.Right != null)
 											{
-											m_Physics.multiplierTargetVelocity = Math2.Clamp(Math2.Cubic((vd.Right.distance - s0) / (m_Length + 4 * s0)), 0.3, 1);
+											_physics.multiplierTargetVelocity = Math2.Clamp(Math2.Cubic((vd.Right.distance - s0) / (_length + 4 * s0)), 0.3, 1);
 											}
 										}
 									}
@@ -677,9 +677,9 @@ namespace CityTrafficSimulator.Vehicle
 							}
 						}
 					}
-				else if (m_State.vehicleThatLetsMeChangeLine != null)
+				else if (_state.vehicleThatLetsMeChangeLine != null)
 					{
-					m_State.UnsetLineChangeVehicleInteraction();
+					_state.UnsetLineChangeVehicleInteraction();
 					}
 
 				#endregion
@@ -698,8 +698,8 @@ namespace CityTrafficSimulator.Vehicle
 					if ((lcp.target.nc != null) && (Math.Abs(arcPos - lcp.start.arcPosition) < Constants.maxDistanceToLineChangePoint * 0.67))
 						{
 						// check whether there is an alternative route that is not too costly
-						Routing alternativeRoute = Routing.CalculateShortestConenction(lcp.target.nc.endNode, targetNodes, m_vehicleType);
-						if (alternativeRoute.SegmentCount() > 0 && alternativeRoute.costs / WayToGo.costs < Constants.maxRatioForVoluntaryLineChange && !alternativeRoute.Top().lineChangeNeeded)
+						Routing alternativeRoute = Routing.CalculateShortestConenction(lcp.target.nc.endNode, targetNodes, _vehicleType);
+						if (alternativeRoute.SegmentCount() > 0 && alternativeRoute.costs / wayToGo.costs < Constants.maxRatioForVoluntaryLineChange && !alternativeRoute.Top().lineChangeNeeded)
 							{
 							double myArcPositionOnOtherConnection = lcp.otherStart.arcPosition + (arcPos - lcp.start.arcPosition);
 							if (myArcPositionOnOtherConnection >= 0)
@@ -775,19 +775,19 @@ namespace CityTrafficSimulator.Vehicle
             {
 			if (!alreadyMoved)
 				{
-				m_Physics.velocity += physics.acceleration;
+				_physics.velocity += physics.acceleration;
 
 				// Rückwärts fahren geht nicht
-				if (m_Physics.velocity < 0)
-					m_Physics.velocity = 0;
+				if (_physics.velocity < 0)
+					_physics.velocity = 0;
 
 				double arcLengthToMove = (physics.velocity * tickLength * 10);
 
-				if (m_Physics.velocity < 0.1)
+				if (_physics.velocity < 0.1)
 					{
 					if (!isStopped)
 						{
-						++m_statistics.numStops;
+						++_statistics.numStops;
 						}
 					isStopped = true;
 					}
@@ -800,21 +800,21 @@ namespace CityTrafficSimulator.Vehicle
 				if (currentlyChangingLine)
 					{
 					currentPositionOnLineChangePoint += arcLengthToMove; // ich bewege mich echt auf dem LCP
-					m_State.position += arcLengthToMove * ratioProjectionOnTargetConnectionvsLCPLength; // ich muss meine Position auf der Ziel-NodeConnection entsprechend anpassen
+					_state.position += arcLengthToMove * ratioProjectionOnTargetConnectionvsLCPLength; // ich muss meine Position auf der Ziel-NodeConnection entsprechend anpassen
 					}
 				else
 					{
-					m_State.position += arcLengthToMove;
+					_state.position += arcLengthToMove;
 					}
 
 				// wenn meine aktuelle NodeConnection zu Ende ist, sollte ich das auch behandeln
 				if (currentPosition > currentNodeConnection.lineSegment.length)
 					{
 					// gucken, ob es mit ner Connection weitergeht
-					if ((currentNodeConnection.endNode.nextConnections.Count != 0) && (WayToGo.SegmentCount() > 0))
+					if ((currentNodeConnection.endNode.nextConnections.Count != 0) && (wayToGo.SegmentCount() > 0))
 						{
-						m_Physics.multiplierTargetVelocity = 1;
-						m_State.UnsetLineChangeVehicleInteraction();
+						_physics.multiplierTargetVelocity = 1;
+						_state.UnsetLineChangeVehicleInteraction();
 
 						double startDistance = (currentPosition - currentNodeConnection.lineSegment.length);
 
@@ -822,8 +822,8 @@ namespace CityTrafficSimulator.Vehicle
 						// (dieser könnte dich geändert haben, weil dort plötzlich mehr Autos fahren)
 						if (currentNodeConnection.endNode.nextConnections.Count > 1)
 							{
-							m_WayToGo = Routing.CalculateShortestConenction(currentNodeConnection.endNode, targetNodes, m_vehicleType);
-							if (m_WayToGo.SegmentCount() == 0 || m_WayToGo.Top() == null)
+							_wayToGo = Routing.CalculateShortestConenction(currentNodeConnection.endNode, targetNodes, _vehicleType);
+							if (_wayToGo.SegmentCount() == 0 || _wayToGo.Top() == null)
 								{
 								RemoveFromCurrentNodeConnection(true, null, 0);
 								return;
@@ -833,7 +833,7 @@ namespace CityTrafficSimulator.Vehicle
 						visitedNodeConnections.AddFirst(currentNodeConnection);
 
 						// nächsten Wegpunkt extrahieren
-						Routing.RouteSegment rs = WayToGo.Pop();
+						Routing.RouteSegment rs = wayToGo.Pop();
 
 						if (rs == null)
 							{
@@ -876,8 +876,8 @@ namespace CityTrafficSimulator.Vehicle
 					{
 					FinishLineChange(currentPositionOnLineChangePoint - currentLineChangePoint.lineSegment.length);
 
-					m_statistics.startTimeOnNodeConnection = GlobalTime.Instance.currentTime;
-					m_statistics.arcPositionOfStartOnNodeConnection = m_State.position;
+					_statistics.startTimeOnNodeConnection = GlobalTime.Instance.currentTime;
+					_statistics.arcPositionOfStartOnNodeConnection = _state.position;
 					}
 
 
@@ -900,7 +900,7 @@ namespace CityTrafficSimulator.Vehicle
 		/// <param name="newAcceleration">der neue Beschleunigungswert</param>
         public void Accelerate(double newAcceleration)
             {
-            m_Physics.acceleration = newAcceleration;
+            _physics.acceleration = newAcceleration;
             }
         #endregion
 
@@ -990,7 +990,7 @@ namespace CityTrafficSimulator.Vehicle
 			LinkedListNode<SpecificIntersection> lln = intersectionRegistration.First;				// current already registered intersection
 			double doneDistance, remainingDistance, startPosition;
 
-			if (arcPos < m_Length && visitedNodeConnections.Count > 0)
+			if (arcPos < _length && visitedNodeConnections.Count > 0)
 				{
 				workingRoute = new List<NodeConnection>(route.Count + 1);
 				workingRoute.Add(visitedNodeConnections.First.Value);
@@ -1149,7 +1149,7 @@ namespace CityTrafficSimulator.Vehicle
 						// first go backwards: If I wait before an intersection I might block other intersections before.
 						// This is usually not wanted, therefore go backwards and wait in front of the first intersection 
 						// where I won't block any other.
-						double distanceToLookBack = si.intersection.GetCrossingVehicleTimes(this, si.nodeConnection).remainingDistance - m_Length - s0;
+						double distanceToLookBack = si.intersection.GetCrossingVehicleTimes(this, si.nodeConnection).remainingDistance - _length - s0;
 						while (lln.Previous != null)
 							{
 							double remainingDistanceToPrevIntersection = lln.Previous.Value.intersection.GetCrossingVehicleTimes(this, lln.Previous.Value.nodeConnection).remainingDistance;
@@ -1161,7 +1161,7 @@ namespace CityTrafficSimulator.Vehicle
 								// => wait in front of it and continue looking backwards
 								if (lln.Previous.Value.intersection.avoidBlocking)
 									{
-									distanceToLookBack = remainingDistanceToPrevIntersection - m_Length - s0;
+									distanceToLookBack = remainingDistanceToPrevIntersection - _length - s0;
 									lln = lln.Previous;
 									}
 								// intersection will be blocked but both NodeConnections from the intersectino originate from the same LineNode
@@ -1248,18 +1248,18 @@ namespace CityTrafficSimulator.Vehicle
 		/// <summary>
         /// Der Ort, zu dem das Fahrzeug hin will
         /// </summary>
-		private List<LineNode> m_TargetNodes;
+		private List<LineNode> _targetNodes;
 		/// <summary>
 		/// Der Ort, zu dem das Fahrzeug hin will
 		/// </summary>
 		public List<LineNode> targetNodes
 			{
-			get { return m_TargetNodes; }
+			get { return _targetNodes; }
 			set 
 				{ 
-				m_TargetNodes = value;
-				m_WayToGo = Routing.CalculateShortestConenction(currentNodeConnection.endNode, m_TargetNodes, m_vehicleType);
-				if (m_WayToGo.SegmentCount() == 0)
+				_targetNodes = value;
+				_wayToGo = Routing.CalculateShortestConenction(currentNodeConnection.endNode, _targetNodes, _vehicleType);
+				if (_wayToGo.SegmentCount() == 0)
 					{
 					RemoveFromCurrentNodeConnection(false, null, 0);
 					}
@@ -1526,8 +1526,8 @@ namespace CityTrafficSimulator.Vehicle
 				{
 				if (m_vehicleThatLetsMeChangeLine != null)
 					{
-					m_vehicleThatLetsMeChangeLine.m_State.m_letVehicleChangeLine = false;
-					m_vehicleThatLetsMeChangeLine.m_State.m_vehicleToChangeLine = null;
+					m_vehicleThatLetsMeChangeLine._state.m_letVehicleChangeLine = false;
+					m_vehicleThatLetsMeChangeLine._state.m_vehicleToChangeLine = null;
 					}
 					
 				m_vehicleThatLetsMeChangeLine = null;
@@ -1552,13 +1552,13 @@ namespace CityTrafficSimulator.Vehicle
 					while (myNode != null)
 						{
 						// we have found a vehicle (call it vehicle B) behind me waiting for another vehicle (call it vehicle C) changing line
-						if (myNode.Value.m_State.letVehicleChangeLine)
+						if (myNode.Value._state.letVehicleChangeLine)
 							{
 							// check whether vehicle C is in front of the vehicle, that will wait for me
-							if (myNode.Value.m_State.vehicleToChangeLine.currentPosition > otherVehicle.currentPosition)
+							if (myNode.Value._state.vehicleToChangeLine.currentPosition > otherVehicle.currentPosition)
 								{
 								// We have found two LineChangeVehicleInteraction crossing each other. To solve the problem, simply let vehicle C wait for me.
-								otherVehicle = myNode.Value.m_State.vehicleToChangeLine;
+								otherVehicle = myNode.Value._state.vehicleToChangeLine;
 								break;
 								}
 							}
@@ -1566,9 +1566,9 @@ namespace CityTrafficSimulator.Vehicle
 						}
 
 					m_vehicleThatLetsMeChangeLine = otherVehicle;
-					otherVehicle.m_State.m_letVehicleChangeLine = true;
-					otherVehicle.m_State.m_tailPositionOfOtherVehicle = myTailPositionOnTargetConnection;
-					otherVehicle.m_State.m_vehicleToChangeLine = lineChangingVehicle;
+					otherVehicle._state.m_letVehicleChangeLine = true;
+					otherVehicle._state.m_tailPositionOfOtherVehicle = myTailPositionOnTargetConnection;
+					otherVehicle._state.m_vehicleToChangeLine = lineChangingVehicle;
 					}
 				else
 					{
@@ -1584,19 +1584,19 @@ namespace CityTrafficSimulator.Vehicle
 		/// <summary>
 		/// Stack von den noch zu besuchenden NodeConnections
 		/// </summary>
-		private Routing m_WayToGo;
+		private Routing _wayToGo;
 		/// <summary>
 		/// Stack von den noch zu besuchenden NodeConnections
 		/// </summary>
-		public Routing WayToGo
+		public Routing wayToGo
 			{
-			get { return m_WayToGo; }
+			get { return _wayToGo; }
 			}
 
 		/// <summary>
 		/// Type of this very vehicle
 		/// </summary>
-		protected VehicleTypes m_vehicleType;
+		protected VehicleTypes _vehicleType;
 
 		#region IDrawable Member
 
@@ -1656,7 +1656,7 @@ namespace CityTrafficSimulator.Vehicle
 				{
 				g.DrawBezier(prevNodeConnectionsPen, prevNC.lineSegment.p0, prevNC.lineSegment.p1, prevNC.lineSegment.p2, prevNC.lineSegment.p3);
 				}
-			foreach (Routing.RouteSegment rs in WayToGo)
+			foreach (Routing.RouteSegment rs in wayToGo)
 				{
 				if (!rs.lineChangeNeeded)
 					{
@@ -1669,7 +1669,7 @@ namespace CityTrafficSimulator.Vehicle
 					}
 				}
 
-			g.DrawString(hashcode.ToString() + " @ " + currentNodeConnection.lineSegment.PosToTime(currentPosition).ToString("0.##") + "t ," + currentPosition.ToString("####") + "dm - " + physics.velocity.ToString("##.#") + "m/s - Mult.: " + physics.multiplierTargetVelocity.ToString("#.##") + "\nnoch " + WayToGo.SegmentCount() + " nodes zu befahren\n\n" + debugData.ToString(), debugFont, blackBrush, state.positionAbs + new Vector2(0, -10));
+			g.DrawString(hashcode.ToString() + " @ " + currentNodeConnection.lineSegment.PosToTime(currentPosition).ToString("0.##") + "t ," + currentPosition.ToString("####") + "dm - " + physics.velocity.ToString("##.#") + "m/s - Mult.: " + physics.multiplierTargetVelocity.ToString("#.##") + "\nnoch " + wayToGo.SegmentCount() + " nodes zu befahren\n\n" + debugData.ToString(), debugFont, blackBrush, state.positionAbs + new Vector2(0, -10));
 			}
 
 		#endregion

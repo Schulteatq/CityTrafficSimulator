@@ -47,13 +47,13 @@ namespace CityTrafficSimulator.Verkehr
 		/// <summary>
 		/// Liste der Startpunkte
 		/// </summary>
-		private List<BunchOfNodes> m_startPoints = new List<BunchOfNodes>();
+		private List<BunchOfNodes> _startPoints = new List<BunchOfNodes>();
 		/// <summary>
 		/// Liste der Startpunkte
 		/// </summary>
 		public List<BunchOfNodes> startPoints
 			{
-			get { return m_startPoints; }
+			get { return _startPoints; }
 			}
 
 		/// <summary>
@@ -62,7 +62,7 @@ namespace CityTrafficSimulator.Verkehr
 		/// <param name="sp">hinzuzufügende BunchOfNodes</param>
 		public void AddStartPoint(BunchOfNodes sp)
 			{
-			m_startPoints.Add(sp);
+			_startPoints.Add(sp);
 			OnStartPointsChanged(new StartPointsChangedEventArgs());
 			}
 
@@ -75,7 +75,7 @@ namespace CityTrafficSimulator.Verkehr
 			// remove all corresponding traffic volumes
 			trafficVolumes.RemoveAll(delegate(TrafficVolume tv) { return tv.startNodes == sp; });
 
-			m_startPoints.Remove(sp);
+			_startPoints.Remove(sp);
 			OnStartPointsChanged(new StartPointsChangedEventArgs());
 			}
 
@@ -84,8 +84,8 @@ namespace CityTrafficSimulator.Verkehr
 		/// </summary>
 		public void ClearStartPoints()
 			{
-			m_startPoints.Clear();
-			m_trafficVolumes.Clear();
+			_startPoints.Clear();
+			_trafficVolumes.Clear();
 			OnStartPointsChanged(new StartPointsChangedEventArgs());
 			}
 
@@ -96,9 +96,9 @@ namespace CityTrafficSimulator.Verkehr
 		/// <param name="title">New title</param>
 		public void UpdateStartPointTitle(int index, string title)
 			{
-			if (index < m_startPoints.Count)
+			if (index < _startPoints.Count)
 				{
-				m_startPoints[index].title = title;
+				_startPoints[index].title = title;
 				OnStartPointsChanged(new StartPointsChangedEventArgs());
 				}
 			}
@@ -110,9 +110,9 @@ namespace CityTrafficSimulator.Verkehr
 		/// <param name="nodes">New list of nodes</param>
 		public void UpdateStartPointNodes(int index, List<LineNode> nodes)
 			{
-			if (index < m_startPoints.Count)
+			if (index < _startPoints.Count)
 				{
-				m_startPoints[index].nodes = nodes;
+				_startPoints[index].nodes = nodes;
 				OnDestinationPointsChanged(new DestinationPointsChangedEventArgs());
 				}
 
@@ -125,13 +125,13 @@ namespace CityTrafficSimulator.Verkehr
 		/// <summary>
 		/// Liste der Zielpunkte
 		/// </summary>
-		private List<BunchOfNodes> m_destinationPoints = new List<BunchOfNodes>();
+		private List<BunchOfNodes> _destinationPoints = new List<BunchOfNodes>();
 		/// <summary>
 		/// Liste der Zielpunkte
 		/// </summary>
 		public List<BunchOfNodes> destinationPoints
 			{
-			get { return m_destinationPoints; }
+			get { return _destinationPoints; }
 			}
 
 		/// <summary>
@@ -140,7 +140,7 @@ namespace CityTrafficSimulator.Verkehr
 		/// <param name="sp">hinzuzufügende BunchOfNodes</param>
 		public void AddDestinationPoint(BunchOfNodes sp)
 			{
-			m_destinationPoints.Add(sp);
+			_destinationPoints.Add(sp);
 			OnDestinationPointsChanged(new DestinationPointsChangedEventArgs());
 			}
 
@@ -153,7 +153,7 @@ namespace CityTrafficSimulator.Verkehr
 			// remove all corresponding traffic volumes
 			trafficVolumes.RemoveAll(delegate(TrafficVolume tv) { return tv.destinationNodes == sp; });
 
-			m_destinationPoints.Remove(sp);
+			_destinationPoints.Remove(sp);
 			OnDestinationPointsChanged(new DestinationPointsChangedEventArgs());
 			}
 
@@ -162,8 +162,8 @@ namespace CityTrafficSimulator.Verkehr
 		/// </summary>
 		public void ClearDestinationPoints()
 			{
-			m_destinationPoints.Clear();
-			m_trafficVolumes.Clear();
+			_destinationPoints.Clear();
+			_trafficVolumes.Clear();
 			OnDestinationPointsChanged(new DestinationPointsChangedEventArgs());
 			}
 
@@ -174,9 +174,9 @@ namespace CityTrafficSimulator.Verkehr
 		/// <param name="title">New title</param>
 		public void UpdateDestinationPointTitle(int index, string title)
 			{
-			if (index < m_destinationPoints.Count)
+			if (index < _destinationPoints.Count)
 				{
-				m_destinationPoints[index].title = title;
+				_destinationPoints[index].title = title;
 				OnDestinationPointsChanged(new DestinationPointsChangedEventArgs());
 				}
 			}
@@ -188,9 +188,9 @@ namespace CityTrafficSimulator.Verkehr
 		/// <param name="nodes">New list of nodes</param>
 		public void UpdateDestinationPointNodes(int index, List<LineNode> nodes)
 			{
-			if (index < m_destinationPoints.Count)
+			if (index < _destinationPoints.Count)
 				{
-				m_destinationPoints[index].nodes = nodes;
+				_destinationPoints[index].nodes = nodes;
 				OnDestinationPointsChanged(new DestinationPointsChangedEventArgs());
 				}
 
@@ -201,85 +201,85 @@ namespace CityTrafficSimulator.Verkehr
 		/// <summary>
 		/// List of traffic volumes
 		/// </summary>
-		private List<TrafficVolume> m_trafficVolumes = new List<TrafficVolume>();
+		private List<TrafficVolume> _trafficVolumes = new List<TrafficVolume>();
 		/// <summary>
 		/// List of traffic volumes
 		/// </summary>
 		public List<TrafficVolume> trafficVolumes
 			{
-			get { return m_trafficVolumes; }
+			get { return _trafficVolumes; }
 			}
 
 		/// <summary>
 		/// Global multiplier for traffic volume
 		/// </summary>
-		private double m_globalTrafficMultiplier = 1;
+		private double _globalTrafficMultiplier = 1;
 		/// <summary>
 		/// Global multiplier for traffic volume
 		/// </summary>
 		public double globalTrafficMultiplier
 			{
-			get { return m_globalTrafficMultiplier; }
-			set { m_globalTrafficMultiplier = value; OnGlobalTrafficMultiplierChanged(new GlobalTrafficMultiplierChangedEventArgs()); }
+			get { return _globalTrafficMultiplier; }
+			set { _globalTrafficMultiplier = value; OnGlobalTrafficMultiplierChanged(new GlobalTrafficMultiplierChangedEventArgs()); }
 			}
 
 		/// <summary>
 		/// Target velocity for cars
 		/// </summary>
-		private double m_carTargetVelocity = 36;
+		private double _carTargetVelocity = 36;
 		/// <summary>
 		/// Target velocity for cars
 		/// </summary>
 		public double carTargetVelocity
 			{
-			get { return m_carTargetVelocity; }
-			set { m_carTargetVelocity = value; OnCarTargetVelocityChanged(new CarTargetVelocityChangedEventArgs()); }
+			get { return _carTargetVelocity; }
+			set { _carTargetVelocity = value; OnCarTargetVelocityChanged(new CarTargetVelocityChangedEventArgs()); }
 			}
 
 		/// <summary>
 		/// Target velocity for trucks
 		/// </summary>
-		private double m_truckTargetVelocity = 23;
+		private double _truckTargetVelocity = 23;
 		/// <summary>
 		/// Target velocity for trucks
 		/// </summary>
 		public double truckTargetVelocity
 			{
-			get { return m_truckTargetVelocity; }
-			set { m_truckTargetVelocity = value; OnTruckTargetVelocityChanged(new TruckTargetVelocityChangedEventArgs()); }
+			get { return _truckTargetVelocity; }
+			set { _truckTargetVelocity = value; OnTruckTargetVelocityChanged(new TruckTargetVelocityChangedEventArgs()); }
 			}
 
 		/// <summary>
 		/// Target velocity for busses
 		/// </summary>
-		private double m_busTargetVelocity = 23;
+		private double _busTargetVelocity = 23;
 		/// <summary>
 		/// Target velocity for busses
 		/// </summary>
 		public double busTargetVelocity
 			{
-			get { return m_busTargetVelocity; }
-			set { m_busTargetVelocity = value; OnBusTargetVelocityChanged(new BusTargetVelocityChangedEventArgs()); }
+			get { return _busTargetVelocity; }
+			set { _busTargetVelocity = value; OnBusTargetVelocityChanged(new BusTargetVelocityChangedEventArgs()); }
 			}
 
 		/// <summary>
 		/// Target velocity for trams
 		/// </summary>
-		private double m_tramTargetVelocity = 23;
+		private double _tramTargetVelocity = 23;
 		/// <summary>
 		/// Target velocity for trams
 		/// </summary>
 		public double tramTargetVelocity
 			{
-			get { return m_tramTargetVelocity; }
-			set { m_tramTargetVelocity = value; OnTramTargetVelocityChanged(new TramTargetVelocityChangedEventArgs()); }
+			get { return _tramTargetVelocity; }
+			set { _tramTargetVelocity = value; OnTramTargetVelocityChanged(new TramTargetVelocityChangedEventArgs()); }
 			}
 
 
 		/// <summary>
 		/// List of vehicles to spawn
 		/// </summary>
-		private List<TrafficVolume.VehicleSpawnedEventArgs> vehiclesToSpawn = new List<TrafficVolume.VehicleSpawnedEventArgs>();
+		private List<TrafficVolume.VehicleSpawnedEventArgs> _vehiclesToSpawn = new List<TrafficVolume.VehicleSpawnedEventArgs>();
 		
 		#endregion
 
@@ -299,7 +299,7 @@ namespace CityTrafficSimulator.Verkehr
 
 			// There certainly are data structures offering better algorithms to search for these specific entities.
 			// But m_trafficVolumes usually contains < 100 items, so performance can be seen as unimportant here.
-			foreach (TrafficVolume tv in m_trafficVolumes)
+			foreach (TrafficVolume tv in _trafficVolumes)
 				{
 				if (tv.startNodes == start && tv.destinationNodes == destination)
 					return tv;
@@ -307,7 +307,7 @@ namespace CityTrafficSimulator.Verkehr
 
 			TrafficVolume newTV = new TrafficVolume(start, destination);
 			newTV.VehicleSpawned += new TrafficVolume.VehicleSpawnedEventHandler(newTV_VehicleSpawned);
-			m_trafficVolumes.Add(newTV);
+			_trafficVolumes.Add(newTV);
 			return newTV;
 			}
 
@@ -447,9 +447,9 @@ namespace CityTrafficSimulator.Verkehr
 			lf.SetupLowerProgess("Parsing XML...", 3);
 
 			// clear everything first
-			m_trafficVolumes.Clear();
-			m_startPoints.Clear();
-			m_destinationPoints.Clear();
+			_trafficVolumes.Clear();
+			_startPoints.Clear();
+			_destinationPoints.Clear();
 
 			// parse save file version (currently not needed, but probably in future)
 			int saveVersion = 0;
@@ -471,7 +471,7 @@ namespace CityTrafficSimulator.Verkehr
 				XmlSerializer xs = new XmlSerializer(typeof(BunchOfNodes));
 				BunchOfNodes bof = (BunchOfNodes)xs.Deserialize(tr);
 				bof.RecoverFromLoad(saveVersion, nodesList);
-				m_startPoints.Add(bof);
+				_startPoints.Add(bof);
 				}
 
 			// Load destination points:
@@ -485,7 +485,7 @@ namespace CityTrafficSimulator.Verkehr
 				XmlSerializer xs = new XmlSerializer(typeof(BunchOfNodes));
 				BunchOfNodes bof = (BunchOfNodes)xs.Deserialize(tr);
 				bof.RecoverFromLoad(saveVersion, nodesList);
-				m_destinationPoints.Add(bof);
+				_destinationPoints.Add(bof);
 				}
 
 			// Load traffic volumes:
@@ -502,7 +502,7 @@ namespace CityTrafficSimulator.Verkehr
 				tv.RecoverFromLoad(saveVersion, startPoints, destinationPoints);
 				if (tv.startNodes != null && tv.destinationNodes != null)
 					{
-					m_trafficVolumes.Add(tv);
+					_trafficVolumes.Add(tv);
 					tv.VehicleSpawned += new TrafficVolume.VehicleSpawnedEventHandler(newTV_VehicleSpawned);
 					}
 				else
@@ -522,7 +522,7 @@ namespace CityTrafficSimulator.Verkehr
 
 		private void newTV_VehicleSpawned(object sender, TrafficVolume.VehicleSpawnedEventArgs e)
 			{
-			vehiclesToSpawn.Add(e);
+			_vehiclesToSpawn.Add(e);
 			}
 
 		#region StartPointsChanged event
@@ -850,15 +850,15 @@ namespace CityTrafficSimulator.Verkehr
 				tv.Tick(tmp);
 				}
 
-			List<TrafficVolume.VehicleSpawnedEventArgs> failedList = new List<TrafficVolume.VehicleSpawnedEventArgs>(vehiclesToSpawn.Count);
-			foreach (TrafficVolume.VehicleSpawnedEventArgs e in vehiclesToSpawn)
+			List<TrafficVolume.VehicleSpawnedEventArgs> failedList = new List<TrafficVolume.VehicleSpawnedEventArgs>(_vehiclesToSpawn.Count);
+			foreach (TrafficVolume.VehicleSpawnedEventArgs e in _vehiclesToSpawn)
 				{
 				if (! SpawnVehicle(e))
 					{
 					failedList.Add(e);
 					}
 				}
-			vehiclesToSpawn = failedList;
+			_vehiclesToSpawn = failedList;
 			}
 
 		/// <summary>

@@ -45,79 +45,79 @@ namespace CityTrafficSimulator.Timeline
 		/// <summary>
 		/// Zeit wenn das TimelineEvent eintritt
 		/// </summary>
-		private double m_eventTime;
+		private double _eventTime;
 		/// <summary>
 		/// Zeit wenn das TimelineEvent eintritt
 		/// </summary>
 		public double eventTime
 			{
-			get { return m_eventTime; }
-			set { m_eventTime = value; }
+			get { return _eventTime; }
+			set { _eventTime = value; }
 			}
 
 		/// <summary>
 		/// Dauer des TimelineEvents
 		/// </summary>
-		private double m_eventLength;
+		private double _eventLength;
 		/// <summary>
 		/// Dauer des TimelineEvents
 		/// </summary>
 		public double eventLength
 			{
-			get { return m_eventLength; }
-			set { m_eventLength = value; }
+			get { return _eventLength; }
+			set { _eventLength = value; }
 			}
 
 
 		/// <summary>
 		/// Befehl der ausgeführt werden soll, wenn das TimelineEvent eintritt
 		/// </summary>
-		private EventAction m_eventStartAction;
+		private EventAction _eventStartAction;
 		/// <summary>
 		/// Befehl der ausgeführt werden soll, wenn das TimelineEvent eintritt
 		/// </summary>
 		[XmlIgnore]
 		public EventAction eventStartAction
 			{
-			get { return m_eventStartAction; }
-			set { m_eventStartAction = value; }
+			get { return _eventStartAction; }
+			set { _eventStartAction = value; }
 			}
 
 		/// <summary>
 		/// Befehl der ausgeführt werden soll, wenn das TimelineEvent zu Ende ist
 		/// </summary>
-		private EventAction m_eventEndAction;
+		private EventAction _eventEndAction;
 		/// <summary>
 		/// Befehl der ausgeführt werden soll, wenn das TimelineEvent zu Ende ist
 		/// </summary>
 		[XmlIgnore]
 		public EventAction eventEndAction
 			{
-			get { return m_eventEndAction; }
-			set { m_eventEndAction = value; }
+			get { return _eventEndAction; }
+			set { _eventEndAction = value; }
 			}
 
 
 		/// <summary>
 		/// Farbe durch die das Event repräsentiert werden soll
 		/// </summary>
-		private Color m_color;
+		private Color _color;
 		/// <summary>
 		/// Farbe durch die das Event repräsentiert werden soll
 		/// </summary>
 		[XmlIgnore]
 		public Color color
 			{
-			get { return m_color; }
-			set { m_color = value; }
+			get { return _color; }
+			set { _color = value; }
 			}
 		/// <summary>
 		/// Farbe im ARGB-Format (Für Serialisierung benötigt)
 		/// </summary>
 		public int argbColor
 			{
-			get { return m_color.ToArgb(); }
-			set { m_color = Color.FromArgb(value); }
+			get { return _color.ToArgb(); }
+			set { _color = Color.FromArgb(value); }
 			}
 		
 		#endregion

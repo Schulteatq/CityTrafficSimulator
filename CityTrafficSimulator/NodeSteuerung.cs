@@ -42,69 +42,41 @@ namespace CityTrafficSimulator
 		/// <summary>
 		/// alle verwendenten LineNodes
 		/// </summary>
-		private List<LineNode> m_nodes = new List<LineNode>();
+		private List<LineNode> _nodes = new List<LineNode>();
 		/// <summary>
 		/// alle verwendenten LineNodes
 		/// </summary>
 		public List<LineNode> nodes
 			{
-			get { return m_nodes; }
-			set { m_nodes = value; }
+			get { return _nodes; }
+			set { _nodes = value; }
 			}
 
 		/// <summary>
 		/// alle verwendeten NodeConnections
 		/// </summary>
-		private List<NodeConnection> m_connections = new List<NodeConnection>();
+		private List<NodeConnection> _connections = new List<NodeConnection>();
 		/// <summary>
 		/// alle verwendeten NodeConnections
 		/// </summary>
 		public List<NodeConnection> connections
 			{
-			get { return m_connections; }
-			set { m_connections = value; }
+			get { return _connections; }
+			set { _connections = value; }
 			}
 
 		/// <summary>
 		/// Liste aller bekannten Intersections
 		/// </summary>
-		private List<Intersection> m_intersections = new List<Intersection>();
+		private List<Intersection> _intersections = new List<Intersection>();
 		/// <summary>
 		/// Liste aller bekannten Intersections
 		/// </summary>
 		public List<Intersection> intersections
 			{
-			get { return m_intersections; }
-			set { m_intersections = value; }
+			get { return _intersections; }
+			set { _intersections = value; }
 			}
-
-
-		/// <summary>
-		/// aktuell ausgewählter LineNode
-		/// </summary>
-		private LineNode m_selectedLineNode;
-		/// <summary>
-		/// aktuell ausgewählter LineNode
-		/// </summary>
-		public LineNode selectedLineNode
-			{
-			get { return m_selectedLineNode; }
-			set { m_selectedLineNode = value; }
-			}
-
-		/// <summary>
-		/// aktuell ausgewählte NodeConnection
-		/// </summary>
-		private NodeConnection m_selectedNodeConnection;
-		/// <summary>
-		/// aktue ausgewählte NodeConnection
-		/// </summary>
-		public NodeConnection selectedNodeConnection
-			{
-			get { return m_selectedNodeConnection; }
-			set { m_selectedNodeConnection = value; }
-			}
-
 
 		/// <summary>
 		/// Titel dieses Layouts
@@ -123,14 +95,14 @@ namespace CityTrafficSimulator
 		/// <summary>
 		/// Informationstext zum Layout
 		/// </summary>
-		private string m_infoText;
+		private string _infoText;
 		/// <summary>
 		/// Informationstext zum Layout
 		/// </summary>
 		public string infoText
 			{
-			get { return m_infoText; }
-			set { m_infoText = value; }
+			get { return _infoText; }
+			set { _infoText = value; }
 			}
 
 
@@ -280,17 +252,19 @@ namespace CityTrafficSimulator
 		/// <param name="from">LineNode von dem die NodeConnection ausgehen soll</param>
 		/// <param name="to">LineNode zu der die NodeConnection hingehen soll</param>
 		/// <param name="priority">Priorität der Linie</param>
+		/// <param name="targetVelocity">Target velocity on the NodeConnection</param>
 		/// <param name="carsAllowed">Flag, ob Autos auf dieser NodeConnection erlaubt sind</param>
 		/// <param name="busAllowed">Flag, ob Busse auf dieser NodeConnection erlaubt sind</param>
 		/// <param name="tramAllowed">Flag, ob Straßenbahnen auf dieser NodeConnection erlaubt sind</param>
 		/// <param name="enableIncomingLineChange">Flag, ob eingehende Spurwechsel erlaubt sind</param>
 		/// <param name="enableOutgoingLineChange">Flag, ob ausgehende Spurchwechsel erlaubt sind</param>
-		public void Connect(LineNode from, LineNode to, int priority, bool carsAllowed, bool busAllowed, bool tramAllowed, bool enableIncomingLineChange, bool enableOutgoingLineChange)
+		public void Connect(LineNode from, LineNode to, int priority, double targetVelocity, bool carsAllowed, bool busAllowed, bool tramAllowed, bool enableIncomingLineChange, bool enableOutgoingLineChange)
 			{
-			NodeConnection nc = new NodeConnection(from, to, null, priority, carsAllowed, busAllowed, tramAllowed, enableIncomingLineChange, enableOutgoingLineChange);
+			NodeConnection nc = new NodeConnection(from, to, null, priority, targetVelocity, carsAllowed, busAllowed, tramAllowed, enableIncomingLineChange, enableOutgoingLineChange);
 
 			TellNodesTheirConnection(nc);
 			UpdateNodeConnection(nc);
+			ResetAverageVelocities(nc);
 
 			connections.Add(nc);
 			connectionsChanged();
@@ -683,7 +657,7 @@ namespace CityTrafficSimulator
 				LineSegment leftLS = new LineSegment(0, startl, startl + 0.25 * maxDistanceToOtherNodeConnection * leftVector, startl + 0.75 * maxDistanceToOtherNodeConnection * leftVector, startl + maxDistanceToOtherNodeConnection * leftVector);
 				LineSegment rightLS = new LineSegment(0, startr, startr + 0.25 * maxDistanceToOtherNodeConnection * rightVector, startr + 0.75 * maxDistanceToOtherNodeConnection * rightVector, startr + maxDistanceToOtherNodeConnection * rightVector);
 
-				foreach (NodeConnection nc2 in m_connections)
+				foreach (NodeConnection nc2 in _connections)
 					{
 					if (nc2.enableIncomingLineChange && (nc2.carsAllowed || nc2.busAllowed) && nc != nc2)
 						{
@@ -801,7 +775,7 @@ namespace CityTrafficSimulator
 			
 			if (removeIncomingLineChangePoints)
 				{
-				foreach (NodeConnection otherNc in m_connections)
+				foreach (NodeConnection otherNc in _connections)
 					{
 					otherNc.RemoveAllLineChangePointsTo(nc);
 					}
@@ -915,7 +889,7 @@ namespace CityTrafficSimulator
 				// TODO: überlegen, ob hier wirklich nichts gemacht werden muss
 				}
 
-			if (ncToUpdate.enableOutgoingLineChange)
+			if (ncToUpdate.enableOutgoingLineChange && (ncToUpdate.carsAllowed || ncToUpdate.busAllowed))
 				{
 				RemoveLineChangePoints(ncToUpdate,true, false);
 				FindLineChangePoints(ncToUpdate, Constants.maxDistanceToLineChangePoint, Constants.maxDistanceToParallelConnection);
@@ -952,8 +926,8 @@ namespace CityTrafficSimulator
 			Disconnect(startNode, endNode);
 
 			// Neue Connections bauen
-			Connect(startNode, middleNode, nc.priority, nc.carsAllowed, nc.busAllowed, nc.tramAllowed, nc.enableIncomingLineChange, nc.enableOutgoingLineChange);
-			Connect(middleNode, endNode, nc.priority, nc.carsAllowed, nc.busAllowed, nc.tramAllowed, nc.enableIncomingLineChange, nc.enableOutgoingLineChange);
+			Connect(startNode, middleNode, nc.priority, nc.targetVelocity, nc.carsAllowed, nc.busAllowed, nc.tramAllowed, nc.enableIncomingLineChange, nc.enableOutgoingLineChange);
+			Connect(middleNode, endNode, nc.priority, nc.targetVelocity, nc.carsAllowed, nc.busAllowed, nc.tramAllowed, nc.enableIncomingLineChange, nc.enableOutgoingLineChange);
 			}
 
 
@@ -1005,10 +979,20 @@ namespace CityTrafficSimulator
 		public void ResetAverageVelocities()
 			{
 			int numBuckets = (int)(GlobalTime.Instance.cycleTime * GlobalTime.Instance.ticksPerSecond);
-			foreach (NodeConnection nc in m_connections)
+			foreach (NodeConnection nc in _connections)
 				{
 				nc.ResetStatistics(numBuckets);
 				}
+			}
+
+		/// <summary>
+		/// Resets the average velocities array of the given NodeConnection.
+		/// </summary>
+		/// <param name="nc">The NodeConection to reset</param>
+		public void ResetAverageVelocities(NodeConnection nc)
+			{
+			int numBuckets = (int)(GlobalTime.Instance.cycleTime * GlobalTime.Instance.ticksPerSecond);
+			nc.ResetStatistics(numBuckets);
 			}
 
 
@@ -1022,7 +1006,7 @@ namespace CityTrafficSimulator
 		/// <param name="state">Status der Visualisierung der gesetzt werden soll</param>
 		public void setVisualizationInNodeConnections(bool state)
 			{
-			foreach (NodeConnection nc in m_connections)
+			foreach (NodeConnection nc in _connections)
 				{
 				nc.visualizeAverageSpeed = state;
 				}
@@ -1221,7 +1205,7 @@ namespace CityTrafficSimulator
 					xw.WriteEndElement();
 
 					xw.WriteStartElement("infoText");
-					xw.WriteString(m_infoText);
+					xw.WriteString(_infoText);
 					xw.WriteEndElement();
 
 					// LineNodes serialisieren
@@ -1281,7 +1265,7 @@ namespace CityTrafficSimulator
 			XmlNode infoNode = xd.SelectSingleNode("//CityTrafficSimulator/Layout/infoText");
 			if (infoNode != null)
 				{
-				m_infoText = infoNode.InnerText;
+				_infoText = infoNode.InnerText;
 				}
 
 			lf.StepLowerProgress();
@@ -1325,19 +1309,19 @@ namespace CityTrafficSimulator
 				connections.Add(ln);
 				}
 
-			lf.SetupLowerProgess("Restoring LineNodes...", m_nodes.Count);
+			lf.SetupLowerProgess("Restoring LineNodes...", _nodes.Count);
 
 			// Nodes wiederherstellen
-			foreach (LineNode ln in m_nodes)
+			foreach (LineNode ln in _nodes)
 				{
-				ln.RecoverFromLoad(saveVersion, m_nodes);
+				ln.RecoverFromLoad(saveVersion, _nodes);
 				lf.StepLowerProgress();
 				}
 
-			lf.SetupLowerProgess("Restoring NodeConnections...", m_connections.Count);
+			lf.SetupLowerProgess("Restoring NodeConnections...", _connections.Count);
 
 			// LineNodes wiederherstellen
-			foreach (NodeConnection nc in m_connections)
+			foreach (NodeConnection nc in _connections)
 				{
 				nc.RecoverFromLoad(saveVersion, nodes);
 				TellNodesTheirConnection(nc);
@@ -1346,10 +1330,10 @@ namespace CityTrafficSimulator
 				lf.StepLowerProgress();
 				}
 
-			lf.SetupLowerProgess("Calculate Intersections and Line Change Points...", m_connections.Count);
+			lf.SetupLowerProgess("Calculate Intersections and Line Change Points...", _connections.Count);
 
 			// Intersections wiederherstellen
-			foreach (NodeConnection nc in m_connections)
+			foreach (NodeConnection nc in _connections)
 				{
 				UpdateNodeConnection(nc);
 
@@ -1451,7 +1435,7 @@ namespace CityTrafficSimulator
 				}
 
 			int bucketNumber = GlobalTime.Instance.currentCycleTick;
-			foreach (NodeConnection nc in m_connections)
+			foreach (NodeConnection nc in _connections)
 				{
 				nc.GatherStatistics(bucketNumber);
 				}

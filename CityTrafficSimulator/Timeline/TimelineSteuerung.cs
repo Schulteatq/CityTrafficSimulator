@@ -41,48 +41,48 @@ namespace CityTrafficSimulator.Timeline
 		/// <summary>
 		/// aktuelle Position der Timeline
 		/// </summary>
-		private double m_currentTime;
+		private double _currentTime;
 		/// <summary>
 		/// aktuelle Position der Timeline
 		/// </summary>
 		public double CurrentTime
 			{
-			get { return m_currentTime; }
-			set { m_currentTime = value; OnCurrentTimeChanged(new CurrentTimeChangedEventArgs(m_currentTime)); }
+			get { return _currentTime; }
+			set { _currentTime = value; OnCurrentTimeChanged(new CurrentTimeChangedEventArgs(_currentTime)); }
 			}
 
 		/// <summary>
 		/// Umlaufzeit / maximale Zeit (Länge) der Timeline
 		/// </summary>
-		private double m_maxTime = 20;
+		private double _maxTime = 20;
 		/// <summary>
 		/// Umlaufzeit / maximale Zeit (Länge) der Timeline
 		/// </summary>
 		public double maxTime
 			{
-			get { return m_maxTime; }
-			set { m_maxTime = value; UpdateMaxTime(); OnMaxTimeChanged(); }
+			get { return _maxTime; }
+			set { _maxTime = value; UpdateMaxTime(); OnMaxTimeChanged(); }
 			}
 
 
 		/// <summary>
 		/// Liste der TimelineGroups
 		/// </summary>
-		private List<TimelineGroup> m_groups = new List<TimelineGroup>();
+		private List<TimelineGroup> _groups = new List<TimelineGroup>();
 		/// <summary>
 		/// Liste der TimelineGroups
 		/// </summary>
 		public List<TimelineGroup> groups
 			{
-			get { return m_groups; }
-			set { m_groups = value; OnGroupsChanged(); }
+			get { return _groups; }
+			set { _groups = value; OnGroupsChanged(); }
 			}
 
 
 		/// <summary>
 		/// Summe aller TimelineEntries in allen TimelineGroups
 		/// </summary>
-		private int totalEntryCount;
+		private int _totalEntryCount;
 
 		#endregion
 
@@ -101,7 +101,7 @@ namespace CityTrafficSimulator.Timeline
 			entryToAdd.EntryChanged += new TimelineEntry.EntryChangedEventHandler(entryToAdd_EntryChanged);
 			entryToAdd.parentGroup.AddEntry(entryToAdd);
 
-			totalEntryCount++;
+			_totalEntryCount++;
 			OnGroupsChanged();
 			}
 
@@ -119,7 +119,7 @@ namespace CityTrafficSimulator.Timeline
 			te.EntryChanged -= entryToAdd_EntryChanged;
 			te.parentGroup.entries.Remove(te);
 
-			totalEntryCount--;
+			_totalEntryCount--;
 			OnGroupsChanged();
 			}
 
@@ -130,7 +130,7 @@ namespace CityTrafficSimulator.Timeline
 		public void AddGroup(TimelineGroup tg)
 			{
 			tg.GroupChanged += new TimelineGroup.GroupChangedEventHandler(tg_GroupChanged);
-			m_groups.Add(tg);
+			_groups.Add(tg);
 			OnGroupsChanged();
 			}
 
@@ -148,7 +148,7 @@ namespace CityTrafficSimulator.Timeline
 			if (g.entries.Count == 0)
 				{
 				g.GroupChanged -= tg_GroupChanged;
-				m_groups.Remove(g);
+				_groups.Remove(g);
 				OnGroupsChanged();
 				}
 			}
@@ -159,14 +159,14 @@ namespace CityTrafficSimulator.Timeline
 		/// </summary>
 		public void Clear()
 			{
-			foreach (TimelineGroup tg in m_groups)
+			foreach (TimelineGroup tg in _groups)
 				{
 				while (tg.entries.Count > 0)
 					{
 					RemoveEntry(tg.entries[0]);
 					}
 				}
-			m_groups.Clear();
+			_groups.Clear();
 			OnGroupsChanged();
 			}
 
@@ -176,11 +176,11 @@ namespace CityTrafficSimulator.Timeline
 		/// </summary>
 		public void UpdateMaxTime()
 			{
-			foreach (TimelineGroup tg in m_groups)
+			foreach (TimelineGroup tg in _groups)
 				{
 				foreach (TimelineEntry te in tg.entries)
 					{
-					te.maxTime = m_maxTime;
+					te.maxTime = _maxTime;
 					}
 				}
 			}
@@ -195,22 +195,22 @@ namespace CityTrafficSimulator.Timeline
 		/// <param name="time">Zeit um die sich die Timeline weiterbewegen soll</param>
 		public void Advance(double time)
 			{
-			m_currentTime += time;
-			if (m_currentTime > m_maxTime)
+			_currentTime += time;
+			if (_currentTime > _maxTime)
 				{
-				m_currentTime = 0;
+				_currentTime = 0;
 				}
 
 			// Nun noch bei jedem TimelineEntry Advance() aufrufen
-			foreach (TimelineGroup tg in m_groups)
+			foreach (TimelineGroup tg in _groups)
 				{
 				foreach (TimelineEntry te in tg.entries)
 					{
-					te.AdvanceTo(m_currentTime);
+					te.AdvanceTo(_currentTime);
 					}
 				}
 
-			OnCurrentTimeChanged(new CurrentTimeChangedEventArgs(m_currentTime));
+			OnCurrentTimeChanged(new CurrentTimeChangedEventArgs(_currentTime));
 			}
 
 		/// <summary>
@@ -220,20 +220,20 @@ namespace CityTrafficSimulator.Timeline
 		public void AdvanceTo(double time)
 			{
 			if (time >= 0)
-				m_currentTime = time;
+				_currentTime = time;
 			else
-				m_currentTime = 0;
+				_currentTime = 0;
 
 			// Nun noch bei jedem TimelineEntry Advance() aufrufen
-			foreach (TimelineGroup tg in m_groups)
+			foreach (TimelineGroup tg in _groups)
 				{
 				foreach (TimelineEntry te in tg.entries)
 					{
-					te.AdvanceTo(m_currentTime);
+					te.AdvanceTo(_currentTime);
 					}
 				}
 
-			OnCurrentTimeChanged(new CurrentTimeChangedEventArgs(m_currentTime));
+			OnCurrentTimeChanged(new CurrentTimeChangedEventArgs(_currentTime));
 			}
 
 		#endregion
@@ -253,7 +253,7 @@ namespace CityTrafficSimulator.Timeline
 			try
 				{
 				// Alles fürs Speichern vorbereiten
-				foreach (TimelineGroup tg in m_groups)
+				foreach (TimelineGroup tg in _groups)
 					{
 					tg.PrepareForSave();
 					}
@@ -262,13 +262,13 @@ namespace CityTrafficSimulator.Timeline
 
 				// write cycle time
 				xw.WriteStartAttribute("cycleTime");
-				xw.WriteString(m_maxTime.ToString());
+				xw.WriteString(_maxTime.ToString());
 				xw.WriteEndAttribute();
 
 				// TimelineGroups (und damit auch alles was dahinter liegt) serialisieren 
 				Type[] extraTypes = { typeof(TrafficLight) };
 				XmlSerializer xs = new XmlSerializer(typeof(TimelineGroup), extraTypes);
-				foreach (TimelineGroup tg in m_groups)
+				foreach (TimelineGroup tg in _groups)
 					{
 					xs.Serialize(xw, tg, xsn);
 					}
@@ -296,7 +296,7 @@ namespace CityTrafficSimulator.Timeline
 			int saveVersion = 0;
 
 			// erstma alles vorhandene löschen
-			foreach (TimelineGroup tg in m_groups)
+			foreach (TimelineGroup tg in _groups)
 				{
 				foreach (TimelineEntry te in tg.entries)
 					{
@@ -305,7 +305,7 @@ namespace CityTrafficSimulator.Timeline
 					}
 				tg.entries.Clear();
 				}
-			m_groups.Clear();
+			_groups.Clear();
 
 			XmlNode mainNode = xd.SelectSingleNode("//CityTrafficSimulator");
 			XmlNode saveVersionNode = mainNode.Attributes.GetNamedItem("saveVersion");
@@ -343,7 +343,7 @@ namespace CityTrafficSimulator.Timeline
 
 					// ab in die Liste
 					tg.GroupChanged += new TimelineGroup.GroupChangedEventHandler(tg_GroupChanged);
-					m_groups.Add(tg);
+					_groups.Add(tg);
 					}
 				}
 			else
@@ -375,13 +375,13 @@ namespace CityTrafficSimulator.Timeline
 					}
 
 				// ab in die Liste
-				m_groups.Add(unsortedGroup);
+				_groups.Add(unsortedGroup);
 				}
 
-			lf.SetupLowerProgess("Restoring Signals...", m_groups.Count);
+			lf.SetupLowerProgess("Restoring Signals...", _groups.Count);
 
 			// Abschließende Arbeiten: Referenzen auflösen
-			foreach (TimelineGroup tg in m_groups)
+			foreach (TimelineGroup tg in _groups)
 				{
 				tg.RecoverFromLoad(saveVersion, nodesList);
 				lf.StepLowerProgress();

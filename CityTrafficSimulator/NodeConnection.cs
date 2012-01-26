@@ -61,93 +61,93 @@ namespace CityTrafficSimulator
 		/// <summary>
 		/// Priorität der NodeConnection
 		/// </summary>
-		private int m_priority = 1;
+		private int _priority = 1;
 		/// <summary>
 		/// Priorität der NodeConnection
 		/// </summary>
 		public int priority
 			{
-			get { return m_priority; }
-			set { m_priority = value; UpdatePen(); }
+			get { return _priority; }
+			set { _priority = value; UpdatePen(); }
 			}
 
 		/// <summary>
 		/// Flag, ob Autos auf dieser NodeConnection erlaubt sind
 		/// </summary>
-		private bool m_carsAllowed = true;
+		private bool _carsAllowed = true;
 		/// <summary>
 		/// Flag, ob Autos auf dieser NodeConnection erlaubt sind
 		/// </summary>
 		public bool carsAllowed
 			{
-			get { return m_carsAllowed; }
-			set { m_carsAllowed = value; UpdatePen(); }
+			get { return _carsAllowed; }
+			set { _carsAllowed = value; UpdatePen(); }
 			}
 
 		/// <summary>
 		/// Flag, ob Busse auf dieser NodeConnection erlaubt sind
 		/// </summary>
-		private bool m_busAllowed;
+		private bool _busAllowed;
 		/// <summary>
 		/// Flag, ob Busse auf dieser NodeConnection erlaubt sind
 		/// </summary>
 		public bool busAllowed
 			{
-			get { return m_busAllowed; }
-			set { m_busAllowed = value; UpdatePen(); }
+			get { return _busAllowed; }
+			set { _busAllowed = value; UpdatePen(); }
 			}
 
 		/// <summary>
 		/// Flag, ob Straßenbahnen auf dieser NodeConnection erlaubt sind
 		/// </summary>
-		private bool m_tramAllowed;
+		private bool _tramAllowed;
 		/// <summary>
 		/// Flag, ob Straßenbahnen auf dieser NodeConnection erlaubt sind
 		/// </summary>
 		public bool tramAllowed
 			{
-			get { return m_tramAllowed; }
-			set { m_tramAllowed = value; UpdatePen(); }
+			get { return _tramAllowed; }
+			set { _tramAllowed = value; UpdatePen(); }
 			}
 
 
 		/// <summary>
 		/// Flag, ob ausgehende Spurwechsel von dieser NodeConnection erlaubt sind
 		/// </summary>
-		private bool m_enableOutgoingLineChange;
+		private bool _enableOutgoingLineChange;
 		/// <summary>
 		/// Flag, ob ausgehende Spurwechsel von dieser NodeConnection erlaubt sind
 		/// </summary>
 		public bool enableOutgoingLineChange
 			{
-			get { return m_enableOutgoingLineChange; }
-			set { m_enableOutgoingLineChange = value; }
+			get { return _enableOutgoingLineChange; }
+			set { _enableOutgoingLineChange = value; }
 			}
 
 		/// <summary>
 		/// Flag, ob eingehende Spurwechsel auf diese NodeConnection erlaubt ist
 		/// </summary>
-		private bool m_enableIncomingLineChange;
+		private bool _enableIncomingLineChange;
 		/// <summary>
 		/// Flag, ob eingehende Spurwechsel auf diese NodeConnection erlaubt ist
 		/// </summary>
 		public bool enableIncomingLineChange
 			{
-			get { return m_enableIncomingLineChange; }
-			set { m_enableIncomingLineChange = value; }
+			get { return _enableIncomingLineChange; }
+			set { _enableIncomingLineChange = value; }
 			}
 
 		/// <summary>
 		/// Target velocity on this NodeConnection
 		/// </summary>
-		private double m_targetVelocity = 14;
+		private double _targetVelocity = 14;
 		/// <summary>
 		/// Target velocity on this NodeConnection
 		/// </summary>
 		public double targetVelocity
 			{
-			get { return m_targetVelocity; }
-			set { m_targetVelocity = value; }
+			get { return _targetVelocity; }
+			set { _targetVelocity = value; }
 			}
 
 
@@ -164,15 +164,15 @@ namespace CityTrafficSimulator
 		/// Liste von LineChangePoints, nach Bogenlängenposition sortiert
 		/// </summary>
 		[XmlIgnore]
-		private List<LineChangePoint> m_lineChangePoints = new List<LineChangePoint>();//new SortedLinkedList<LineChangePoint>(lineChangePointComparer);
+		private List<LineChangePoint> _lineChangePoints = new List<LineChangePoint>();//new SortedLinkedList<LineChangePoint>(lineChangePointComparer);
 		/// <summary>
 		/// Liste von LineChangePoints, nach Bogenlängenposition sortiert
 		/// </summary>
 		[XmlIgnore]
 		public List<LineChangePoint> lineChangePoints
 			{
-			get { return m_lineChangePoints; }
-			set { m_lineChangePoints = value; }
+			get { return _lineChangePoints; }
+			set { _lineChangePoints = value; }
 			}
 
 
@@ -180,14 +180,14 @@ namespace CityTrafficSimulator
 		/// Liste von LineChangeAreas, aller von dieser NodeConnection per Spurwechsel zu erreichenden LineNodes
 		/// </summary>
 		[XmlIgnore]
-		private Dictionary<int, LineChangeInterval> m_lineChangeIntervals = new Dictionary<int,LineChangeInterval>(Constants.defaultLineChangeIntervalDictionaryCapacity);
+		private Dictionary<int, LineChangeInterval> _lineChangeIntervals = new Dictionary<int,LineChangeInterval>(Constants.defaultLineChangeIntervalDictionaryCapacity);
 		/// <summary>
 		/// Liste von LineChangeAreas, aller von dieser NodeConnection per Spurwechsel zu erreichenden LineNodes
 		/// </summary>
 		[XmlIgnore]
 		public Dictionary<int, LineChangeInterval> lineChangeIntervals
 			{
-			get { return m_lineChangeIntervals; }
+			get { return _lineChangeIntervals; }
 			}
 
 
@@ -195,14 +195,14 @@ namespace CityTrafficSimulator
 		/// Liste aller LineNodes, die über Spurwechsel erreicht werden können
 		/// </summary>
 		[XmlIgnore]
-		private List<LineNode> m_viaLineChangeReachableNodes = new List<LineNode>();
+		private List<LineNode> _viaLineChangeReachableNodes = new List<LineNode>();
 		/// <summary>
 		/// Liste aller LineNodes, die über Spurwechsel erreicht werden können
 		/// </summary>
 		[XmlIgnore]
 		public List<LineNode> viaLineChangeReachableNodes
 			{
-			get { return m_viaLineChangeReachableNodes; }
+			get { return _viaLineChangeReachableNodes; }
 			}
 
 
@@ -216,27 +216,27 @@ namespace CityTrafficSimulator
 		/// <summary>
 		/// Summe der Durchschnittsgeschwindigkeiten in m/s der Autos auf dieser NodeConnection
 		/// </summary>
-		private float m_sumOfAverageSpeeds;
+		private float _sumOfAverageSpeeds;
 		/// <summary>
 		/// Summe der Durchschnittsgeschwindigkeiten in m/s der Autos auf dieser NodeConnection
 		/// </summary>
 		[XmlIgnore]
 		public float sumOfAverageSpeeds
 			{
-			get { return m_sumOfAverageSpeeds; }
+			get { return _sumOfAverageSpeeds; }
 			}
 
 		/// <summary>
 		/// Anzahl der Summanden der Durchschnittsgeschwindigkeiten
 		/// </summary>
-		private int m_countOfVehicles;
+		private int _countOfVehicles;
 		/// <summary>
 		/// Anzahl der Summanden der Durchschnittsgeschwindigkeiten
 		/// </summary>
 		[XmlIgnore]
 		public int countOfVehicles
 			{
-			get { return m_countOfVehicles; }
+			get { return _countOfVehicles; }
 			}
 
 
@@ -253,15 +253,15 @@ namespace CityTrafficSimulator
 		/// <summary>
 		/// DEPRECATED: Farbe der Linie
 		/// </summary>
-		private Color m_color = Color.Black;
+		private Color _color = Color.Black;
 		/// <summary>
 		/// DEPRECATED: Farbe der Linie
 		/// </summary>
 		[XmlIgnore]
 		public Color color
 			{
-			get { return m_color; }
-			set { m_color = value; UpdatePen(); }
+			get { return _color; }
+			set { _color = value; UpdatePen(); }
 			}
 		/// <summary>
 		/// DEPRECATED: Farbe der Linie im ARGB-Format (Für Serialisierung benötigt)
@@ -269,8 +269,8 @@ namespace CityTrafficSimulator
 		[XmlIgnore]
 		public int argbColor
 			{
-			get { return m_color.ToArgb(); }
-			set { m_color = Color.FromArgb(value); }
+			get { return _color.ToArgb(); }
+			set { _color = Color.FromArgb(value); }
 			}
 
 
@@ -284,15 +284,15 @@ namespace CityTrafficSimulator
 		/// <summary>
 		/// soll die Durchschnittsgeschwindigkeit durch den Zeichenstil visualisiert werden?
 		/// </summary>
-		private bool m_visualizeAverageSpeed = false;
+		private bool _visualizeAverageSpeed = false;
 		/// <summary>
 		/// soll die Durchschnittsgeschwindigkeit durch den Zeichenstil visualisiert werden?
 		/// </summary>
 		[XmlIgnore]
 		public bool visualizeAverageSpeed
 			{
-			get { return m_visualizeAverageSpeed; }
-			set { m_visualizeAverageSpeed = value; UpdatePen(); }
+			get { return _visualizeAverageSpeed; }
+			set { _visualizeAverageSpeed = value; UpdatePen(); }
 			}
 
 
@@ -301,7 +301,7 @@ namespace CityTrafficSimulator
 		/// </summary>
 		private void UpdatePen()
 			{
-			if (m_visualizeAverageSpeed)
+			if (_visualizeAverageSpeed)
 				{
 				float averageSpeed = getAverageSpeedOfVehicles();
 				if (averageSpeed < 2)
@@ -335,30 +335,30 @@ namespace CityTrafficSimulator
 				}
 			else
 				{
-				if (m_carsAllowed && !m_busAllowed && !m_tramAllowed)
+				if (_carsAllowed && !_busAllowed && !_tramAllowed)
 					{
 					drawingPen = new Pen(Color.LightGray, priority);
 					}
-				else if (!m_carsAllowed && m_busAllowed && !m_tramAllowed)
+				else if (!_carsAllowed && _busAllowed && !_tramAllowed)
 					{
 					drawingPen = new Pen(Color.LightBlue, priority);
 					}
-				else if (!m_carsAllowed && !m_busAllowed && m_tramAllowed)
+				else if (!_carsAllowed && !_busAllowed && _tramAllowed)
 					{
 					drawingPen = new Pen(Color.Black, priority);
 					}
 
-				else if (m_carsAllowed && !m_busAllowed && m_tramAllowed)
+				else if (_carsAllowed && !_busAllowed && _tramAllowed)
 					{
-					drawingPen = new Pen(new HatchBrush(HatchStyle.LargeConfetti, Color.Black, Color.LightGray), m_priority);
+					drawingPen = new Pen(new HatchBrush(HatchStyle.LargeConfetti, Color.Black, Color.LightGray), _priority);
 					}
-				else if (m_carsAllowed && m_busAllowed && !m_tramAllowed)
+				else if (_carsAllowed && _busAllowed && !_tramAllowed)
 					{
-					drawingPen = new Pen(new HatchBrush(HatchStyle.LargeConfetti, Color.LightBlue, Color.LightGray), m_priority);
+					drawingPen = new Pen(new HatchBrush(HatchStyle.LargeConfetti, Color.LightBlue, Color.LightGray), _priority);
 					}
-				else if (!m_carsAllowed && m_busAllowed && m_tramAllowed)
+				else if (!_carsAllowed && _busAllowed && _tramAllowed)
 					{
-					drawingPen = new Pen(new HatchBrush(HatchStyle.LargeConfetti, Color.Black, Color.LightBlue), m_priority);
+					drawingPen = new Pen(new HatchBrush(HatchStyle.LargeConfetti, Color.Black, Color.LightBlue), _priority);
 					}
 
 				else
@@ -396,7 +396,7 @@ namespace CityTrafficSimulator
 					return a.bTime.CompareTo(b.bTime);
 			};
 
-			m_intersections = new SortedLinkedList<Intersection>(intersectionComparer);
+			_intersections = new SortedLinkedList<Intersection>(intersectionComparer);
 			statistics = new Statistics[1];
 			}
 
@@ -407,6 +407,7 @@ namespace CityTrafficSimulator
 		/// <param name="endNode">Endknoten</param>
 		/// <param name="ls">LineSegment</param>
 		/// <param name="priority">Priorität</param>
+		/// <param name="targetVelocity">target velocity</param>
 		/// <param name="carsAllowed">Flag, ob Autos auf dieser NodeConnection erlaubt sind</param>
 		/// <param name="busAllowed">Flag, ob Busse auf dieser NodeConnection erlaubt sind</param>
 		/// <param name="tramAllowed">Flag, ob Straßenbahnen auf dieser NodeConnection erlaubt sind</param>
@@ -417,6 +418,7 @@ namespace CityTrafficSimulator
 			LineNode endNode, 
 			LineSegment ls, 
 			int priority, 
+			double targetVelocity,
 			bool carsAllowed,
 			bool busAllowed,
 			bool tramAllowed,
@@ -428,12 +430,13 @@ namespace CityTrafficSimulator
             this.endNode = endNode;
             lineSegment = ls;
 
-			this.m_priority = priority;
-			this.m_carsAllowed = carsAllowed;
-			this.m_busAllowed = busAllowed;
-			this.m_tramAllowed = tramAllowed;
-			this.m_enableIncomingLineChange = enableIncomingLineChange;
-			this.m_enableOutgoingLineChange = enableOutgoingLineChange;
+			this._priority = priority;
+			this._targetVelocity = targetVelocity;
+			this._carsAllowed = carsAllowed;
+			this._busAllowed = busAllowed;
+			this._tramAllowed = tramAllowed;
+			this._enableIncomingLineChange = enableIncomingLineChange;
+			this._enableOutgoingLineChange = enableOutgoingLineChange;
 
 			UpdatePen();
 
@@ -452,7 +455,7 @@ namespace CityTrafficSimulator
 					return a.bTime.CompareTo(b.bTime);
 				};
 
-			m_intersections = new SortedLinkedList<Intersection>(intersectionComparer);
+			_intersections = new SortedLinkedList<Intersection>(intersectionComparer);
 			statistics = new Statistics[1];
 			}
 
@@ -469,7 +472,7 @@ namespace CityTrafficSimulator
 			{
 			LineChangeInterval lci;
 			// prüfen, ob der Zielknoten schon im LineChangeInterval-Dictionary enthalten ist
-			if (m_lineChangeIntervals.TryGetValue(lcp.target.nc.endNode.hashcode, out lci))
+			if (_lineChangeIntervals.TryGetValue(lcp.target.nc.endNode.hashcode, out lci))
 				{
 				// er ist schon vorhanden, also passen wir ihn evtl. an
 				if (lci.startArcPos > lcp.start.arcPosition)
@@ -485,11 +488,11 @@ namespace CityTrafficSimulator
 				{
 				// er ist noch nicht vorhanden, also legen wir einen neuen an
 				lci = new LineChangeInterval(lcp.target.nc.endNode, lcp.start.arcPosition, lcp.start.arcPosition);
-				m_lineChangeIntervals.Add(lcp.target.nc.endNode.hashcode, lci);
-				m_viaLineChangeReachableNodes.Add(lcp.target.nc.endNode);
+				_lineChangeIntervals.Add(lcp.target.nc.endNode.hashcode, lci);
+				_viaLineChangeReachableNodes.Add(lcp.target.nc.endNode);
 				}
 
-			m_lineChangePoints.Add(lcp);
+			_lineChangePoints.Add(lcp);
 			}
 
 		/// <summary>
@@ -497,9 +500,9 @@ namespace CityTrafficSimulator
 		/// </summary>
 		public void ClearLineChangePoints()
 			{
-			m_lineChangePoints.Clear();
-			m_lineChangeIntervals.Clear();
-			m_viaLineChangeReachableNodes.Clear();
+			_lineChangePoints.Clear();
+			_lineChangeIntervals.Clear();
+			_viaLineChangeReachableNodes.Clear();
 			}
 
 
@@ -510,7 +513,7 @@ namespace CityTrafficSimulator
 		/// <returns></returns>
 		public double GetLengthToLineNodeViaLineChange(LineNode ln)
 			{
-			foreach (LineChangePoint lcp in m_lineChangePoints)
+			foreach (LineChangePoint lcp in _lineChangePoints)
 				{
 				if (lcp.target.nc.endNode == ln)
 					{
@@ -526,17 +529,17 @@ namespace CityTrafficSimulator
 		/// <param name="nc">Ziel-NodeConnection der zu löschenden LineChangePoints</param>
 		public void RemoveAllLineChangePointsTo(NodeConnection nc)
 			{
-			for (int i = 0; i < m_lineChangePoints.Count; i++)
+			for (int i = 0; i < _lineChangePoints.Count; i++)
 				{
-				if ((m_lineChangePoints[i].otherStart.nc == nc) || (m_lineChangePoints[i].target.nc == nc))
+				if ((_lineChangePoints[i].otherStart.nc == nc) || (_lineChangePoints[i].target.nc == nc))
 					{
-					m_lineChangePoints.RemoveAt(i);
+					_lineChangePoints.RemoveAt(i);
 					i--;
 					}
 				}
 
-			m_lineChangeIntervals.Remove(nc.endNode.hashcode);
-			m_viaLineChangeReachableNodes.Remove(nc.endNode);
+			_lineChangeIntervals.Remove(nc.endNode.hashcode);
+			_viaLineChangeReachableNodes.Remove(nc.endNode);
 			}
 
 
@@ -580,20 +583,20 @@ namespace CityTrafficSimulator
 		/// <returns>den letzte LineChangePoint mit lcp.myArcPosition \leq arcPosition oder null</returns>
 		public LineChangePoint GetPrevLineChangePoint(double arcPosition)
 			{
-			if (m_lineChangePoints.Count > 0 && m_lineChangePoints[0].start.arcPosition < arcPosition)
+			if (_lineChangePoints.Count > 0 && _lineChangePoints[0].start.arcPosition < arcPosition)
 				{
 				int lBorder = 0;
-				int rBorder = m_lineChangePoints.Count - 1;
+				int rBorder = _lineChangePoints.Count - 1;
 
 				while (rBorder - lBorder > 1)
 					{
 					int i = (rBorder + lBorder) / 2;
 
-					if (arcPosition == m_lineChangePoints[i].start.arcPosition)
+					if (arcPosition == _lineChangePoints[i].start.arcPosition)
 						{
-						return m_lineChangePoints[i];
+						return _lineChangePoints[i];
 						}
-					else if (m_lineChangePoints[i].start.arcPosition < arcPosition)
+					else if (_lineChangePoints[i].start.arcPosition < arcPosition)
 						{
 						lBorder = i ;
 						}
@@ -603,7 +606,7 @@ namespace CityTrafficSimulator
 						}
 					}
 
-				return m_lineChangePoints[lBorder];
+				return _lineChangePoints[lBorder];
 				}
 			else
 				{
@@ -619,20 +622,20 @@ namespace CityTrafficSimulator
 		/// <returns>den ersten LineChangePoint mit lcp.myArcPosition >= arcPosition oder null</returns>
 		public LineChangePoint GetNextLineChangePoint(double arcPosition)
 			{
-			if (m_lineChangePoints.Count > 0 && m_lineChangePoints[0].start.arcPosition < arcPosition)
+			if (_lineChangePoints.Count > 0 && _lineChangePoints[0].start.arcPosition < arcPosition)
 				{
 				int lBorder = 0;
-				int rBorder = m_lineChangePoints.Count - 1;
+				int rBorder = _lineChangePoints.Count - 1;
 
 				while (rBorder - lBorder > 1)
 					{
 					int i = (rBorder + lBorder) / 2;
 
-					if (arcPosition == m_lineChangePoints[i].start.arcPosition)
+					if (arcPosition == _lineChangePoints[i].start.arcPosition)
 						{
-						return m_lineChangePoints[i];
+						return _lineChangePoints[i];
 						}
-					else if (m_lineChangePoints[i].start.arcPosition < arcPosition)
+					else if (_lineChangePoints[i].start.arcPosition < arcPosition)
 						{
 						lBorder = i+1;
 						}
@@ -642,7 +645,7 @@ namespace CityTrafficSimulator
 						}
 					}
 
-				return m_lineChangePoints[rBorder];
+				return _lineChangePoints[rBorder];
 				}
 			else
 				{
@@ -679,14 +682,14 @@ namespace CityTrafficSimulator
 		/// <summary>
 		/// Liste von Intersections
 		/// </summary>
-		private SortedLinkedList<Intersection> m_intersections;// = new SortedLinkedList<Intersection>(intersectionComparer);
+		private SortedLinkedList<Intersection> _intersections;// = new SortedLinkedList<Intersection>(intersectionComparer);
 		/// <summary>
 		/// Liste von Intersections
 		/// </summary>
 		[XmlIgnore]
 		public SortedLinkedList<Intersection> intersections
 			{
-			get { return m_intersections; }
+			get { return _intersections; }
 			}
 
 
@@ -1094,9 +1097,9 @@ namespace CityTrafficSimulator
 			float averageSpeed = (float)((e.partsUsed.right - e.partsUsed.left) / (10 * (e.timeInterval.right - e.timeInterval.left)));
 			if (averageSpeed > 0)
 				{
-				m_countOfVehicles++;
-				m_sumOfAverageSpeeds += averageSpeed;
-				if (m_visualizeAverageSpeed)
+				_countOfVehicles++;
+				_sumOfAverageSpeeds += averageSpeed;
+				if (_visualizeAverageSpeed)
 					UpdatePen();
 				}
 			}
@@ -1139,10 +1142,10 @@ namespace CityTrafficSimulator
 		/// <returns>Durchschnittsgeschwindigkeit in m/s</returns>
 		public float getAverageSpeedOfVehicles()
 			{
-			if (m_countOfVehicles == 0)
+			if (_countOfVehicles == 0)
 				return 0;
 			else
-				return m_sumOfAverageSpeeds / m_countOfVehicles;
+				return _sumOfAverageSpeeds / _countOfVehicles;
 			}
 
 
@@ -1237,7 +1240,7 @@ namespace CityTrafficSimulator
 						{
 						using (Brush redBrush = new SolidBrush(Color.Red))
 							{
-							foreach (LineChangePoint lcp in m_lineChangePoints)
+							foreach (LineChangePoint lcp in _lineChangePoints)
 								{
 								// LineChangePoints malen:
 								lcp.lineSegment.Draw(g, orangePen);

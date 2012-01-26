@@ -41,14 +41,14 @@ namespace CityTrafficSimulator.Tools
 		/// <summary>
 		/// Vergleichsfunktion
 		/// </summary>
-		private CompareDelegate m_comparer;
+		private CompareDelegate _comparer;
 		/// <summary>
 		/// Vergleichsfunktion
 		/// </summary>
 		public CompareDelegate comparer
 			{
-			get { return m_comparer; }
-			set { m_comparer = value; }
+			get { return _comparer; }
+			set { _comparer = value; }
 			}
 
 		/// <summary>

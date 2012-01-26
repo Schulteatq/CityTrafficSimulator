@@ -33,14 +33,14 @@ namespace CityTrafficSimulator
 		/// <summary>
 		/// Singleton instance
 		/// </summary>
-		private static readonly GlobalTime m_instance = new GlobalTime();
+		private static readonly GlobalTime _instance = new GlobalTime();
 
 		/// <summary>
 		/// Singleton instance
 		/// </summary>
 		public static GlobalTime Instance
 			{
-			get { return m_instance; }
+			get { return _instance; }
 			}
 
 		/// <summary>
