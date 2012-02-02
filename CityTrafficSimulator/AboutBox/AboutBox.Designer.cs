@@ -1,6 +1,6 @@
 ﻿/*
  *  CityTrafficSimulator - a tool to simulate traffic in urban areas and on intersections
- *  Copyright (C) 2005-2011, Christian Schulte zu Berge
+ *  Copyright (C) 2005-2012, Christian Schulte zu Berge
  *  
  *  This program is free software; you can redistribute it and/or modify it under the 
  *  terms of the GNU General Public License as published by the Free Software 
@@ -122,7 +122,7 @@ namespace CityTrafficSimulator
 			this.labelVersion.Name = "labelVersion";
 			this.labelVersion.Size = new System.Drawing.Size(349, 17);
 			this.labelVersion.TabIndex = 0;
-			this.labelVersion.Text = "Version 0.6-2";
+			this.labelVersion.Text = "Version 0.6-3";
 			this.labelVersion.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
 			// 
 			// labelCopyright
@@ -134,7 +134,7 @@ namespace CityTrafficSimulator
 			this.labelCopyright.Name = "labelCopyright";
 			this.labelCopyright.Size = new System.Drawing.Size(349, 17);
 			this.labelCopyright.TabIndex = 21;
-			this.labelCopyright.Text = "Copyright 2005-2011, Christian Schulte zu Berge";
+			this.labelCopyright.Text = "Copyright 2005-2012, Christian Schulte zu Berge";
 			this.labelCopyright.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
 			// 
 			// labelCompanyName

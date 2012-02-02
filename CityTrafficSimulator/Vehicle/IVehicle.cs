@@ -1,6 +1,6 @@
 ﻿/*
  *  CityTrafficSimulator - a tool to simulate traffic in urban areas and on intersections
- *  Copyright (C) 2005-2011, Christian Schulte zu Berge
+ *  Copyright (C) 2005-2012, Christian Schulte zu Berge
  *  
  *  This program is free software; you can redistribute it and/or modify it under the 
  *  terms of the GNU General Public License as published by the Free Software 
@@ -638,7 +638,7 @@ namespace CityTrafficSimulator.Vehicle
 							double percentOfLCILeft = Math.Max(0.2, (lci.endArcPos - currentPosition - Constants.breakPointBeforeForcedLineChange) / (lci.length - Constants.breakPointBeforeForcedLineChange));
 
 							// slow down a bit
-							_physics.multiplierTargetVelocity = Math.Max(1, 1.5 * percentOfLCILeft);
+							_physics.multiplierTargetVelocity = Math.Min(0.9, 1.5 * percentOfLCILeft);
 
 							// When reaching the end of the LineChangeInterval, check whether there are other possibilities to reach the target:
 							if (percentOfLCILeft < 0.5)
@@ -1652,7 +1652,7 @@ namespace CityTrafficSimulator.Vehicle
 				g.DrawLine(lineToIntersectionPen, state.positionAbs, si.intersection.aPosition);
 				}
 
-			foreach (NodeConnection prevNC in visitedNodeConnections)
+			/*foreach (NodeConnection prevNC in visitedNodeConnections)
 				{
 				g.DrawBezier(prevNodeConnectionsPen, prevNC.lineSegment.p0, prevNC.lineSegment.p1, prevNC.lineSegment.p2, prevNC.lineSegment.p3);
 				}
@@ -1667,7 +1667,7 @@ namespace CityTrafficSimulator.Vehicle
 					{
 					g.DrawLine(nextNodeConnectionsPen, rs.startConnection.startNode.position, rs.nextNode.position);
 					}
-				}
+				}*/
 
 			g.DrawString(hashcode.ToString() + " @ " + currentNodeConnection.lineSegment.PosToTime(currentPosition).ToString("0.##") + "t ," + currentPosition.ToString("####") + "dm - " + physics.velocity.ToString("##.#") + "m/s - Mult.: " + physics.multiplierTargetVelocity.ToString("#.##") + "\nnoch " + wayToGo.SegmentCount() + " nodes zu befahren\n\n" + debugData.ToString(), debugFont, blackBrush, state.positionAbs + new Vector2(0, -10));
 			}

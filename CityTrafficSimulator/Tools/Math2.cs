@@ -1,6 +1,6 @@
 /*
  *  CityTrafficSimulator - a tool to simulate traffic in urban areas and on intersections
- *  Copyright (C) 2005-2011, Christian Schulte zu Berge
+ *  Copyright (C) 2005-2012, Christian Schulte zu Berge
  *  
  *  This program is free software; you can redistribute it and/or modify it under the 
  *  terms of the GNU General Public License as published by the Free Software 
