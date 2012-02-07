@@ -1117,18 +1117,29 @@ namespace CityTrafficSimulator
 				{
 				using (Pen redPen = new Pen(Color.Red, 1.0f))
 					{
-					foreach (Intersection i in intersections)
+					using (Pen greenPen = new Pen(Color.Green, 1.0f))
 						{
-						g.DrawLine(redPen, i.aPosition, i.bPosition);
+						foreach (Intersection i in intersections)
+							{
+							PointF[] surroundingPoints = new PointF[4]
+									{
+										i.aPosition + i._aConnection.lineSegment.DerivateAtTime(i._aTime).Normalized * i._rearWaitingDistance,
+										i.bPosition + i._bConnection.lineSegment.DerivateAtTime(i._bTime).Normalized * i._rearWaitingDistance,
+										i.aPosition + i._aConnection.lineSegment.DerivateAtTime(i._aTime).Normalized * i._frontWaitingDistance * -1,
+										i.bPosition + i._bConnection.lineSegment.DerivateAtTime(i._bTime).Normalized * i._frontWaitingDistance * -1
+									};
 
-						PointF[] surroundingPoints = new PointF[4]
+							if (i.avoidBlocking)
 								{
-									i.aPosition + i._aConnection.lineSegment.DerivateAtTime(i._aTime).Normalized * i._rearWaitingDistance,
-									i.bPosition + i._bConnection.lineSegment.DerivateAtTime(i._bTime).Normalized * i._rearWaitingDistance,
-									i.aPosition + i._aConnection.lineSegment.DerivateAtTime(i._aTime).Normalized * i._frontWaitingDistance * -1,
-									i.bPosition + i._bConnection.lineSegment.DerivateAtTime(i._bTime).Normalized * i._frontWaitingDistance * -1
-								};
-						g.DrawPolygon(redPen, surroundingPoints);
+								g.DrawLine(redPen, i.aPosition, i.bPosition);
+								g.DrawPolygon(redPen, surroundingPoints);
+								}
+							else
+								{
+								g.DrawLine(greenPen, i.aPosition, i.bPosition);
+								g.DrawPolygon(greenPen, surroundingPoints);
+								}
+							}
 						}
 					}
 				}

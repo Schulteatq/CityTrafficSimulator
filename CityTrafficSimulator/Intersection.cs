@@ -141,7 +141,7 @@ namespace CityTrafficSimulator
 			double aPos = aArcPosition - distance;
 			double bPos = bArcPosition - distance;
 
-			while (   Vector2.GetDistance(_aConnection.lineSegment.AtPosition(aPos), _bConnection.lineSegment.AtPosition(bPos)) < 24
+			while (   Vector2.GetDistance(_aConnection.lineSegment.AtPosition(aPos), _bConnection.lineSegment.AtPosition(bPos)) < 22
 				   && aPos > 0 && bPos > 0)
 				{
 				aPos -= stepSize;
@@ -153,7 +153,7 @@ namespace CityTrafficSimulator
 			distance = 0;
 			aPos = aArcPosition + distance;
 			bPos = bArcPosition + distance;
-			while (Vector2.GetDistance(_aConnection.lineSegment.AtPosition(aPos), _bConnection.lineSegment.AtPosition(bPos)) < 24
+			while (Vector2.GetDistance(_aConnection.lineSegment.AtPosition(aPos), _bConnection.lineSegment.AtPosition(bPos)) < 22
 				   && aPos < _aConnection.lineSegment.length && bPos < _bConnection.lineSegment.length)
 				{
 				aPos += stepSize;

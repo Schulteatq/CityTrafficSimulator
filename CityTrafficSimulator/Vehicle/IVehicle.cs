@@ -534,10 +534,11 @@ namespace CityTrafficSimulator.Vehicle
 			double distanceToIntersection = HandleIntersections(registrationTarget, stopDistance);
 
 			// If there is an intersection where I should wait, I should do so...
-			if (!Double.IsPositiveInfinity(distanceToIntersection) && distanceToIntersection < lookaheadDistance)
+			if (!Double.IsPositiveInfinity(distanceToIntersection))// && distanceToIntersection < lookaheadDistance)
 				{
 				lookaheadDistance = distanceToIntersection;
-				lowestAcceleration = CalculateAcceleration(physics.velocity, effectiveDesiredVelocity, distanceToIntersection, physics.velocity);
+				double newAcceleration = CalculateAcceleration(physics.velocity, effectiveDesiredVelocity, distanceToIntersection, physics.velocity);
+				lowestAcceleration = Math.Min(lowestAcceleration, newAcceleration);
 				}
 
 			// In case of simple calculations we need to unregister the vehicle from all intersections. Otherwise
