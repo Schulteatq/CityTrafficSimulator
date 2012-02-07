@@ -316,8 +316,8 @@ namespace CityTrafficSimulator
 						doHandleTrafficLightTreeViewSelect = false;
 						trafficLightTreeView.SelectNodeByTimelineEntry(m_selectedLineNodes[0].tLight);
 						trafficLightTreeView.Select();
-						doHandleTrafficLightTreeViewSelect = true;
 						trafficLightForm.selectedEntry = m_selectedLineNodes[0].tLight;
+						doHandleTrafficLightTreeViewSelect = true;
 						}
 					else
 						{
@@ -450,7 +450,7 @@ namespace CityTrafficSimulator
 
 		private void trafficLightForm_SelectedEntryChanged(object sender, TrafficLightForm.SelectedEntryChangedEventArgs e)
 			{
-			if (trafficLightForm.selectedEntry != null)
+			if (trafficLightForm.selectedEntry != null && doHandleTrafficLightTreeViewSelect)
 				{
 				TrafficLight tl = trafficLightForm.selectedEntry as TrafficLight;
 				LineNode tmp = (m_selectedLineNodes.Count == 1) ? tmp = m_selectedLineNodes[0] : null;
@@ -1545,7 +1545,6 @@ namespace CityTrafficSimulator
 			nodeSteuerung.Reset();
 
 			thinkStopwatch.Stop();
-
 			Invalidate(InvalidationLevel.MAIN_CANVAS_AND_TIMLINE);
 			}
 
@@ -1553,7 +1552,7 @@ namespace CityTrafficSimulator
 
 		private void timerOnCheckBox_CheckedChanged(object sender, EventArgs e)
 			{
-			timer1.Enabled = timerOnCheckBox.Checked;
+			timerSimulation.Enabled = timerOnCheckBox.Checked;
 			}
 
 		private void BildLadenButton_Click(object sender, EventArgs e)
@@ -1637,6 +1636,7 @@ namespace CityTrafficSimulator
 		private void stepButton_Click(object sender, EventArgs e)
 			{
 			timer1_Tick(sender, e);
+			Invalidate(InvalidationLevel.MAIN_CANVAS_AND_TIMLINE);
 			}
 
 		private void killAllVehiclesButton_Click(object sender, EventArgs e)
@@ -1936,12 +1936,12 @@ namespace CityTrafficSimulator
 
 		private void simulationSpeedSpinEdit_ValueChanged(object sender, EventArgs e)
 			{
-			timer1.Interval = (int)(1000 / stepsPerSecondSpinEdit.Value / simulationSpeedSpinEdit.Value);
+			timerSimulation.Interval = (int)(1000 / stepsPerSecondSpinEdit.Value / simulationSpeedSpinEdit.Value);
 			}
 
 		private void stepsPerSecondSpinEdit_ValueChanged(object sender, EventArgs e)
 			{
-			timer1.Interval = (int)(1000 / stepsPerSecondSpinEdit.Value / simulationSpeedSpinEdit.Value);
+			timerSimulation.Interval = (int)(1000 / stepsPerSecondSpinEdit.Value / simulationSpeedSpinEdit.Value);
 			UpdateSimulationParameters();
 			}
 
@@ -2186,6 +2186,5 @@ namespace CityTrafficSimulator
 					}
 				}
 			}
-
 		}
     }

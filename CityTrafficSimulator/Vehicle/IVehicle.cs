@@ -245,6 +245,13 @@ namespace CityTrafficSimulator.Vehicle
 			// einem evtl. ausgebremsten Fahrzeug sagen, dass es nicht mehr extra für mich abbremsen braucht
 			_state.UnsetLineChangeVehicleInteraction();
 
+			// unregister at all intersections
+			foreach (SpecificIntersection si in registeredIntersections)
+				{
+				si.intersection.UnregisterVehicle(this, si.nodeConnection);
+				}
+			registeredIntersections.Clear();
+	
 			// sich merken, dass das IVehicle gerade am Spurwechseln ist
 			currentlyChangingLine = true;
 			currentLineChangePoint = lcp;
@@ -450,7 +457,9 @@ namespace CityTrafficSimulator.Vehicle
 				return 0;
 
 			double lookaheadDistance = Constants.lookaheadDistance;
+			double intersectionLookaheadDistance = Constants.intersectionLookaheadDistance;
 			double stopDistance = -1;
+			_state._freeDrive = true;
 
 			bool thinkAboutLineChange = false;
 			double lowestAcceleration = 0;
@@ -463,6 +472,7 @@ namespace CityTrafficSimulator.Vehicle
 				lookaheadDistance = Math.Max(0, _state.tailPositionOfOtherVehicle - currentPosition);
 				thinkAboutLineChange = false;
 				lowestAcceleration = CalculateAcceleration(physics.velocity, effectiveDesiredVelocity, lookaheadDistance, physics.velocity);
+				_state._freeDrive = false;
 				}
 
 			#endregion
@@ -479,6 +489,8 @@ namespace CityTrafficSimulator.Vehicle
 				lookaheadDistance = theVehicleInFrontOfMe.distance;
 				thinkAboutLineChange = true;
 				lowestAcceleration = CalculateAcceleration(physics.velocity, effectiveDesiredVelocity, theVehicleInFrontOfMe.distance, physics.velocity - theVehicleInFrontOfMe.vehicle.physics.velocity);
+				if (lowestAcceleration < 0.1)
+					_state._freeDrive = false;
 
 				if (    (theVehicleInFrontOfMe.vehicle.physics.velocity < 2.5)
 					 || (theVehicleInFrontOfMe.vehicle.physics.velocity < 5 && theVehicleInFrontOfMe.vehicle.physics.acceleration < 0.1))
@@ -503,8 +515,10 @@ namespace CityTrafficSimulator.Vehicle
 			if (distanceToTrafficLight < lookaheadDistance)
 				{
 				lookaheadDistance = distanceToTrafficLight;
+				intersectionLookaheadDistance = distanceToTrafficLight;
 				thinkAboutLineChange = false;
 				lowestAcceleration = CalculateAcceleration(physics.velocity, effectiveDesiredVelocity, lookaheadDistance, physics.velocity);
+				_state._freeDrive = false;
 				}
 			
 			#endregion
@@ -516,11 +530,11 @@ namespace CityTrafficSimulator.Vehicle
 			LinkedList<SpecificIntersection> registrationTarget = (onlySimpleCalculations ? temporaryRegisteredIntersections : registeredIntersections);
 
 			// gather all upcoming intersections (and update the ones we are already registered at)
-			GatherNextIntersectionsOnMyTrack(route, arcPos, registrationTarget, lookaheadDistance);
+			GatherNextIntersectionsOnMyTrack(route, arcPos, registrationTarget, intersectionLookaheadDistance);
 			double distanceToIntersection = HandleIntersections(registrationTarget, stopDistance);
 
 			// If there is an intersection where I should wait, I should do so...
-			if (distanceToIntersection > 0 && distanceToIntersection < lookaheadDistance)
+			if (!Double.IsPositiveInfinity(distanceToIntersection) && distanceToIntersection < lookaheadDistance)
 				{
 				lookaheadDistance = distanceToIntersection;
 				lowestAcceleration = CalculateAcceleration(physics.velocity, effectiveDesiredVelocity, distanceToIntersection, physics.velocity);
@@ -1155,7 +1169,7 @@ namespace CityTrafficSimulator.Vehicle
 							double remainingDistanceToPrevIntersection = lln.Previous.Value.intersection.GetCrossingVehicleTimes(this, lln.Previous.Value.nodeConnection).remainingDistance;
 
 							// check whether intersection will be blocked
-							if (remainingDistanceToPrevIntersection > 0 && remainingDistanceToPrevIntersection + lln.Previous.Value.intersection.GetWaitingDistance() > distanceToLookBack)
+							if (remainingDistanceToPrevIntersection > 0 && remainingDistanceToPrevIntersection + lln.Previous.Value.intersection._rearWaitingDistance > distanceToLookBack)
 								{
 								// intersection will be blocked and both NodeConnections from the intersection do not originate from the same node 
 								// => wait in front of it and continue looking backwards
@@ -1188,13 +1202,17 @@ namespace CityTrafficSimulator.Vehicle
 						lln = lln.Next;
 						}
 
-					return si.intersection.GetCrossingVehicleTimes(this, si.nodeConnection).remainingDistance - si.intersection.GetWaitingDistance(); // si is a Value-Type (copy)
+					return si.intersection.GetCrossingVehicleTimes(this, si.nodeConnection).remainingDistance - si.intersection._frontWaitingDistance; // si is a Value-Type (copy)
+					}
+				else
+					{
+					lln.Value.intersection.UpdateVehicle(this, lln.Value.nodeConnection, false);
 					}
 
 				lln = lln.Next;
 				}
 
-			return -1;
+			return Double.PositiveInfinity;
 			}
 
 		/// <summary>
@@ -1381,6 +1399,7 @@ namespace CityTrafficSimulator.Vehicle
 				m_tailPositionOfOtherVehicle = 0;
 				m_vehicleThatLetsMeChangeLine = null;
 				m_vehicleToChangeLine = null;
+				_freeDrive = true;
                 }
 
 			/// <summary>
@@ -1400,6 +1419,7 @@ namespace CityTrafficSimulator.Vehicle
 				m_tailPositionOfOtherVehicle = 0;
 				m_vehicleThatLetsMeChangeLine = null;
 				m_vehicleToChangeLine = null;
+				_freeDrive = true;
 				}
 
             /// <summary>
@@ -1466,6 +1486,11 @@ namespace CityTrafficSimulator.Vehicle
 						);
 					}
 				}
+
+			/// <summary>
+			/// Flag whether this vehicle can drive freely or is obstructed (traffic light, slower vehicle in front)
+			/// </summary>
+			public bool _freeDrive;
 
 			#region LineChangeVehicleInteraction
 
@@ -1650,6 +1675,8 @@ namespace CityTrafficSimulator.Vehicle
 			foreach (SpecificIntersection si in registeredIntersections)
 				{
 				g.DrawLine(lineToIntersectionPen, state.positionAbs, si.intersection.aPosition);
+				CrossingVehicleTimes myCvt = si.intersection.GetCrossingVehicleTimes(this, si.nodeConnection);
+				g.DrawString("arr.: " + myCvt.originalArrivingTime.ToString("####.##") + ", wait: " + myCvt.willWaitInFrontOfIntersection, debugFont, blackBrush, (state.positionAbs + si.intersection.aPosition) * 0.5);
 				}
 
 			/*foreach (NodeConnection prevNC in visitedNodeConnections)
@@ -1669,7 +1696,7 @@ namespace CityTrafficSimulator.Vehicle
 					}
 				}*/
 
-			g.DrawString(hashcode.ToString() + " @ " + currentNodeConnection.lineSegment.PosToTime(currentPosition).ToString("0.##") + "t ," + currentPosition.ToString("####") + "dm - " + physics.velocity.ToString("##.#") + "m/s - Mult.: " + physics.multiplierTargetVelocity.ToString("#.##") + "\nnoch " + wayToGo.SegmentCount() + " nodes zu befahren\n\n" + debugData.ToString(), debugFont, blackBrush, state.positionAbs + new Vector2(0, -10));
+			g.DrawString(hashcode.ToString() + " @ " + currentPosition.ToString("####") + "dm - " + physics.velocity.ToString("##.#") + "m/s - Mult.: " + physics.multiplierTargetVelocity.ToString("#.##") + debugData.ToString(), debugFont, blackBrush, state.positionAbs + new Vector2(0, -10));
 			}
 
 		#endregion

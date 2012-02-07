@@ -96,5 +96,10 @@ namespace CityTrafficSimulator
 		/// distance to end of LineChangeInterval where the vehicle shal stop in case of a forced line change
 		/// </summary>
 		public const double breakPointBeforeForcedLineChange = 48;
+
+		/// <summary>
+		/// lookahead distance for intersections
+		/// </summary>
+		public const double intersectionLookaheadDistance = 384;
 		}
 	}

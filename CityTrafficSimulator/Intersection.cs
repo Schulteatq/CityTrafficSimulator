@@ -36,122 +36,75 @@ namespace CityTrafficSimulator
 		#region Variablen und Eigenschaften
 
 		/// <summary>
-		/// Winkel der beiden NodeConnections zueinander an der Intersection 
+		/// Waiting Distance in front of this Intersection
 		/// </summary>
-		private double m_angle;
+		public double _frontWaitingDistance { get; private set; }
+
 		/// <summary>
-		/// Winkel der beiden NodeConnections zueinander an der Intersection 
+		/// Waiting Distance in behind this Intersection
 		/// </summary>
-		public double angle
-			{
-			get { return m_angle; }
-			set { m_angle = value; }
-			}
+		public double _rearWaitingDistance { get; private set; }
+
 
 		/// <summary>
 		/// NodeConnection A
 		/// </summary>
-		private NodeConnection m_aConnection;
-		/// <summary>
-		/// NodeConnection A
-		/// </summary>
-		public NodeConnection aConnection
-			{
-			get { return m_aConnection; }
-			set { m_aConnection = value; }
-			}
+		public NodeConnection _aConnection { get; private set; }
 
 		/// <summary>
 		/// LinkedListNode der von NodeConnection A auf die Intersection verweist
 		/// </summary>
-		private LinkedListNode<Intersection> m_aListNode;
-		/// <summary>
-		/// LinkedListNode der von NodeConnection A auf die Intersection verweist
-		/// </summary>
-		public LinkedListNode<Intersection> aListNode
-			{
-			get { return m_aListNode; }
-			set { m_aListNode = value; }
-			}
+		public LinkedListNode<Intersection> _aListNode { get; set; }
 
 		/// <summary>
 		/// Zeitpunkt der NodeConnection A des Schnittpunktes
 		/// </summary>
-		private double m_aTime;
-		/// <summary>
-		/// Zeitpunkt der NodeConnection A des Schnittpunktes
-		/// </summary>
-		public double aTime
-			{
-			get { return m_aTime; }
-			set { m_aTime = value; }
-			}
+		public double _aTime { get; private set; }
+
 		/// <summary>
 		/// absolute Position der Intersection auf NodeConnection A
 		/// </summary>
 		public Vector2 aPosition
 			{
-			get { return aConnection.lineSegment.AtTime(aTime); }
+			get { return _aConnection.lineSegment.AtTime(_aTime); }
 			}
+
 		/// <summary>
 		/// Bogenlängenposition des Schnittpunktes auf NodeConnection A
 		/// </summary>
 		public double aArcPosition
 			{
-			get { return aConnection.lineSegment.TimeToArcPosition(aTime); }
+			get { return _aConnection.lineSegment.TimeToArcPosition(_aTime); }
 			}
 
 		/// <summary>
 		/// NodeConnection B
 		/// </summary>
-		private NodeConnection m_bConnection;
-		/// <summary>
-		/// NodeConnection B
-		/// </summary>
-		public NodeConnection bConnection
-			{
-			get { return m_bConnection; }
-			set { m_bConnection = value; }
-			}
+		public NodeConnection _bConnection { get; private set; }
 
 		/// <summary>
 		/// LinkedListNode der von NodeConnection B auf die Intersection verweist
 		/// </summary>
-		private LinkedListNode<Intersection> m_bListNode;
-		/// <summary>
-		/// LinkedListNode der von NodeConnection B auf die Intersection verweist
-		/// </summary>
-		public LinkedListNode<Intersection> bListNode
-			{
-			get { return m_bListNode; }
-			set { m_bListNode = value; }
-			}
+		public LinkedListNode<Intersection> _bListNode { get; set; }
 
 		/// <summary>
 		/// Zeitpunkt der NodeConnection B des Schnittpunktes
 		/// </summary>
-		private double m_bTime;
-		/// <summary>
-		/// Zeitpunkt der NodeConnection B des Schnittpunktes
-		/// </summary>
-		public double bTime
-			{
-			get { return m_bTime; }
-			set { m_bTime = value; }
-			}
+		public double _bTime { get; private set; }
+
 		/// <summary>
 		/// absolute Position der Intersection auf NodeConnection B
 		/// </summary>
 		public Vector2 bPosition
 			{
-			get { return bConnection.lineSegment.AtTime(bTime); }
+			get { return _bConnection.lineSegment.AtTime(_bTime); }
 			}
 		/// <summary>
 		/// Bogenlängenposition des Schnittpunktes auf NodeConnection B
 		/// </summary>
 		public double bArcPosition
 			{
-			get { return bConnection.lineSegment.TimeToArcPosition(bTime); }
+			get { return _bConnection.lineSegment.TimeToArcPosition(_bTime); }
 			}
 
 		/// <summary>
@@ -160,7 +113,7 @@ namespace CityTrafficSimulator
 		/// </summary>
 		public bool avoidBlocking
 			{
-			get { return aConnection.startNode != bConnection.startNode && aConnection.endNode != bConnection.endNode; }
+			get { return _aConnection.startNode != _bConnection.startNode && _aConnection.endNode != _bConnection.endNode; }
 			}
 
 		#endregion
@@ -170,20 +123,44 @@ namespace CityTrafficSimulator
 		/// <summary>
 		/// Standardkonstruktor
 		/// Erstellt ein neues Intersection Objekt
-		/// Die Parameter sollten so gewählt sein, dass aConnection.lineSegment.AtTime(aTime) ~ bConnection.lineSegment.AtTime(bTime)
+		/// Die Parameter sollten so gewählt sein, dass _aConnection.lineSegment.AtTime(_aTime) ~ _bConnection.lineSegment.AtTime(_bTime)
 		/// </summary>
-		/// <param name="aConnection">NodeConnection A</param>
-		/// <param name="bConnection">NodeConnection B</param>
-		/// <param name="aTime">Zeitpunkt des Schnittpunktes an NodeConnection A</param>
-		/// <param name="bTime">Zeitpunkt des Schnittpunktes an NodeConnection B</param>
-		public Intersection(NodeConnection aConnection, NodeConnection bConnection, double aTime, double bTime)
+		/// <param name="_aConnection">NodeConnection A</param>
+		/// <param name="_bConnection">NodeConnection B</param>
+		/// <param name="_aTime">Zeitpunkt des Schnittpunktes an NodeConnection A</param>
+		/// <param name="_bTime">Zeitpunkt des Schnittpunktes an NodeConnection B</param>
+		public Intersection(NodeConnection _aConnection, NodeConnection _bConnection, double _aTime, double _bTime)
 			{
-			this.aConnection = aConnection;
-			this.bConnection = bConnection;
-			this.aTime = aTime;
-			this.bTime = bTime;
+			this._aConnection = _aConnection;
+			this._bConnection = _bConnection;
+			this._aTime = _aTime;
+			this._bTime = _bTime;
 
-			angle = Vector2.AngleBetween(aConnection.lineSegment.DerivateAtTime(aTime), bConnection.lineSegment.DerivateAtTime(bTime));
+			const double stepSize = 8;
+			double distance = 0;
+			double aPos = aArcPosition - distance;
+			double bPos = bArcPosition - distance;
+
+			while (   Vector2.GetDistance(_aConnection.lineSegment.AtPosition(aPos), _bConnection.lineSegment.AtPosition(bPos)) < 24
+				   && aPos > 0 && bPos > 0)
+				{
+				aPos -= stepSize;
+				bPos -= stepSize;
+				distance += stepSize;
+				}
+			_frontWaitingDistance = distance;
+
+			distance = 0;
+			aPos = aArcPosition + distance;
+			bPos = bArcPosition + distance;
+			while (Vector2.GetDistance(_aConnection.lineSegment.AtPosition(aPos), _bConnection.lineSegment.AtPosition(bPos)) < 24
+				   && aPos < _aConnection.lineSegment.length && bPos < _bConnection.lineSegment.length)
+				{
+				aPos += stepSize;
+				bPos += stepSize;
+				distance += stepSize;
+				}
+			_rearWaitingDistance = distance;
 			}
 
 		#endregion
@@ -197,18 +174,18 @@ namespace CityTrafficSimulator
 		/// <returns>(angle - Math.PI / 2) * 8</returns>
 		public double GetWaitingDistance()
 			{
-			double toReturn = Math.Pow(1.5d* Math.Abs(angle - Math.PI/2), 2) * 8;
-			return toReturn;
+			//double toReturn = Math.Pow(1.5d* Math.Abs(angle - Math.PI/2), 3) * 6;
+			return Math.Max(_frontWaitingDistance, _rearWaitingDistance);
 			}
 
 		/// <summary>
 		/// prüft ob die NodeConnection nc an der Intersection teilnimmt
 		/// </summary>
 		/// <param name="nc">zu prüfende NodeConnection</param>
-		/// <returns>(nc == aConnection) || (nc == bConnection)</returns>
+		/// <returns>(nc == _aConnection) || (nc == _bConnection)</returns>
 		public bool ContainsNodeConnection(NodeConnection nc)
 			{
-			return (nc == aConnection) || (nc == bConnection);
+			return (nc == _aConnection) || (nc == _bConnection);
 			}
 
 
@@ -217,8 +194,8 @@ namespace CityTrafficSimulator
 		/// </summary>
 		public void Dispose()
 			{
-			aConnection.RemoveIntersection(this);
-			bConnection.RemoveIntersection(this);
+			_aConnection.RemoveIntersection(this);
+			_bConnection.RemoveIntersection(this);
 			}
 
 
@@ -229,13 +206,13 @@ namespace CityTrafficSimulator
 		/// <returns>Die NodeConnection, die sich in dieser Intersection mit nc schneidet oder null, wenn nc nicht an der Intersection teilnimmt</returns>
 		public NodeConnection GetOtherNodeConnection(NodeConnection nc)
 			{
-			if (aConnection == nc)
+			if (_aConnection == nc)
 				{
-				return bConnection;
+				return _bConnection;
 				}
-			else if (bConnection == nc)
+			else if (_bConnection == nc)
 				{
-				return aConnection;
+				return _aConnection;
 				}
 			else
 				{
@@ -248,13 +225,13 @@ namespace CityTrafficSimulator
 		/// Gibt den Zeitpunkt des Schnittpunktes an der NodeConnection nc an
 		/// </summary>
 		/// <param name="nc">NodeConnection dessen Schnittpunkt-Zeitparameter zurückgegeben werden soll</param>
-		/// <returns>aTime/bTime falls nc=aConnection/nc=bConnection, sonst Exception</returns>
+		/// <returns>_aTime/_bTime falls nc=_aConnection/nc=_bConnection, sonst Exception</returns>
 		public double GetMyTime(NodeConnection nc)
 			{
-			if (aConnection == nc)
-				return m_aTime;
-			else if (bConnection == nc)
-				return m_bTime;
+			if (_aConnection == nc)
+				return _aTime;
+			else if (_bConnection == nc)
+				return _bTime;
 			else
 				throw new Exception();
 			}
@@ -264,12 +241,12 @@ namespace CityTrafficSimulator
 		/// Gibt Bogenlängenposition des Schnittpunktes an der NodeConnection nc an
 		/// </summary>
 		/// <param name="nc">NodeConnection dessen Bogenlängenposition zurückgegeben werden soll</param>
-		/// <returns>aArcPosition/bArcPosition falls nc=aConnection/nc=bConnection, sonst Exception</returns>
+		/// <returns>aArcPosition/bArcPosition falls nc=_aConnection/nc=_bConnection, sonst Exception</returns>
 		public double GetMyArcPosition(NodeConnection nc)
 			{
-			if (aConnection == nc)
+			if (_aConnection == nc)
 				return aArcPosition;
-			else if (bConnection == nc)
+			else if (_bConnection == nc)
 				return bArcPosition;
 			else
 				throw new Exception();
@@ -280,13 +257,13 @@ namespace CityTrafficSimulator
 		/// Gibt den ListNode des Schnittpunktes an der NodeConnection nc an
 		/// </summary>
 		/// <param name="nc">NodeConnection dessen ListNode zurückgegeben werden soll</param>
-		/// <returns>aListNode/bListNode falls nc=aConnection/nc=bConnection, sonst Exception</returns>
+		/// <returns>_aListNode/_bListNode falls nc=_aConnection/nc=_bConnection, sonst Exception</returns>
 		public LinkedListNode<Intersection> GetMyListNode(NodeConnection nc)
 			{
-			if (aConnection == nc)
-				return aListNode;
-			else if (bConnection == nc)
-				return bListNode;
+			if (_aConnection == nc)
+				return _aListNode;
+			else if (_bConnection == nc)
+				return _bListNode;
 			else
 				throw new Exception();
 			}
@@ -325,20 +302,21 @@ namespace CityTrafficSimulator
 		/// <param name="currentTime">current world time.</param>
 		public void RegisterVehicle(IVehicle v, NodeConnection nc, double distance, double currentTime)
 			{
-			Debug.Assert(nc == aConnection || nc == bConnection);
+			Debug.Assert(nc == _aConnection || nc == _bConnection);
 			// TODO: add some safety space before and behind
-			double blockingStartTime = currentTime + CalculateArrivingTime(v, distance) - v.SafetyTime/2;
+			double blockingStartTime = currentTime + CalculateArrivingTime(v, distance - (_frontWaitingDistance / 2)) - v.SafetyTime/2;
 			double blockingEndTime = currentTime + CalculateArrivingTime(v, distance + v.length) + v.SafetyTime/2;
+			double originalArrivingTime = currentTime + v.GetTimeToCoverDistance(distance, false);
 
-			if (nc == aConnection)
+			if (nc == _aConnection)
 				{
 				//Debug.Assert(!aCrossingVehicles.ContainsKey(v));
-				aCrossingVehicles.Add(v, new CrossingVehicleTimes(blockingStartTime, distance, new Interval<double>(blockingStartTime, blockingEndTime), false));
+				aCrossingVehicles.Add(v, new CrossingVehicleTimes(originalArrivingTime, distance, new Interval<double>(blockingStartTime, blockingEndTime), false));
 				}
 			else
 				{
 				//Debug.Assert(!bCrossingVehicles.ContainsKey(v));
-				bCrossingVehicles.Add(v, new CrossingVehicleTimes(blockingStartTime, distance, new Interval<double>(blockingStartTime, blockingEndTime), false));
+				bCrossingVehicles.Add(v, new CrossingVehicleTimes(originalArrivingTime, distance, new Interval<double>(blockingStartTime, blockingEndTime), false));
 				}
 			}
 
@@ -351,12 +329,12 @@ namespace CityTrafficSimulator
 		/// <param name="currentTime">current world time.</param>
 		public void UpdateVehicle(IVehicle v, NodeConnection nc, double distance, double currentTime)
 			{
-			Debug.Assert(nc == aConnection || nc == bConnection);
+			Debug.Assert(nc == _aConnection || nc == _bConnection);
 			// TODO: add some safety space before and behind
-			double blockingStartTime = currentTime + CalculateArrivingTime(v, distance) - v.SafetyTime/2;
-			double blockingEndTime = currentTime + CalculateArrivingTime(v, distance + v.length) + v.SafetyTime/2;
+			double blockingStartTime = currentTime + CalculateArrivingTime(v, distance - (_frontWaitingDistance / 2)) - v.SafetyTime / 2;
+			double blockingEndTime = currentTime + CalculateArrivingTime(v, distance + v.length) + v.SafetyTime / 2;
 
-			if (nc == aConnection)
+			if (nc == _aConnection)
 				{
 				Debug.Assert(aCrossingVehicles.ContainsKey(v));
 				CrossingVehicleTimes cvt = aCrossingVehicles[v]; // CrossingVehicleTimes is a Value-Type!
@@ -384,9 +362,9 @@ namespace CityTrafficSimulator
 		/// <param name="willWaitInFrontOfIntersection">Set true if vehicle will wait before intersection (and thus not cross it in the meantime).</param>
 		public void UpdateVehicle(IVehicle v, NodeConnection nc, bool willWaitInFrontOfIntersection)
 			{
-			Debug.Assert(nc == aConnection || nc == bConnection);
+			Debug.Assert(nc == _aConnection || nc == _bConnection);
 
-			if (nc == aConnection)
+			if (nc == _aConnection)
 				{
 				Debug.Assert(aCrossingVehicles.ContainsKey(v));
 				CrossingVehicleTimes cvt = aCrossingVehicles[v]; // CrossingVehicleTimes is a Value-Type!
@@ -409,9 +387,9 @@ namespace CityTrafficSimulator
 		/// <param name="nc">NodeConnection the vehicle is going to use (must participate on this Intersection!).</param>
 		public void UnregisterVehicle(IVehicle v, NodeConnection nc)
 			{
-			Debug.Assert(nc == aConnection || nc == bConnection);
+			Debug.Assert(nc == _aConnection || nc == _bConnection);
 
-			if (nc == aConnection)
+			if (nc == _aConnection)
 				{
 				Debug.Assert(aCrossingVehicles.ContainsKey(v));
 				aCrossingVehicles.Remove(v);
@@ -437,12 +415,12 @@ namespace CityTrafficSimulator
 		/// </summary>
 		public List<CrossingVehicleTimes> CalculateInterferingVehicles(IVehicle v, NodeConnection nc)
 			{
-			Debug.Assert(nc == aConnection || nc == bConnection);
+			Debug.Assert(nc == _aConnection || nc == _bConnection);
 
 			// hopefully these are references... ;)
 			List<CrossingVehicleTimes> toReturn = new List<CrossingVehicleTimes>();
-			Dictionary<IVehicle, CrossingVehicleTimes> myCrossingVehicles = (nc == aConnection ? aCrossingVehicles : bCrossingVehicles);
-			Dictionary<IVehicle, CrossingVehicleTimes> otherCrossingVehicles = (nc == aConnection ? bCrossingVehicles : aCrossingVehicles);
+			Dictionary<IVehicle, CrossingVehicleTimes> myCrossingVehicles = (nc == _aConnection ? aCrossingVehicles : bCrossingVehicles);
+			Dictionary<IVehicle, CrossingVehicleTimes> otherCrossingVehicles = (nc == _aConnection ? bCrossingVehicles : aCrossingVehicles);
 			CrossingVehicleTimes myCvt = myCrossingVehicles[v];
 
 			// check each vehicle in aCrossingVehicles with each in bCrossingVehicles for interference
@@ -466,9 +444,9 @@ namespace CityTrafficSimulator
 		/// <returns>The CrossingVehicleTimes data of the given vehicle.</returns>
 		public CrossingVehicleTimes GetCrossingVehicleTimes(IVehicle v, NodeConnection nc)
 			{
-			Debug.Assert(nc == aConnection || nc == bConnection);
+			Debug.Assert(nc == _aConnection || nc == _bConnection);
 
-			if (nc == aConnection)
+			if (nc == _aConnection)
 				{
 				Debug.Assert(aCrossingVehicles.ContainsKey(v));
 				return aCrossingVehicles[v];
@@ -494,7 +472,7 @@ namespace CityTrafficSimulator
 
 		private double CalculateArrivingTime(IVehicle v, double distance)
 			{
-			if (v.physics.velocity < 5)
+			if (v.state._freeDrive)
 				{
 				//double timeToArrive = (v.physics.desiredVelocity * Math2.Acosh (Math.Exp(v.a * distance / Math2.Square(v.physics.desiredVelocity)))) / (10 * v.a);
 				return v.GetTimeToCoverDistance(distance, false);//timeToArrive;

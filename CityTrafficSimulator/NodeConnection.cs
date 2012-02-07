@@ -383,17 +383,17 @@ namespace CityTrafficSimulator
 			// den intersectionComparer müssen wir trotzdem erstellen...
 			intersectionComparer = delegate(Intersection a, Intersection b)
 			{
-				bool aA = (this == a.aConnection);
-				bool bA = (this == b.aConnection);
+				bool aA = (this == a._aConnection);
+				bool bA = (this == b._aConnection);
 
 				if (aA && bA)
-					return a.aTime.CompareTo(b.aTime);
+					return a._aTime.CompareTo(b._aTime);
 				else if (!aA && bA)
-					return a.bTime.CompareTo(b.aTime);
+					return a._bTime.CompareTo(b._aTime);
 				else if (aA && !bA)
-					return a.aTime.CompareTo(b.bTime);
+					return a._aTime.CompareTo(b._bTime);
 				else
-					return a.bTime.CompareTo(b.bTime);
+					return a._bTime.CompareTo(b._bTime);
 			};
 
 			_intersections = new SortedLinkedList<Intersection>(intersectionComparer);
@@ -442,17 +442,17 @@ namespace CityTrafficSimulator
 
 			intersectionComparer = delegate(Intersection a, Intersection b)
 				{
-				bool aA = (this == a.aConnection);
-				bool bA = (this == b.aConnection);
+				bool aA = (this == a._aConnection);
+				bool bA = (this == b._aConnection);
 
 				if (aA && bA)
-					return a.aTime.CompareTo(b.aTime);
+					return a._aTime.CompareTo(b._aTime);
 				else if (!aA && bA)
-					return a.bTime.CompareTo(b.aTime);
+					return a._bTime.CompareTo(b._aTime);
 				else if (aA && !bA)
-					return a.aTime.CompareTo(b.bTime);
+					return a._aTime.CompareTo(b._bTime);
 				else
-					return a.bTime.CompareTo(b.bTime);
+					return a._bTime.CompareTo(b._bTime);
 				};
 
 			_intersections = new SortedLinkedList<Intersection>(intersectionComparer);
@@ -699,10 +699,10 @@ namespace CityTrafficSimulator
 		/// <param name="i">Intersection-Objekt mit allen nötigen Informationen</param>
 		public void AddIntersection(Intersection i)
 			{
-			if (this == i.aConnection)
-				i.aListNode = intersections.Add(i);
+			if (this == i._aConnection)
+				i._aListNode = intersections.Add(i);
 			else
-				i.bListNode = intersections.Add(i);
+				i._bListNode = intersections.Add(i);
 			}
 
 		/// <summary>
@@ -726,16 +726,16 @@ namespace CityTrafficSimulator
 
 			foreach (Intersection i in this.intersections)
 				{
-				if (this == i.aConnection)
+				if (this == i._aConnection)
 					{
-					if (interval.Contains(i.aTime))
+					if (interval.Contains(i._aTime))
 						{
 						toReturn.Add(i);
 						}
 					}
 				else
 					{
-					if (interval.Contains(i.bTime))
+					if (interval.Contains(i._bTime))
 						{
 						toReturn.Add(i);
 						}
@@ -756,7 +756,7 @@ namespace CityTrafficSimulator
 
 			foreach (Intersection i in this.intersections)
 				{
-				if (this == i.aConnection)
+				if (this == i._aConnection)
 					{
 					if (interval.Contains(i.aArcPosition))
 						{

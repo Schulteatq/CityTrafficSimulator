@@ -821,7 +821,7 @@ namespace CityTrafficSimulator
 			// erstmal bestehende Intersections dieser NodeConnections zerstören
 			for (int i = 0; i < intersections.Count; i++)
 				{
-				if ((intersections[i].aConnection == nc) || (intersections[i].bConnection == nc))
+				if ((intersections[i]._aConnection == nc) || (intersections[i]._bConnection == nc))
 					{
 					intersections[i].Dispose();
 					intersections.RemoveAt(i);
@@ -833,8 +833,8 @@ namespace CityTrafficSimulator
 			List<Intersection> foundIntersections = CalculateIntersections(nc, 0.25d);
 			foreach (Intersection i in foundIntersections)
 				{
-				i.aConnection.AddIntersection(i);
-				i.bConnection.AddIntersection(i);
+				i._aConnection.AddIntersection(i);
+				i._bConnection.AddIntersection(i);
 				intersections.Add(i);
 				}
 			}
@@ -1121,13 +1121,12 @@ namespace CityTrafficSimulator
 						{
 						g.DrawLine(redPen, i.aPosition, i.bPosition);
 
-						double streckungsfaktor = i.GetWaitingDistance();
 						PointF[] surroundingPoints = new PointF[4]
 								{
-									i.aPosition + i.aConnection.lineSegment.DerivateAtTime(i.aTime).Normalized * streckungsfaktor,
-									i.bPosition + i.bConnection.lineSegment.DerivateAtTime(i.bTime).Normalized * streckungsfaktor,
-									i.aPosition + i.aConnection.lineSegment.DerivateAtTime(i.aTime).Normalized * streckungsfaktor * -1,
-									i.bPosition + i.bConnection.lineSegment.DerivateAtTime(i.bTime).Normalized * streckungsfaktor * -1
+									i.aPosition + i._aConnection.lineSegment.DerivateAtTime(i._aTime).Normalized * i._rearWaitingDistance,
+									i.bPosition + i._bConnection.lineSegment.DerivateAtTime(i._bTime).Normalized * i._rearWaitingDistance,
+									i.aPosition + i._aConnection.lineSegment.DerivateAtTime(i._aTime).Normalized * i._frontWaitingDistance * -1,
+									i.bPosition + i._bConnection.lineSegment.DerivateAtTime(i._bTime).Normalized * i._frontWaitingDistance * -1
 								};
 						g.DrawPolygon(redPen, surroundingPoints);
 						}
