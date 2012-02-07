@@ -424,7 +424,7 @@ namespace CityTrafficSimulator.Vehicle
 		/// <summary>
 		/// alle bisher besuchten NodeConnections
 		/// </summary>
-		protected LinkedList<NodeConnection> visitedNodeConnections = new LinkedList<NodeConnection>();
+		public LinkedList<NodeConnection> visitedNodeConnections = new LinkedList<NodeConnection>();
 
 
 		/// <summary>
@@ -1669,9 +1669,6 @@ namespace CityTrafficSimulator.Vehicle
 			Brush blackBrush =  new SolidBrush(Color.Black);
 			Font debugFont = new Font("Calibri", 6);
 
-			Pen prevNodeConnectionsPen = new Pen(Color.Red, 3);
-			Pen nextNodeConnectionsPen = new Pen(Color.Green, 3);
-
 			foreach (SpecificIntersection si in registeredIntersections)
 				{
 				g.DrawLine(lineToIntersectionPen, state.positionAbs, si.intersection.aPosition);
@@ -1679,22 +1676,6 @@ namespace CityTrafficSimulator.Vehicle
 				g.DrawString("arr.: " + myCvt.originalArrivingTime.ToString("####.##") + ", wait: " + myCvt.willWaitInFrontOfIntersection, debugFont, blackBrush, (state.positionAbs + si.intersection.aPosition) * 0.5);
 				}
 
-			/*foreach (NodeConnection prevNC in visitedNodeConnections)
-				{
-				g.DrawBezier(prevNodeConnectionsPen, prevNC.lineSegment.p0, prevNC.lineSegment.p1, prevNC.lineSegment.p2, prevNC.lineSegment.p3);
-				}
-			foreach (Routing.RouteSegment rs in wayToGo)
-				{
-				if (!rs.lineChangeNeeded)
-					{
-					NodeConnection nextNC = rs.startConnection;
-					g.DrawBezier(nextNodeConnectionsPen, nextNC.lineSegment.p0, nextNC.lineSegment.p1, nextNC.lineSegment.p2, nextNC.lineSegment.p3);
-					}
-				else
-					{
-					g.DrawLine(nextNodeConnectionsPen, rs.startConnection.startNode.position, rs.nextNode.position);
-					}
-				}*/
 
 			g.DrawString(hashcode.ToString() + " @ " + currentPosition.ToString("####") + "dm - " + physics.velocity.ToString("##.#") + "m/s - Mult.: " + physics.multiplierTargetVelocity.ToString("#.##") + debugData.ToString(), debugFont, blackBrush, state.positionAbs + new Vector2(0, -10));
 			}

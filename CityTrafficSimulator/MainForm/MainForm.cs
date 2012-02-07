@@ -1330,6 +1330,28 @@ namespace CityTrafficSimulator
 					selectedNodeConnection.lineSegment.Draw(e.Graphics, BlackPen);
 					}
 
+				if (selectedVehicle != null && renderOptionsDaGrid.renderVehicleDebugData)
+					{
+					Pen prevNodeConnectionsPen = new Pen(Color.Red, 3);
+					Pen nextNodeConnectionsPen = new Pen(Color.Green, 3);
+
+					foreach (NodeConnection prevNC in selectedVehicle.visitedNodeConnections)
+						{
+						e.Graphics.DrawBezier(prevNodeConnectionsPen, prevNC.lineSegment.p0, prevNC.lineSegment.p1, prevNC.lineSegment.p2, prevNC.lineSegment.p3);
+						}
+					foreach (Routing.RouteSegment rs in selectedVehicle.wayToGo)
+						{
+						if (!rs.lineChangeNeeded)
+							{
+							NodeConnection nextNC = rs.startConnection;
+							e.Graphics.DrawBezier(nextNodeConnectionsPen, nextNC.lineSegment.p0, nextNC.lineSegment.p1, nextNC.lineSegment.p2, nextNC.lineSegment.p3);
+							}
+						else
+							{
+							e.Graphics.DrawLine(nextNodeConnectionsPen, rs.startConnection.startNode.position, rs.nextNode.position);
+							}
+						}
+					}
 
 
 				// Gummiband zeichnen
