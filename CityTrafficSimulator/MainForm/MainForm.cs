@@ -1128,12 +1128,14 @@ namespace CityTrafficSimulator
 					}
 				break;
 
-			// Ampel
-			case Keys.A:
-				if (selectedLineNodes != null)
+			// reset LineNode slopes
+			case Keys.R:
+				foreach (LineNode ln in selectedLineNodes)
 					{
-					//IsTrafficLightCheckBox.Checked = !IsTrafficLightCheckBox.Checked;
+					ln.outSlope = ln.outSlope.Normalized * 32;
+					ln.inSlope = ln.inSlope.Normalized * 32;
 					}
+				Invalidate(InvalidationLevel.ONLY_MAIN_CANVAS);
 				break;
 			#endregion
 

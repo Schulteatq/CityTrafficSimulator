@@ -353,8 +353,8 @@ namespace CityTrafficSimulator.Vehicle
 		public double targetVelocity
 			{
 			get 
-				{ 
-				return Math.Min(_physics.targetVelocity, (currentNodeConnection != null) ? currentNodeConnection.targetVelocity : 0); 
+				{
+				return (currentNodeConnection != null) ? Math.Min(_physics.targetVelocity, currentNodeConnection.targetVelocity) : _physics.targetVelocity; 
 				}
 			}
 
@@ -509,13 +509,13 @@ namespace CityTrafficSimulator.Vehicle
 			#region Traffic lights
 
 			// Check for red traffic lights on route
-			double distanceToTrafficLight = GetDistanceToNextTrafficLightOnRoute(route, arcPos, lookaheadDistance, true);
+			double distanceToTrafficLight = GetDistanceToNextTrafficLightOnRoute(route, arcPos, Constants.lookaheadDistance, true);
+			intersectionLookaheadDistance = distanceToTrafficLight;
 
 			// If the next TrafficLight is closer than the next vehicle, no free line change shall be performed
 			if (distanceToTrafficLight < lookaheadDistance)
 				{
 				lookaheadDistance = distanceToTrafficLight;
-				intersectionLookaheadDistance = distanceToTrafficLight;
 				thinkAboutLineChange = false;
 				lowestAcceleration = CalculateAcceleration(physics.velocity, effectiveDesiredVelocity, lookaheadDistance, physics.velocity);
 				_state._freeDrive = false;

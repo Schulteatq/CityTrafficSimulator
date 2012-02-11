@@ -423,13 +423,16 @@ namespace CityTrafficSimulator
 			Dictionary<IVehicle, CrossingVehicleTimes> otherCrossingVehicles = (nc == _aConnection ? bCrossingVehicles : aCrossingVehicles);
 			CrossingVehicleTimes myCvt = myCrossingVehicles[v];
 
-			// check each vehicle in aCrossingVehicles with each in bCrossingVehicles for interference
-			foreach (KeyValuePair<IVehicle, CrossingVehicleTimes> ocv in otherCrossingVehicles)
+			if (_aConnection.startNode != _bConnection.startNode || (_frontWaitingDistance < aArcPosition && _frontWaitingDistance < bArcPosition))
 				{
-				if (   (!ocv.Value.willWaitInFrontOfIntersection || ocv.Value.remainingDistance < 0)
-					&& myCvt.blockingTime.IntersectsTrue(ocv.Value.blockingTime))
+				// check each vehicle in aCrossingVehicles with each in bCrossingVehicles for interference
+				foreach (KeyValuePair<IVehicle, CrossingVehicleTimes> ocv in otherCrossingVehicles)
 					{
-					toReturn.Add(ocv.Value);
+					if (   (!ocv.Value.willWaitInFrontOfIntersection || ocv.Value.remainingDistance < 0)
+						&& myCvt.blockingTime.IntersectsTrue(ocv.Value.blockingTime))
+						{
+						toReturn.Add(ocv.Value);
+						}
 					}
 				}
 

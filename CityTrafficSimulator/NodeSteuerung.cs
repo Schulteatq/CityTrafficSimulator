@@ -1117,27 +1117,39 @@ namespace CityTrafficSimulator
 				{
 				using (Pen redPen = new Pen(Color.Red, 1.0f))
 					{
-					using (Pen greenPen = new Pen(Color.Green, 1.0f))
+					using (Pen yellowPen = new Pen(Color.Orange, 1.0f))
 						{
-						foreach (Intersection i in intersections)
+						using (Pen greenPen = new Pen(Color.Green, 1.0f))
 							{
-							PointF[] surroundingPoints = new PointF[4]
-									{
-										i.aPosition + i._aConnection.lineSegment.DerivateAtTime(i._aTime).Normalized * i._rearWaitingDistance,
-										i.bPosition + i._bConnection.lineSegment.DerivateAtTime(i._bTime).Normalized * i._rearWaitingDistance,
-										i.aPosition + i._aConnection.lineSegment.DerivateAtTime(i._aTime).Normalized * i._frontWaitingDistance * -1,
-										i.bPosition + i._bConnection.lineSegment.DerivateAtTime(i._bTime).Normalized * i._frontWaitingDistance * -1
-									};
+							foreach (Intersection i in intersections)
+								{
+								PointF[] surroundingPoints = new PointF[4]
+										{
+											i._aConnection.lineSegment.AtPosition(i.aArcPosition - i._frontWaitingDistance),
+											i._bConnection.lineSegment.AtPosition(i.bArcPosition - i._frontWaitingDistance),
+											i._aConnection.lineSegment.AtPosition(i.aArcPosition + i._rearWaitingDistance),
+											i._bConnection.lineSegment.AtPosition(i.bArcPosition + i._rearWaitingDistance)
+											/*i.aPosition + i._aConnection.lineSegment.DerivateAtTime(i._aTime).Normalized * i._rearWaitingDistance,
+											i.bPosition + i._bConnection.lineSegment.DerivateAtTime(i._bTime).Normalized * i._rearWaitingDistance,
+											i.aPosition + i._aConnection.lineSegment.DerivateAtTime(i._aTime).Normalized * i._frontWaitingDistance * -1,
+											i.bPosition + i._bConnection.lineSegment.DerivateAtTime(i._bTime).Normalized * i._frontWaitingDistance * -1*/
+										};
 
-							if (i.avoidBlocking)
-								{
-								g.DrawLine(redPen, i.aPosition, i.bPosition);
-								g.DrawPolygon(redPen, surroundingPoints);
-								}
-							else
-								{
-								g.DrawLine(greenPen, i.aPosition, i.bPosition);
-								g.DrawPolygon(greenPen, surroundingPoints);
+								if (i.avoidBlocking)
+									{
+									g.DrawLine(redPen, i.aPosition, i.bPosition);
+									g.DrawPolygon(redPen, surroundingPoints);
+									}
+								else if (i._aConnection.startNode != i._bConnection.startNode || (i._frontWaitingDistance < i.aArcPosition && i._frontWaitingDistance < i.bArcPosition))
+									{
+									g.DrawLine(yellowPen, i.aPosition, i.bPosition);
+									g.DrawPolygon(yellowPen, surroundingPoints);
+									}
+								else
+									{
+									g.DrawLine(greenPen, i.aPosition, i.bPosition);
+									g.DrawPolygon(greenPen, surroundingPoints);
+									}
 								}
 							}
 						}
