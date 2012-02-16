@@ -453,7 +453,7 @@ namespace CityTrafficSimulator
 			if (trafficLightForm.selectedEntry != null && doHandleTrafficLightTreeViewSelect)
 				{
 				TrafficLight tl = trafficLightForm.selectedEntry as TrafficLight;
-				LineNode tmp = (m_selectedLineNodes.Count == 1) ? tmp = m_selectedLineNodes[0] : null;
+				LineNode tmp = (m_selectedLineNodes.Count == 1) ? m_selectedLineNodes[0] : null;
 				m_selectedLineNodes.Clear();
 				m_selectedLineNodes.AddRange(tl.assignedNodes);
 				selectedLineNodesMovingOffset.Clear();
