@@ -58,7 +58,7 @@ namespace CityTrafficSimulator
 
 					// saveVersion schreiben
 					xw.WriteStartAttribute("saveVersion");
-					xw.WriteString("5");
+					xw.WriteString("6");
 					xw.WriteEndAttribute();
 
 					nodeSteuerung.SaveToFile(xw, xsn);

@@ -631,7 +631,7 @@ namespace CityTrafficSimulator.Vehicle
 									{
 									// accelerate to get in front
 									_physics.multiplierTargetVelocity = 1.75;
-									lowestAcceleration = CalculateAcceleration(physics.velocity, effectiveDesiredVelocity, lookaheadDistance, physics.velocity);
+									lowestAcceleration = Math.Min(lowestAcceleration, CalculateAcceleration(physics.velocity, effectiveDesiredVelocity, lookaheadDistance, physics.velocity));
 
 									_state.SetLineChangeVehicleInteraction(this, otherVehicles.Left.vehicle, lcp.otherStart.nc, myArcPositionOnOtherConnection - _length);
 									}
@@ -671,7 +671,7 @@ namespace CityTrafficSimulator.Vehicle
 							// Line change still necessacy => stop at break point
 							if (lineChangeNeeded)
 								{
-								lowestAcceleration = CalculateAcceleration(physics.velocity, effectiveDesiredVelocity, lci.endArcPos - Constants.breakPointBeforeForcedLineChange - arcPos, physics.velocity);
+								lowestAcceleration = Math.Min(lowestAcceleration, CalculateAcceleration(physics.velocity, effectiveDesiredVelocity, lci.endArcPos - Constants.breakPointBeforeForcedLineChange - arcPos, physics.velocity));
 
 								if (! _state.letVehicleChangeLine && percentOfLCILeft < 0.6)
 									{

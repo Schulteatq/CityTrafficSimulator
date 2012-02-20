@@ -79,6 +79,11 @@ namespace CityTrafficSimulator
 			}
 
 		/// <summary>
+		/// List of all known network layers
+		/// </summary>
+		public List<NetworkLayer> _networkLayers { get; private set; }
+
+		/// <summary>
 		/// Titel dieses Layouts
 		/// </summary>
 		private string m_title;
@@ -178,7 +183,7 @@ namespace CityTrafficSimulator
 		/// </summary>
 		public NodeSteuerung()
 			{
-			// TODO: muss hier irgendwas passieren?
+			_networkLayers = new List<NetworkLayer>();
 			}
 
 		#endregion
@@ -796,14 +801,21 @@ namespace CityTrafficSimulator
 				{
 				if (nc != nc2)
 					{
-					// Zeitparameterpaare ermitteln
-					List<Pair<double>> intersectionTimes = CalculateIntersections(nc.lineSegment, nc2.lineSegment, 0d, 1d, 0d, 1d, tolerance, nc.lineSegment, nc2.lineSegment);
-					if (intersectionTimes != null)
+					if (   (nc.startNode.networkLayer == nc.endNode.networkLayer && (nc2.startNode.networkLayer == nc.startNode.networkLayer || nc2.endNode.networkLayer == nc.endNode.networkLayer))
+						|| (nc.startNode.networkLayer != nc.endNode.networkLayer && (   nc2.startNode.networkLayer == nc.startNode.networkLayer
+																					 || nc2.startNode.networkLayer == nc.endNode.networkLayer
+																					 || nc2.endNode.networkLayer == nc.startNode.networkLayer 
+																					 || nc2.endNode.networkLayer == nc.endNode.networkLayer)))
 						{
-						// Intersections erstellen
-						foreach (Pair<double> p in intersectionTimes)
+						// Zeitparameterpaare ermitteln
+						List<Pair<double>> intersectionTimes = CalculateIntersections(nc.lineSegment, nc2.lineSegment, 0d, 1d, 0d, 1d, tolerance, nc.lineSegment, nc2.lineSegment);
+						if (intersectionTimes != null)
 							{
-							toReturn.Add(new Intersection(nc, nc2, p.Left, p.Right));
+							// Intersections erstellen
+							foreach (Pair<double> p in intersectionTimes)
+								{
+								toReturn.Add(new Intersection(nc, nc2, p.Left, p.Right));
+								}
 							}
 						}
 					}
@@ -913,7 +925,7 @@ namespace CityTrafficSimulator
 			Pair<LineSegment> divided = nc.lineSegment.Subdivide();
 
 			// Mittelknoten erstellen
-			LineNode middleNode = new LineNode(divided.Left.p3);
+			LineNode middleNode = new LineNode(divided.Left.p3, nc.startNode.networkLayer);
 			middleNode.inSlopeAbs = divided.Left.p2;
 			middleNode.outSlopeAbs = divided.Right.p1;
 			nodes.Add(middleNode);
@@ -1085,7 +1097,7 @@ namespace CityTrafficSimulator
 				{
 				foreach (NodeConnection nc in connections)
 					{
-					if (!options.performClipping || nc.lineSegment.boundingRectangle.IntersectsWith(options.clippingRect))
+					if ((nc.startNode.networkLayer.visible || nc.endNode.networkLayer.visible) && (!options.performClipping || nc.lineSegment.boundingRectangle.IntersectsWith(options.clippingRect)))
 						nc.Draw(g);
 					}
 				}
@@ -1094,7 +1106,7 @@ namespace CityTrafficSimulator
 				{
 				foreach (LineNode ln in nodes)
 					{
-					if (!options.performClipping || ln.positionRect.IntersectsWith(options.clippingRect))
+					if (ln.networkLayer.visible && (!options.performClipping || ln.positionRect.IntersectsWith(options.clippingRect)))
 						ln.Draw(g);
 					}
 				}
@@ -1103,7 +1115,7 @@ namespace CityTrafficSimulator
 				{
 				foreach (NodeConnection nc in connections)
 					{
-					if (!options.performClipping || nc.lineSegment.boundingRectangle.IntersectsWith(options.clippingRect))
+					if ((nc.startNode.networkLayer.visible || nc.endNode.networkLayer.visible) && (!options.performClipping || nc.lineSegment.boundingRectangle.IntersectsWith(options.clippingRect)))
 						{
 						foreach (IVehicle v in nc.vehicles)
 							{
@@ -1123,32 +1135,31 @@ namespace CityTrafficSimulator
 							{
 							foreach (Intersection i in intersections)
 								{
-								PointF[] surroundingPoints = new PointF[4]
-										{
-											i._aConnection.lineSegment.AtPosition(i.aArcPosition - i._frontWaitingDistance),
-											i._bConnection.lineSegment.AtPosition(i.bArcPosition - i._frontWaitingDistance),
-											i._aConnection.lineSegment.AtPosition(i.aArcPosition + i._rearWaitingDistance),
-											i._bConnection.lineSegment.AtPosition(i.bArcPosition + i._rearWaitingDistance)
-											/*i.aPosition + i._aConnection.lineSegment.DerivateAtTime(i._aTime).Normalized * i._rearWaitingDistance,
-											i.bPosition + i._bConnection.lineSegment.DerivateAtTime(i._bTime).Normalized * i._rearWaitingDistance,
-											i.aPosition + i._aConnection.lineSegment.DerivateAtTime(i._aTime).Normalized * i._frontWaitingDistance * -1,
-											i.bPosition + i._bConnection.lineSegment.DerivateAtTime(i._bTime).Normalized * i._frontWaitingDistance * -1*/
-										};
+								if (i._aConnection.startNode.networkLayer.visible || i._aConnection.endNode.networkLayer.visible || i._bConnection.startNode.networkLayer.visible || i._bConnection.endNode.networkLayer.visible)
+									{
+									PointF[] surroundingPoints = new PointF[4]
+											{
+												i._aConnection.lineSegment.AtPosition(i.aArcPosition - i._frontWaitingDistance),
+												i._bConnection.lineSegment.AtPosition(i.bArcPosition - i._frontWaitingDistance),
+												i._aConnection.lineSegment.AtPosition(i.aArcPosition + i._rearWaitingDistance),
+												i._bConnection.lineSegment.AtPosition(i.bArcPosition + i._rearWaitingDistance)
+											};
 
-								if (i.avoidBlocking)
-									{
-									g.DrawLine(redPen, i.aPosition, i.bPosition);
-									g.DrawPolygon(redPen, surroundingPoints);
-									}
-								else if (i._aConnection.startNode != i._bConnection.startNode || (i._frontWaitingDistance < i.aArcPosition && i._frontWaitingDistance < i.bArcPosition))
-									{
-									g.DrawLine(yellowPen, i.aPosition, i.bPosition);
-									g.DrawPolygon(yellowPen, surroundingPoints);
-									}
-								else
-									{
-									g.DrawLine(greenPen, i.aPosition, i.bPosition);
-									g.DrawPolygon(greenPen, surroundingPoints);
+									if (i.avoidBlocking)
+										{
+										g.DrawLine(redPen, i.aPosition, i.bPosition);
+										g.DrawPolygon(redPen, surroundingPoints);
+										}
+									else if (i._aConnection.startNode != i._bConnection.startNode || (i._frontWaitingDistance < i.aArcPosition && i._frontWaitingDistance < i.bArcPosition))
+										{
+										g.DrawLine(yellowPen, i.aPosition, i.bPosition);
+										g.DrawPolygon(yellowPen, surroundingPoints);
+										}
+									else
+										{
+										g.DrawLine(greenPen, i.aPosition, i.bPosition);
+										g.DrawPolygon(greenPen, surroundingPoints);
+										}
 									}
 								}
 							}
@@ -1198,6 +1209,124 @@ namespace CityTrafficSimulator
 
 		#endregion
 
+		#region NetworkLayer stuff
+
+		/// <summary>
+		/// Adds a render network layer with the given title.
+		/// </summary>
+		/// <param name="title">Title of the new render network layer</param>
+		/// <param name="visible">Visible flag of the new network layer</param>
+		public void AddNetworkLayer(string title, bool visible)
+			{
+			NetworkLayer nl = new NetworkLayer(title, visible);
+			nl.TitleChanged += new NetworkLayer.TitleChangedEventHandler(nl_TitleChanged);
+			nl.VisibleChanged += new NetworkLayer.VisibleChangedEventHandler(nl_VisibleChanged);
+			_networkLayers.Add(nl);
+			InvokeNetworkLayersChanged(new NetworkLayersChangedEventArgs(NetworkLayersChangedEventArgs.InvalidationLevel.COLLECTION_CHANGED));
+			}
+
+		/// <summary>
+		/// Tries to remove the given NetworkLayer. Succeeds only, if <paramref name="nl"/> isn't assigned to any managed LineNode.
+		/// </summary>
+		/// <param name="nl">NetworkLayer to remove</param>
+		/// <returns>True if nl was successfully deleted. False if nl is still assigned to at least one LineNode in _nodes.</returns>
+		public bool RemoveNetworkLayer(NetworkLayer nl)
+			{
+			if (_networkLayers.Count <= 1)
+				return false;
+
+			foreach (LineNode ln in _nodes)
+				{
+				if (ln.networkLayer == nl)
+					return false;
+				}
+
+			_networkLayers.Remove(nl);
+			nl.VisibleChanged -= nl_VisibleChanged;
+			nl.TitleChanged -= nl_TitleChanged;
+			InvokeNetworkLayersChanged(new NetworkLayersChangedEventArgs(NetworkLayersChangedEventArgs.InvalidationLevel.COLLECTION_CHANGED));
+			return true;
+			}
+
+		void nl_VisibleChanged(object sender, NetworkLayer.VisibleChangedEventArgs e)
+			{
+			InvokeNetworkLayersChanged(new NetworkLayersChangedEventArgs(NetworkLayersChangedEventArgs.InvalidationLevel.ONLY_VISIBILITY_CHANGED));
+			}
+
+		void nl_TitleChanged(object sender, NetworkLayer.TitleChangedEventArgs e)
+			{
+			InvokeNetworkLayersChanged(new NetworkLayersChangedEventArgs(NetworkLayersChangedEventArgs.InvalidationLevel.ONLY_TITLES_CHANGED));
+			}
+
+		#region NetworkLayersChanged event
+
+		/// <summary>
+		/// EventArgs for a NetworkLayersChanged event
+		/// </summary>
+		public class NetworkLayersChangedEventArgs : EventArgs
+			{
+			/// <summary>
+			/// Level of Invalidation during the NetworkLayersChangedEvent
+			/// </summary>
+			public enum InvalidationLevel
+				{
+				/// <summary>
+				/// Only the visibility has changed
+				/// </summary>
+				ONLY_VISIBILITY_CHANGED,
+				/// <summary>
+				/// Only the tiltes have changed
+				/// </summary>
+				ONLY_TITLES_CHANGED,
+				/// <summary>
+				/// The whole collection has changed
+				/// </summary>
+				COLLECTION_CHANGED
+				}
+
+			/// <summary>
+			/// Level of Invalidation during the NetworkLayersChangedEvent
+			/// </summary>
+			public NetworkLayersChangedEventArgs.InvalidationLevel _invalidationLevel;
+
+			/// <summary>
+			/// Creates new NetworkLayersChangedEventArgs
+			/// </summary>
+			/// <param name="il">Level of Invalidation during the NetworkLayersChangedEvent</param>
+			public NetworkLayersChangedEventArgs(InvalidationLevel il)
+				{
+				_invalidationLevel = il;
+				}
+			}
+
+		/// <summary>
+		/// Delegate for the NetworkLayersChanged-EventHandler, which is called when the list of network layers has changed
+		/// </summary>
+		/// <param name="sender">Sneder of the event</param>
+		/// <param name="e">Event parameter</param>
+		public delegate void NetworkLayersChangedEventHandler(object sender, NetworkLayersChangedEventArgs e);
+
+		/// <summary>
+		/// The NetworkLayersChanged event occurs when the list of network layers has changed
+		/// </summary>
+		public event NetworkLayersChangedEventHandler NetworkLayersChanged;
+
+		/// <summary>
+		/// Helper method to initiate the NetworkLayersChanged event
+		/// </summary>
+		/// <param name="e">Event parameters</param>
+		protected void InvokeNetworkLayersChanged(NetworkLayersChangedEventArgs e)
+			{
+			if (NetworkLayersChanged != null)
+				{
+				NetworkLayersChanged(this, e);
+				}
+			}
+
+		#endregion
+
+		#endregion
+
 		#region Speichern/Laden
 
 		/// <summary>
@@ -1210,9 +1339,14 @@ namespace CityTrafficSimulator
 			try
 				{
 				// Alles fürs Speichern vorbereiten
+				foreach (NetworkLayer nl in _networkLayers)
+					{
+					nl._nodeHashes.Clear();
+					}
 				foreach (LineNode ln in nodes)
 					{
 					ln.PrepareForSave();
+					ln.networkLayer._nodeHashes.Add(ln.hashcode);
 					}
 				foreach (NodeConnection nc in connections)
 					{
@@ -1231,17 +1365,24 @@ namespace CityTrafficSimulator
 					xw.WriteEndElement();
 
 					// LineNodes serialisieren
-					XmlSerializer xs = new XmlSerializer(typeof(LineNode));
+					XmlSerializer xsLN = new XmlSerializer(typeof(LineNode));
 					foreach (LineNode ln in nodes)
 						{
-						xs.Serialize(xw, ln, xsn);
+						xsLN.Serialize(xw, ln, xsn);
+						}
+
+					// serialize NetworkLayers
+					XmlSerializer xsNL = new XmlSerializer(typeof(NetworkLayer));
+					foreach (NetworkLayer nl in _networkLayers)
+						{
+						xsNL.Serialize(xw, nl, xsn);
 						}
 
 					// NodeConnections serialisieren
-					XmlSerializer xs2 = new XmlSerializer(typeof(NodeConnection));
+					XmlSerializer xsNC = new XmlSerializer(typeof(NodeConnection));
 					foreach (NodeConnection nc in connections)
 						{
-						xs2.Serialize(xw, nc, xsn);
+						xsNC.Serialize(xw, nc, xsn);
 						}
 
 					xw.WriteEndElement();
@@ -1261,7 +1402,7 @@ namespace CityTrafficSimulator
 		/// <param name="lf">LoadingForm für Statusinformationen</param>
 		public List<Auftrag> LoadFromFile(XmlDocument xd, LoadingForm.LoadingForm lf)
 			{
-			lf.SetupLowerProgess("Parsing XML...", 2);
+			lf.SetupLowerProgess("Parsing XML...", 3);
 
 			List<Auftrag> toReturn = new List<Auftrag>();
 			int saveVersion = 0;
@@ -1270,6 +1411,7 @@ namespace CityTrafficSimulator
 			nodes.Clear();
 			connections.Clear();
 			intersections.Clear();
+			_networkLayers.Clear();
 
 			XmlNode mainNode = xd.SelectSingleNode("//CityTrafficSimulator");
 			XmlNode saveVersionNode = mainNode.Attributes.GetNamedItem("saveVersion");
@@ -1302,18 +1444,24 @@ namespace CityTrafficSimulator
 				XmlSerializer xs = new XmlSerializer(typeof(LineNode));
 				LineNode ln = (LineNode)xs.Deserialize(tr);
 
-				/*ln.position *= 1.9d;
-				ln.position += new Vector2(8, 8);
-
-				ln.inSlope *= 1.9d;
-				ln.outSlope *= 1.9d;
-
-				ln.position.Round();
-				ln.inSlope.Round();
-				ln.outSlope.Round();
-				*/
 				// ab in die Liste
 				nodes.Add(ln);
+				}
+
+			lf.StepLowerProgress();
+
+			// entsprechenden Node auswählen
+			XmlNodeList xnlNetworkLayer = xd.SelectNodes("//CityTrafficSimulator/Layout/NetworkLayer");
+			foreach (XmlNode aXmlNode in xnlNetworkLayer)
+				{
+				// Node in einen TextReader packen
+				TextReader tr = new StringReader(aXmlNode.OuterXml);
+				// und Deserializen
+				XmlSerializer xs = new XmlSerializer(typeof(NetworkLayer));
+				NetworkLayer nl = (NetworkLayer)xs.Deserialize(tr);
+
+				// ab in die Liste
+				_networkLayers.Add(nl);
 				}
 
 			lf.StepLowerProgress();
@@ -1339,6 +1487,33 @@ namespace CityTrafficSimulator
 				ln.RecoverFromLoad(saveVersion, _nodes);
 				lf.StepLowerProgress();
 				}
+
+			lf.SetupLowerProgess("Restoring NetworkLayers...", _networkLayers.Count);
+
+			// restore NetworkLayers
+			if (saveVersion >= 6)
+				{
+				foreach (NetworkLayer nl in _networkLayers)
+					{
+					foreach (int hash in nl._nodeHashes)
+						{
+						LineNode tmp = GetLineNodeByHash(nodes, hash);
+						if (tmp != null)
+							tmp.networkLayer = nl;
+						}
+					nl.TitleChanged += new NetworkLayer.TitleChangedEventHandler(nl_TitleChanged);
+					nl.VisibleChanged +=new NetworkLayer.VisibleChangedEventHandler(nl_VisibleChanged);
+					}
+				}
+			else
+				{
+				AddNetworkLayer("Layer 1", true);
+				foreach (LineNode ln in _nodes)
+					{
+					ln.networkLayer = _networkLayers[0];
+					}
+				}
+			InvokeNetworkLayersChanged(new NetworkLayersChangedEventArgs(NetworkLayersChangedEventArgs.InvalidationLevel.COLLECTION_CHANGED));
 
 			lf.SetupLowerProgess("Restoring NodeConnections...", _connections.Count);
 
@@ -1414,6 +1589,24 @@ namespace CityTrafficSimulator
 				}
 
 			return toReturn;
+			}
+
+		/// <summary>
+		/// Gibt den LineNode aus nodesList zurück, dessen Hash mit hash übereinstimmt
+		/// </summary>
+		/// <param name="nodesList">zu durchsuchende Liste von LineNodes</param>
+		/// <param name="hash">auf Gleichheit zu überprüfender Hashcode</param>
+		/// <returns>den erstbesten LineNode mit GetHashCode() == hash oder null, falls kein solcher existiert</returns>
+		private LineNode GetLineNodeByHash(List<LineNode> nodesList, int hash)
+			{
+			foreach (LineNode ln in nodesList)
+				{
+				if (ln.GetHashCode() == hash)
+					{
+					return ln;
+					}
+				}
+			return null;
 			}
 
 		#endregion

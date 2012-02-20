@@ -82,6 +82,8 @@ namespace CityTrafficSimulator
 			SetContentDefaultSettings(thumbContent, new Size(150, 150));
 			Content statisticsContent = _dockingManager.Contents.Add(pnlStatistics, "Connection Statistics");
 			SetContentDefaultSettings(statisticsContent, new Size(196, 196));
+			Content layersContent = _dockingManager.Contents.Add(pnlLayers, "Network Layers");
+			SetContentDefaultSettings(layersContent, new Size(196, 64));
 			
 			WindowContent dock0 = _dockingManager.AddContentWithState(connectionContent, State.DockRight);
 			_dockingManager.AddContentToWindowContent(signalContent, dock0);
@@ -90,6 +92,7 @@ namespace CityTrafficSimulator
 			_dockingManager.AddContentToWindowContent(simContent, dock1);
 
 			WindowContent dock2 = _dockingManager.AddContentToZone(thumbContent, dock0.ParentZone, 2) as WindowContent;
+			_dockingManager.AddContentToWindowContent(layersContent, dock2); 
 			_dockingManager.AddContentToWindowContent(viewContent, dock2); 
 			_dockingManager.AddContentToWindowContent(canvasContent, dock2);
 			_dockingManager.AddContentToWindowContent(statisticsContent, dock2);
@@ -116,9 +119,9 @@ namespace CityTrafficSimulator
 			statusleiste.Visible = false;
 
 			if (!statisticsContent.Visible)
-				{
 				statisticsContent.BringToFront();
-				}
+			if (!layersContent.Visible)
+				layersContent.BringToFront();
 			}
 
 		void _dockingManager_ContentHiding(Content c, CancelEventArgs cea)
@@ -162,6 +165,184 @@ namespace CityTrafficSimulator
 		#endregion
 
 		#region Variablen / Properties
+
+		#region NetworkLayer GUI stuff
+
+		private struct NetworkLayerGUI
+			{
+			#region Members
+
+			/// <summary>
+			/// Reference to the NodeSteuerung controlling the network layers
+			/// </summary>
+			private NodeSteuerung _nodeController;
+
+			/// <summary>
+			/// Reference to base NetworkLayer
+			/// </summary>
+			private NetworkLayer _networkLayer;
+
+			/// <summary>
+			/// Textbox for editing layer title
+			/// </summary>
+			public System.Windows.Forms.TextBox _editTitle;
+
+			/// <summary>
+			/// Button to remove layer
+			/// </summary>
+			public System.Windows.Forms.Button _btnRemove;
+
+			/// <summary>
+			/// Checkbox for layer visible state
+			/// </summary>
+			public System.Windows.Forms.CheckBox _cbVisible;
+
+			#endregion
+
+			#region Constructor & event handlers
+
+			/// <summary>
+			/// Constructor: Creates the necessary GUI elements for the given NetworkLayer
+			/// </summary>
+			/// <param name="ns">Reference to the NodeSteuerung controlling the network layers</param>
+			/// <param name="nl">Reference to base NetworkLayer to create GUI elements for</param>
+			public NetworkLayerGUI(NodeSteuerung ns, NetworkLayer nl)
+				{
+				_nodeController = ns;
+				_networkLayer = nl;
+				_editTitle = new System.Windows.Forms.TextBox();
+				_btnRemove = new System.Windows.Forms.Button();
+				_cbVisible = new System.Windows.Forms.CheckBox();
+
+				_editTitle.Text = nl.title;
+				_editTitle.Dock = DockStyle.Fill;
+				_editTitle.Leave += new EventHandler(_editTitle_Leave);
+
+				_btnRemove.Text = "Remove";
+				_btnRemove.Click += new EventHandler(_btnRemove_Click);
+
+				_cbVisible.Text = "Visible";
+				_cbVisible.Checked = nl.visible;
+				_cbVisible.CheckedChanged += new EventHandler(_cbVisible_CheckedChanged);
+				}
+
+			void _editTitle_Leave(object sender, EventArgs e)
+				{
+				_networkLayer.title = _editTitle.Text;
+				}
+
+			void _btnRemove_Click(object sender, EventArgs e)
+				{
+				if (! _nodeController.RemoveNetworkLayer(_networkLayer))
+					{
+					MessageBox.Show("Could not remove layer '" + _networkLayer.title + "' because it is assigned to at least one node.");
+					}
+				}
+
+			void _cbVisible_CheckedChanged(object sender, EventArgs e)
+				{
+				_networkLayer.visible = _cbVisible.Checked;
+				}
+
+			#endregion
+
+			#region methods
+
+			public void AddToPanel(TableLayoutPanel tlp, int row)
+				{
+				tlp.RowStyles.Add(new RowStyle(SizeType.Absolute, 28));
+				tlp.Controls.Add(_editTitle, 0, row);
+				tlp.Controls.Add(_btnRemove, 1, row);
+				tlp.Controls.Add(_cbVisible, 2, row);
+				}
+
+			#endregion
+			}
+
+		private List<NetworkLayerGUI> _networkLayerGUI = new List<NetworkLayerGUI>();
+
+		private void cbNetworkLayer_SelectionChangeCommitted(object sender, EventArgs e)
+			{
+			NetworkLayer nl = cbNetworkLayer.SelectedItem as NetworkLayer;
+			if (nl != null)
+				{
+				foreach (LineNode ln in selectedLineNodes)
+					{
+					ln.networkLayer = nl;
+					foreach (NodeConnection nc in ln.nextConnections)
+						nodeSteuerung.FindIntersections(nc);
+					foreach (NodeConnection nc in ln.prevConnections)
+						nodeSteuerung.FindIntersections(nc);
+					}
+				}
+			Invalidate(InvalidationLevel.ONLY_MAIN_CANVAS);
+			}
+
+		private void pnlLayers_Resize(object sender, EventArgs e)
+			{
+			tlpLayers.ColumnStyles[0].SizeType = SizeType.Absolute;
+			tlpLayers.ColumnStyles[0].Width = tlpLayers.ClientSize.Width - 150;
+			tlpLayers.ColumnStyles[1].SizeType = SizeType.Absolute;
+			tlpLayers.ColumnStyles[1].Width = 65;
+			tlpLayers.ColumnStyles[2].SizeType = SizeType.Absolute;
+			tlpLayers.ColumnStyles[2].Width = 65;
+			btnAddLayer.Location = new System.Drawing.Point(pnlLayers.ClientSize.Width - btnAddLayer.Width - 24, tlpLayers.Height + 8);
+			}
+
+		private void pnlLayers_Resize_1(object sender, EventArgs e)
+			{
+			btnAddLayer.Location = new System.Drawing.Point(pnlLayers.ClientSize.Width - btnAddLayer.Width - 24, tlpLayers.Height + 8);
+			}
+
+		private void btnAddLayer_Click(object sender, EventArgs e)
+			{
+			nodeSteuerung.AddNetworkLayer("Layer " + (nodeSteuerung._networkLayers.Count + 1).ToString(), true);
+			}
+
+		void nodeSteuerung_NetworkLayersChanged(object sender, NodeSteuerung.NetworkLayersChangedEventArgs e)
+			{
+			switch (e._invalidationLevel)
+				{
+				case NodeSteuerung.NetworkLayersChangedEventArgs.InvalidationLevel.ONLY_VISIBILITY_CHANGED:
+					Invalidate(InvalidationLevel.ONLY_MAIN_CANVAS);
+					break;
+				default:
+					// fist: update NetworkLayer combo box for LineNode setup
+					cbNetworkLayer.Items.Clear();
+					foreach (NetworkLayer nl in nodeSteuerung._networkLayers)
+						{
+						cbNetworkLayer.Items.Add(nl);
+						}
+
+					selectedLineNodes = selectedLineNodes;
+
+
+					// then: update NetworkLayerGUI elements
+					_networkLayerGUI.Clear();
+
+					tlpLayers.SuspendLayout();
+					tlpLayers.Controls.Clear();
+					tlpLayers.RowStyles.Clear();
+
+					tlpLayers.RowCount = nodeSteuerung._networkLayers.Count + 1;
+					tlpLayers.Height = (tlpLayers.RowCount + 1) * 28;
+					int i = 0;
+					foreach (NetworkLayer nl in nodeSteuerung._networkLayers)
+						{
+						NetworkLayerGUI nlg = new NetworkLayerGUI(nodeSteuerung, nl);
+						nlg.AddToPanel(tlpLayers, i);
+						_networkLayerGUI.Add(nlg);
+						++i;
+						}
+
+					tlpLayers.RowStyles.Add(new RowStyle(SizeType.AutoSize, 28));
+					tlpLayers.ResumeLayout(true);
+					break;
+				}
+
+			}
+		#endregion
+
 		private Image[,] satelliteImages;
 
 		private Random rnd = new Random();
@@ -332,6 +513,33 @@ namespace CityTrafficSimulator
 					trafficLightTreeView.SelectedNode = null;
 					trafficLightForm.selectedEntry = null;
 					}
+
+				// set network layer combo box to appropriate value
+				if (m_selectedLineNodes.Count > 0)
+					{
+					NetworkLayer tmp = m_selectedLineNodes[0].networkLayer;
+					bool same = true;
+					foreach (LineNode ln in m_selectedLineNodes)
+						{
+						if (ln.networkLayer != tmp)
+							{
+							same = false;
+							break;
+							}
+						}
+
+					if (same)
+						cbNetworkLayer.SelectedItem = tmp;
+					else
+						cbNetworkLayer.SelectedItem = null;
+					}
+				/*else
+					{
+					NetworkLayer nl = cbNetworkLayer.SelectedItem as NetworkLayer;
+					if (nl == null)
+						cbNetworkLayer.SelectedItem = nodeSteuerung._networkLayers[0];
+					}*/
+
 				pnlStatistics.Invalidate();
 				}
 			}
@@ -392,7 +600,6 @@ namespace CityTrafficSimulator
 
 		#endregion
 
-
 		/// <summary>
 		/// Standardkonstruktor des Hauptformulars
 		/// </summary>
@@ -406,9 +613,13 @@ namespace CityTrafficSimulator
 			SetupDockingStuff();
 
 			trafficLightTreeView.steuerung = timelineSteuerung;
+			trafficLightForm.SelectedEntryChanged += new TrafficLightForm.SelectedEntryChangedEventHandler(trafficLightForm_SelectedEntryChanged);
+
 			timelineSteuerung.CurrentTimeChanged += new TimelineSteuerung.CurrentTimeChangedEventHandler(timelineSteuerung_CurrentTimeChanged);
 			timelineSteuerung.MaxTimeChanged += new TimelineSteuerung.MaxTimeChangedEventHandler(timelineSteuerung_MaxTimeChanged);
-			trafficLightForm.SelectedEntryChanged += new TrafficLightForm.SelectedEntryChangedEventHandler(trafficLightForm_SelectedEntryChanged);
+
+			nodeSteuerung.NetworkLayersChanged += new NodeSteuerung.NetworkLayersChangedEventHandler(nodeSteuerung_NetworkLayersChanged);
+			nodeSteuerung.AddNetworkLayer("Layer 1", true);
 
 			zoomComboBox.SelectedIndex = 7;
 			DaGrid.Size = new System.Drawing.Size((int)canvasWidthSpinEdit.Value, (int)canvasHeigthSpinEdit.Value);
@@ -436,6 +647,7 @@ namespace CityTrafficSimulator
 			renderOptionsThumbnail.renderNodeConnectionDebugData = false;
 			renderOptionsThumbnail.renderVehicleDebugData = false;
 			}
+
 
 		void timelineSteuerung_MaxTimeChanged(object sender, EventArgs e)
 			{
@@ -584,7 +796,7 @@ namespace CityTrafficSimulator
 							if (!((Control.ModifierKeys & Keys.Shift) == Keys.Shift))
 								{
 								// ersten Line Node erstellen
-								nodesToAdd.Add(new LineNode(DaGrid.DockToGrid(clickedPosition, dockToGrid)));
+								nodesToAdd.Add(new LineNode(DaGrid.DockToGrid(clickedPosition, dockToGrid), cbNetworkLayer.SelectedItem as NetworkLayer));
 								selectedLineNodesMovingOffset.Add(m_selectedLineNodes[0].outSlope);
 
 								// in/outSlope berechnen
@@ -611,7 +823,7 @@ namespace CityTrafficSimulator
 									selectedLineNodesMovingOffset.Add(offset);
 
 									// Line Node erstellen
-									nodesToAdd.Add(new LineNode(DaGrid.DockToGrid(clickedPosition - offset, dockToGrid)));
+									nodesToAdd.Add(new LineNode(DaGrid.DockToGrid(clickedPosition - offset, dockToGrid), cbNetworkLayer.SelectedItem as NetworkLayer));
 
 									// in/outSlope berechnen
 									nodesToAdd[i].outSlope = 30 * Vector2.Normalize(nodesToAdd[i].position - midpoint);
@@ -635,7 +847,7 @@ namespace CityTrafficSimulator
 							else
 								{
 								// ersten Line Node erstellen
-								nodesToAdd.Add(new LineNode(DaGrid.DockToGrid(clickedPosition, dockToGrid)));
+								nodesToAdd.Add(new LineNode(DaGrid.DockToGrid(clickedPosition, dockToGrid), cbNetworkLayer.SelectedItem as NetworkLayer));
 								selectedLineNodesMovingOffset.Add(m_selectedLineNodes[0].outSlope);
 
 
@@ -663,7 +875,7 @@ namespace CityTrafficSimulator
 									selectedLineNodesMovingOffset.Add(offset);
 
 									// Line Node erstellen
-									nodesToAdd.Add(new LineNode(DaGrid.DockToGrid(clickedPosition - offset, dockToGrid)));
+									nodesToAdd.Add(new LineNode(DaGrid.DockToGrid(clickedPosition - offset, dockToGrid), cbNetworkLayer.SelectedItem as NetworkLayer));
 
 									// in/outSlope berechnen
 									nodesToAdd[i].outSlope = 30 * Vector2.Normalize(nodesToAdd[i].position - midpoint);
@@ -687,7 +899,7 @@ namespace CityTrafficSimulator
 						else
 							{
 							// ersten Line Node erstellen
-							nodesToAdd.Add(new LineNode(DaGrid.DockToGrid(clickedPosition, dockToGrid)));
+							nodesToAdd.Add(new LineNode(DaGrid.DockToGrid(clickedPosition, dockToGrid), cbNetworkLayer.SelectedItem as NetworkLayer));
 							selectedLineNodesMovingOffset.Add(new Vector2(0, 0));
 							}
 
@@ -1089,7 +1301,8 @@ namespace CityTrafficSimulator
 			case Keys.Return:
 				if (selectedNodeConnection != null)
 					{
-					nodeSteuerung.FindLineChangePoints(selectedNodeConnection, 50, 32);
+					nodeSteuerung.RemoveLineChangePoints(selectedNodeConnection, true, false);
+					nodeSteuerung.FindLineChangePoints(selectedNodeConnection, Constants.maxDistanceToLineChangePoint, Constants.maxDistanceToParallelConnection);
 					Invalidate(InvalidationLevel.ONLY_MAIN_CANVAS);
 					}
 				break;
@@ -1132,8 +1345,11 @@ namespace CityTrafficSimulator
 			case Keys.R:
 				foreach (LineNode ln in selectedLineNodes)
 					{
-					ln.outSlope = ln.outSlope.Normalized * 32;
-					ln.inSlope = ln.inSlope.Normalized * 32;
+					if (!ln.outSlope.IsZeroVector() && !ln.inSlope.IsZeroVector())
+						{
+						ln.outSlope = ln.outSlope.Normalized * 32;
+						ln.inSlope = ln.inSlope.Normalized * 32;
+						}
 					}
 				Invalidate(InvalidationLevel.ONLY_MAIN_CANVAS);
 				break;
@@ -2210,5 +2426,6 @@ namespace CityTrafficSimulator
 					}
 				}
 			}
+
 		}
     }

@@ -65,21 +65,6 @@ namespace CityTrafficSimulator
             }
 
 		/// <summary>
-		/// Elternknoten
-		/// </summary>
-        [XmlIgnore]
-        private LineNode _parent;
-		/// <summary>
-		/// Elternknoten
-		/// </summary>
-        [XmlIgnore]
-        public LineNode parent
-            {
-            get { return _parent; }
-            }
-
-
-		/// <summary>
 		/// Liste von LineNodes denen dieses TrafficLight zugeordnet ist
 		/// </summary>
 		[XmlIgnore]
@@ -132,23 +117,13 @@ namespace CityTrafficSimulator
 		#endregion
 		
         #region Konstruktoren
-        /// <summary>
-        /// Standardconstruktor (!!! NICHT VERVENDEN !!!) [wird nur für XML Serialisierung gebraucht]
-        /// </summary>
-        public TrafficLight()
-            {
-            //*** Hier passiert gar nix - das TrafficLight ist nicht funktionsfähig ***\\
-            }
 
 		/// <summary>
 		/// Konstruktor für TimelineEntry-Ampeln
 		/// </summary>
-		/// <param name="parent">LineNode dem das TrafficLight gehört</param>
-		public TrafficLight(LineNode parent)
+		public TrafficLight()
 			{
 			hashcode = hashcodeIndex++;
-
-			this._parent = parent;
 
 			// Initial Event anlegen
 			this.defaultAction = SwitchToRed;

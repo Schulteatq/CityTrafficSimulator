@@ -128,6 +128,25 @@ namespace CityTrafficSimulator
             get { return position + _out; }
             set { _out = value - position; UpdateNodeConnections(true); UpdateNodeGraphics(); }
             }
+
+		#endregion
+
+		#region NetworkLayer stuff
+
+		/// <summary>
+		/// NetworkLayer this LineNode lies on.
+		/// </summary>
+		private NetworkLayer _networkLayer;
+		/// <summary>
+		/// NetworkLayer this LineNode lies on.
+		/// </summary>
+		[XmlIgnore]
+		public NetworkLayer networkLayer
+			{
+			get { return _networkLayer; }
+			set { _networkLayer = value; }
+			}
+
         #endregion
 
         #region Connections
@@ -216,11 +235,13 @@ namespace CityTrafficSimulator
 		/// in-/outSlope werden mit (0,0) initialisiert.
 		/// </summary>
 		/// <param name="position">absolute Position</param>
-        public LineNode(Vector2 position)
+		/// <param name="nl">Network layer of this LineNode</param>
+		public LineNode(Vector2 position, NetworkLayer nl)
             {
             this.position = position;
             this.inSlope = new Vector2(0, 0);
             this.outSlope = new Vector2(0, 0);
+			_networkLayer = nl;
 
 			// Hashcode vergeben
 			hashcode = hashcodeIndex++;
@@ -232,11 +253,13 @@ namespace CityTrafficSimulator
 		/// <param name="Position">absolute Position</param>
 		/// <param name="inSlope">eingehender Richtungsvektor</param>
 		/// <param name="outSlope">ausgehender Richtungsvektor</param>
-        public LineNode(Vector2 Position, Vector2 inSlope, Vector2 outSlope)
+		/// <param name="nl">Network layer of this LineNode</param>
+        public LineNode(Vector2 Position, Vector2 inSlope, Vector2 outSlope, NetworkLayer nl)
             {
             this.position = Position;
             this.inSlope = inSlope;
 			this.outSlope = outSlope;
+			_networkLayer = nl;
 
 			// Hashcode vergeben
 			hashcode = hashcodeIndex++;

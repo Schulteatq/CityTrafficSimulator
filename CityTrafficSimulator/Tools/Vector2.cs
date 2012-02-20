@@ -332,5 +332,14 @@ namespace CityTrafficSimulator
 			{
 			return Math.Acos((v1._x * v2._x + v1._y * v2._y) / (v1.Abs * v2.Abs));
 			}
+
+		/// <summary>
+		/// Returns whether this vector is a zero vector
+		/// </summary>
+		/// <returns>X == 0 AND Y == 0</returns>
+		public bool IsZeroVector()
+			{
+			return (_x == 0 && _y == 0);
+			}
         }
     }

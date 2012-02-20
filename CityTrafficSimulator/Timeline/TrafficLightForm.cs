@@ -155,7 +155,7 @@ namespace CityTrafficSimulator.Timeline
 
 			if (parentGroup != null)
 				{
-				TimelineEntry te = new TrafficLight(new LineNode(new Vector2(0, 0)));
+				TimelineEntry te = new TrafficLight();
 				te.parentGroup = parentGroup;
 				te.name = trafficLightNameEdit.Text;
 				if (te.name == "")
