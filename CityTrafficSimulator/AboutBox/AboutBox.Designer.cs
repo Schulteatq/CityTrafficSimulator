@@ -122,7 +122,7 @@ namespace CityTrafficSimulator
 			this.labelVersion.Name = "labelVersion";
 			this.labelVersion.Size = new System.Drawing.Size(349, 17);
 			this.labelVersion.TabIndex = 0;
-			this.labelVersion.Text = "Version 0.6-4";
+			this.labelVersion.Text = "Version 0.6-5";
 			this.labelVersion.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
 			// 
 			// labelCopyright
