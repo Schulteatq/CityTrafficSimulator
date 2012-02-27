@@ -147,6 +147,11 @@ namespace CityTrafficSimulator
 			set { _networkLayer = value; }
 			}
 
+		/// <summary>
+		/// Returns whether this LineNode is visible (this is the case if _networkLayer is either null or set to visible).
+		/// </summary>
+		public bool isVisible { get { return networkLayer == null || networkLayer.visible; } }
+
         #endregion
 
         #region Connections

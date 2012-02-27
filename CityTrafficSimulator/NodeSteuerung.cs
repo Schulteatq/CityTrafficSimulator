@@ -113,68 +113,6 @@ namespace CityTrafficSimulator
 
 		#endregion
 
-		#region Delegates und Beobachter-Muster
-
-		/// <summary>
-		/// Delegate für Zuhörer/Beobachter-Strukturmuster
-		/// (Statt Interfaces nutzen wir Delegates, welche übergeben und aufgerufen werden)
-		/// </summary>
-		public delegate void ActionMethod();
-
-
-		/// <summary>
-		/// Liste aller Methoden die aufgerufen werden, wenn sich nodes ändert
-		/// </summary>
-		private List<ActionMethod> nodesChangedActions = new List<ActionMethod>();
-
-		/// <summary>
-		/// Liste aller Methoden die aufgerufen werden, wenn sich connections ändert
-		/// </summary>
-		private List<ActionMethod> connectionsChangedActions = new List<ActionMethod>();
-
-
-		/// <summary>
-		/// Meldet eine Funktion an, die beim Ändern von nodes aufgerufen werden soll
-		/// </summary>
-		/// <param name="am">Funktion ohne Argumente</param>
-		public void AddNodesChangedAction(ActionMethod am)
-			{
-			nodesChangedActions.Add(am);
-			}
-		
-		/// <summary>
-		/// Meldet eine Funktion an, die beim Ändern von connections aufgerufen werden soll
-		/// </summary>
-		/// <param name="am">Funktion ohne Argumente</param>
-		public void AddConnectionsChangedAction(ActionMethod am)
-			{
-			connectionsChangedActions.Add(am);
-			}
-
-
-		/// <summary>
-		/// sage allen Beobachtern Bescheid, dass nodes sich geändert hat
-		/// </summary>
-		private void NodesChanged()
-			{
-			foreach (ActionMethod am in nodesChangedActions)
-				{
-				am();
-				}
-			}
-
-		/// <summary>
-		/// sage allen Beobachtern Bescheid, dass connections sich geändert hat
-		/// </summary>
-		private void connectionsChanged()
-			{
-			foreach (ActionMethod am in connectionsChangedActions)
-				{
-				am();
-				}
-			}
-		
-		#endregion
 
 		#region Konstruktoren
 
@@ -225,7 +163,7 @@ namespace CityTrafficSimulator
 		public void AddLineNode(LineNode ln)
 			{
 			nodes.Add(ln);
-			NodesChanged();
+			InvalidateNodeBounds();
 			}
 
 
@@ -248,6 +186,7 @@ namespace CityTrafficSimulator
 				}
 
 			nodes.Remove(ln);
+			InvalidateNodeBounds();
 			}
 
 
@@ -272,7 +211,6 @@ namespace CityTrafficSimulator
 			ResetAverageVelocities(nc);
 
 			connections.Add(nc);
-			connectionsChanged();
 			}
 
 		/// <summary>
@@ -309,8 +247,6 @@ namespace CityTrafficSimulator
 				to.prevConnections.Remove(nc);
 				connections.Remove(nc);
 				}
-
-			connectionsChanged();
 			}
 
 		/// <summary>
@@ -369,7 +305,7 @@ namespace CityTrafficSimulator
 			{
 			foreach (LineNode ln in nodes)
 				{
-				if (ln.positionRect.Contains(pos))
+				if (ln.isVisible && ln.positionRect.Contains(pos))
 					{
 					return ln;
 					}
@@ -387,7 +323,7 @@ namespace CityTrafficSimulator
 			List<LineNode> toReturn = new List<LineNode>();
 			foreach (LineNode ln in nodes)
 				{
-				if (r.Contains(ln.position))
+				if (ln.isVisible && r.Contains(ln.position))
 					{
 					toReturn.Add(ln);
 					}
@@ -395,18 +331,48 @@ namespace CityTrafficSimulator
 			return toReturn;
 			}
 
+
+		private bool _nodeBoundsValid = false;
+		private RectangleF _nodeBounds;
+
 		/// <summary>
-		/// Returns the maximum bounds of all LineNodes
+		/// Returns the bounds of all handled LineNodes.
 		/// </summary>
 		/// <returns></returns>
-		public Vector2 GetBounds()
+		public RectangleF GetLineNodeBounds()
 			{
-			Vector2 toReturn = new Vector2(0, 0);
-			foreach (LineNode ln in nodes)
+			if (!_nodeBoundsValid)
 				{
-				toReturn.Nibble(ln.position);
+				if (_nodes.Count > 0)
+					{
+					double minX, maxX, minY, maxY;
+					minX = minY = Double.PositiveInfinity;
+					maxX = maxY = Double.NegativeInfinity;
+					foreach (LineNode ln in _nodes)
+						{
+						minX = Math.Min(minX, Math.Min(ln.position.X, Math.Min(ln.inSlopeAbs.X, ln.outSlopeAbs.X)));
+						maxX = Math.Max(maxX, Math.Max(ln.position.X, Math.Max(ln.inSlopeAbs.X, ln.outSlopeAbs.X)));
+						minY = Math.Min(minY, Math.Min(ln.position.Y, Math.Min(ln.inSlopeAbs.Y, ln.outSlopeAbs.Y)));
+						maxY = Math.Max(maxY, Math.Max(ln.position.Y, Math.Max(ln.inSlopeAbs.Y, ln.outSlopeAbs.Y)));
+						}
+					_nodeBounds = new RectangleF((float)minX, (float)minY, (float)(maxX - minX), (float)(maxY - minY));
+					}
+				else
+					{
+					_nodeBounds = new RectangleF();
+					}
+				_nodeBoundsValid = true;
 				}
-			return toReturn;
+			return _nodeBounds;
+			}
+
+		/// <summary>
+		/// 
+		/// </summary>
+		public void InvalidateNodeBounds()
+			{
+			// TODO: replace with clean node handling/event pattern
+			_nodeBoundsValid = false;
 			}
 
 		#endregion
@@ -910,6 +876,8 @@ namespace CityTrafficSimulator
 				{
 				// TODO: überlegen, ob hier wirklich nichts gemacht werden muss
 				}
+
+			InvalidateNodeBounds();
 			}
 
 		/// <summary>
@@ -1097,7 +1065,7 @@ namespace CityTrafficSimulator
 				{
 				foreach (NodeConnection nc in connections)
 					{
-					if ((nc.startNode.networkLayer.visible || nc.endNode.networkLayer.visible) && (!options.performClipping || nc.lineSegment.boundingRectangle.IntersectsWith(options.clippingRect)))
+					if ((nc.startNode.isVisible || nc.endNode.isVisible) && (!options.performClipping || nc.lineSegment.boundingRectangle.IntersectsWith(options.clippingRect)))
 						nc.Draw(g);
 					}
 				}
@@ -1106,7 +1074,7 @@ namespace CityTrafficSimulator
 				{
 				foreach (LineNode ln in nodes)
 					{
-					if (ln.networkLayer.visible && (!options.performClipping || ln.positionRect.IntersectsWith(options.clippingRect)))
+					if (ln.isVisible && (!options.performClipping || ln.positionRect.IntersectsWith(options.clippingRect)))
 						ln.Draw(g);
 					}
 				}
@@ -1115,7 +1083,7 @@ namespace CityTrafficSimulator
 				{
 				foreach (NodeConnection nc in connections)
 					{
-					if ((nc.startNode.networkLayer.visible || nc.endNode.networkLayer.visible) && (!options.performClipping || nc.lineSegment.boundingRectangle.IntersectsWith(options.clippingRect)))
+					if ((nc.startNode.isVisible || nc.endNode.isVisible) && (!options.performClipping || nc.lineSegment.boundingRectangle.IntersectsWith(options.clippingRect)))
 						{
 						foreach (IVehicle v in nc.vehicles)
 							{
@@ -1135,7 +1103,7 @@ namespace CityTrafficSimulator
 							{
 							foreach (Intersection i in intersections)
 								{
-								if (i._aConnection.startNode.networkLayer.visible || i._aConnection.endNode.networkLayer.visible || i._bConnection.startNode.networkLayer.visible || i._bConnection.endNode.networkLayer.visible)
+								if (i._aConnection.startNode.isVisible || i._aConnection.endNode.isVisible || i._bConnection.startNode.isVisible || i._bConnection.endNode.isVisible)
 									{
 									PointF[] surroundingPoints = new PointF[4]
 											{

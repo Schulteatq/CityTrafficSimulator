@@ -134,7 +134,8 @@ namespace CityTrafficSimulator
 		#region Hilfsklassen
 		private enum DragNDrop
 			{
-			NONE, 
+			NONE,
+			MOVE_MAIN_GRID,
 			MOVE_NODES, 
 			CREATE_NODE, 
 			MOVE_IN_SLOPE, MOVE_OUT_SLOPE, 
@@ -362,12 +363,12 @@ namespace CityTrafficSimulator
 		/// <summary>
 		/// AutoscrollPosition vom daGrid umschließenden Panel. (Wird für Thumbnailanzeige benötigt)
 		/// </summary>
-		private Point daGridAutoscrollPosition = new Point();
+		private Point daGridScrollPosition = new Point();
 
 		/// <summary>
 		/// Mittelpunkt der angezeigten Fläche in Weltkoordinaten. (Wird für Zoom benötigt)
 		/// </summary>
-		private Point daGridZoomPosition = new Point();
+		private PointF daGridViewCenter = new Point();
 
 		private List<GraphicsPath> additionalGraphics = new List<GraphicsPath>();
 
@@ -622,8 +623,10 @@ namespace CityTrafficSimulator
 			nodeSteuerung.AddNetworkLayer("Layer 1", true);
 
 			zoomComboBox.SelectedIndex = 7;
-			DaGrid.Size = new System.Drawing.Size((int)canvasWidthSpinEdit.Value, (int)canvasHeigthSpinEdit.Value);
-
+			daGridScrollPosition = new Point(0, 0);
+			UpdateDaGridClippingRect();
+			DaGrid.Dock = DockStyle.Fill;
+			
 			this.SetStyle(ControlStyles.OptimizedDoubleBuffer | ControlStyles.AllPaintingInWmPaint | ControlStyles.UserPaint, true);
 
 			renderOptionsDaGrid.renderLineNodes = true;
@@ -719,16 +722,18 @@ namespace CityTrafficSimulator
 			{
 			if (!thumbGridClientRect.Contains(e.Location))
 				{
-				float zoom = (float)DaGrid.ClientSize.Width / thumbGrid.ClientSize.Width;
-				thumbGridClientRect.X = e.Location.X - thumbGridClientRect.Width/2;
+				RectangleF bounds = nodeSteuerung.GetLineNodeBounds();
+				float zoom = Math.Min(1.0f, Math.Min((float)thumbGrid.ClientSize.Width / bounds.Width, (float)thumbGrid.ClientSize.Height / bounds.Height));
+				thumbGridClientRect.X = e.Location.X - thumbGridClientRect.Width / 2;
 				thumbGridClientRect.Y = e.Location.Y - thumbGridClientRect.Height/2;
 
-				pnlMainGrid.AutoScrollPosition = new Point(
-					(int)Math.Round(zoom * thumbGridClientRect.X * zoomMultipliers[zoomComboBox.SelectedIndex, 0]),
-					(int)Math.Round(zoom * thumbGridClientRect.Y * zoomMultipliers[zoomComboBox.SelectedIndex, 0]));
+				daGridScrollPosition = new Point(
+					(int)Math.Round((thumbGridClientRect.X / zoom) + bounds.X),
+					(int)Math.Round((thumbGridClientRect.Y / zoom) + bounds.Y));
 
 
 				UpdateDaGridClippingRect();
+				thumbGrid.Invalidate();
 				DaGrid.Invalidate(true);
 				}
 
@@ -741,19 +746,12 @@ namespace CityTrafficSimulator
 			{
 			if (howToDrag == DragNDrop.MOVE_THUMB_RECT)
 				{
-				float zoom = (float)DaGrid.ClientSize.Width / thumbGrid.ClientSize.Width;
+				RectangleF bounds = nodeSteuerung.GetLineNodeBounds();
+				float zoom = Math.Min(1.0f, Math.Min((float)thumbGrid.ClientSize.Width / bounds.Width, (float)thumbGrid.ClientSize.Height / bounds.Height));
 
-				/*thumbGridWorldRect = new Rectangle(
-					(int)Math.Round(-daGridAutoscrollPosition.X * zoomMultipliers[zoomComboBox.SelectedIndex, 1]),
-					(int)Math.Round(-daGridAutoscrollPosition.Y * zoomMultipliers[zoomComboBox.SelectedIndex, 1]),
-					(int)Math.Round(pnlMainGrid.ClientSize.Width * zoomMultipliers[zoomComboBox.SelectedIndex, 1]),
-					(int)Math.Round(pnlMainGrid.ClientSize.Height * zoomMultipliers[zoomComboBox.SelectedIndex, 1]));
-				*/
-
-
-				pnlMainGrid.AutoScrollPosition = new Point(
-					(int)Math.Round(zoom * thumbGridClientRect.X * zoomMultipliers[zoomComboBox.SelectedIndex, 0]),
-					(int)Math.Round(zoom * thumbGridClientRect.Y * zoomMultipliers[zoomComboBox.SelectedIndex, 0]));
+				daGridScrollPosition = new Point(
+					(int)Math.Round((thumbGridClientRect.X / zoom) + bounds.X),
+					(int)Math.Round((thumbGridClientRect.Y / zoom) + bounds.Y));
 
 				UpdateDaGridClippingRect();
 				DaGrid.Invalidate(true);
@@ -768,7 +766,7 @@ namespace CityTrafficSimulator
 			{
 			Vector2 clickedPosition = new Vector2(e.X, e.Y);
 			clickedPosition *= zoomMultipliers[zoomComboBox.SelectedIndex, 1];
-
+			clickedPosition += daGridScrollPosition;
 
 			// Node Gedöns
 			switch (e.Button)
@@ -1021,9 +1019,9 @@ namespace CityTrafficSimulator
 					#endregion
 					break;
 				case MouseButtons.Right:
-					#region Nodes löschen
 					if ((Control.ModifierKeys & Keys.Control) == Keys.Control)
 						{
+						#region Nodes löschen
 						// LineNode entfernen
 						LineNode nodeToDelete = nodeSteuerung.GetLineNodeAt(clickedPosition);
 						// checken ob gefunden
@@ -1035,8 +1033,15 @@ namespace CityTrafficSimulator
 								}
 							nodeSteuerung.DeleteLineNode(nodeToDelete);
 							}
+						#endregion
 						}
-					#endregion
+					else
+						{
+						#region move main grid
+						howToDrag = DragNDrop.MOVE_MAIN_GRID;
+						daGridRubberband.Location = clickedPosition;
+						#endregion
+						}
 
 					break;
 				}
@@ -1048,11 +1053,20 @@ namespace CityTrafficSimulator
 			{
 			Vector2 clickedPosition = new Vector2(e.X, e.Y);
 			clickedPosition *= zoomMultipliers[zoomComboBox.SelectedIndex, 1];
+			clickedPosition += daGridScrollPosition;
+			lblMouseCoordinates.Text = clickedPosition.ToString();
 
 			if (selectedLineNodes != null)
 				{
 				switch (howToDrag)
 					{
+					case DragNDrop.MOVE_MAIN_GRID:
+						clickedPosition = new Vector2(e.X, e.Y);
+						clickedPosition *= zoomMultipliers[zoomComboBox.SelectedIndex, 1];
+						daGridScrollPosition = new Point((int)Math.Round(-clickedPosition.X + daGridRubberband.X), (int)Math.Round(-clickedPosition.Y + daGridRubberband.Y));
+						UpdateDaGridClippingRect();
+						Invalidate(InvalidationLevel.ONLY_MAIN_CANVAS);
+						break;
 					case DragNDrop.MOVE_NODES:
 						for (int i = 0; i < m_selectedLineNodes.Count; i++)
 							{
@@ -1157,6 +1171,7 @@ namespace CityTrafficSimulator
 			{
 			Vector2 clickedPosition = new Vector2(e.X, e.Y);
 			clickedPosition *= zoomMultipliers[zoomComboBox.SelectedIndex, 1];
+			clickedPosition += daGridScrollPosition;
 
 			switch (howToDrag)
 				{
@@ -1198,6 +1213,9 @@ namespace CityTrafficSimulator
 						selectedVehicle = nodeSteuerung.GetVehicleAt(clickedPosition);
 						}
 					break;
+				case DragNDrop.MOVE_MAIN_GRID:
+					thumbGrid.Invalidate();
+					break;
 				default:
 					break;
 				}
@@ -1205,6 +1223,9 @@ namespace CityTrafficSimulator
 			if ((howToDrag == DragNDrop.CREATE_NODE || howToDrag == DragNDrop.MOVE_NODES || howToDrag == DragNDrop.MOVE_IN_SLOPE || howToDrag == DragNDrop.MOVE_OUT_SLOPE) && m_selectedLineNodes != null)
 				{
 				nodeSteuerung.UpdateNodeConnections(m_selectedLineNodes);
+				nodeSteuerung.InvalidateNodeBounds();
+				UpdateDaGridClippingRect();
+				thumbGrid.Invalidate();
 				}
 
 			// Drag'n'Drop Bereich wieder löschen
@@ -1442,19 +1463,6 @@ namespace CityTrafficSimulator
 		#region Zeichnen
 		void DaGrid_Paint(object sender, PaintEventArgs e)
 			{
-			// Da pnlMainGrid.OnScroll nicht alles mitbekommt, muss das eben die Paintmethode übernehmen
-			if (daGridAutoscrollPosition != pnlMainGrid.AutoScrollPosition)
-				{
-				daGridZoomPosition = new Point(
-					(int)Math.Round((-pnlMainGrid.AutoScrollPosition.X + pnlMainGrid.Width / 2) * zoomMultipliers[zoomComboBox.SelectedIndex, 1]),
-					(int)Math.Round((-pnlMainGrid.AutoScrollPosition.Y + pnlMainGrid.Height / 2) * zoomMultipliers[zoomComboBox.SelectedIndex, 1]));
-
-				daGridAutoscrollPosition = pnlMainGrid.AutoScrollPosition;
-
-				UpdateDaGridClippingRect();
-				UpdateThumbGridRect();
-				}
-
 			// TODO: Paint Methode entschlacken und outsourcen?
 			switch (renderQualityComboBox.SelectedIndex)
 				{
@@ -1496,7 +1504,10 @@ namespace CityTrafficSimulator
 					}
 				}
 
-			e.Graphics.Transform = new Matrix(zoomMultipliers[zoomComboBox.SelectedIndex, 0], 0, 0, zoomMultipliers[zoomComboBox.SelectedIndex, 0], 0, 0);
+			e.Graphics.Transform = new Matrix(
+				zoomMultipliers[zoomComboBox.SelectedIndex, 0], 0, 
+				0, zoomMultipliers[zoomComboBox.SelectedIndex, 0],
+				-daGridScrollPosition.X * zoomMultipliers[zoomComboBox.SelectedIndex, 0], -daGridScrollPosition.Y * zoomMultipliers[zoomComboBox.SelectedIndex, 0]);
 
 
 			using (Pen BlackPen = new Pen(Color.Black, 1.0F))
@@ -1596,21 +1607,23 @@ namespace CityTrafficSimulator
 
 				renderStopwatch.Stop();
 
+
 				if (cbRenderFps.Checked)
 					{
+					e.Graphics.Transform = new Matrix(1, 0, 0, 1, 0, 0);
 					e.Graphics.DrawString(
 						"thinking time: " + thinkStopwatch.ElapsedMilliseconds + "ms, possible thoughts per second: " + ((thinkStopwatch.ElapsedMilliseconds != 0) ? (1000 / thinkStopwatch.ElapsedMilliseconds).ToString() : "-"),
 						new Font("Arial", 10),
 						new SolidBrush(Color.Black),
-						-pnlMainGrid.AutoScrollPosition.X * zoomMultipliers[zoomComboBox.SelectedIndex, 1] + 8,
-						-pnlMainGrid.AutoScrollPosition.Y * zoomMultipliers[zoomComboBox.SelectedIndex, 1] + 40);
+						8,
+						40);
 
 					e.Graphics.DrawString(
 						"rendering time: " + renderStopwatch.ElapsedMilliseconds + "ms, possible fps: " + ((renderStopwatch.ElapsedMilliseconds != 0) ? (1000 / renderStopwatch.ElapsedMilliseconds).ToString() : "-"),
 						new Font("Arial", 10),
 						new SolidBrush(Color.Black),
-						-pnlMainGrid.AutoScrollPosition.X * zoomMultipliers[zoomComboBox.SelectedIndex, 1] + 8,
-						-pnlMainGrid.AutoScrollPosition.Y * zoomMultipliers[zoomComboBox.SelectedIndex, 1] + 56);
+						8,
+						56);
 					}
 				}
 			}
@@ -1621,9 +1634,10 @@ namespace CityTrafficSimulator
 			e.Graphics.InterpolationMode = InterpolationMode.Bilinear;
 
 			// Zoomfaktor berechnen
-			float zoom = (float)thumbGrid.ClientSize.Width / DaGrid.ClientSize.Width;
+			RectangleF bounds = nodeSteuerung.GetLineNodeBounds();
+			float zoom = Math.Min(1.0f, Math.Min((float)thumbGrid.ClientSize.Width / bounds.Width, (float)thumbGrid.ClientSize.Height / bounds.Height));
 
-			e.Graphics.Transform = new Matrix(zoom, 0, 0, zoom, 0, 0);
+			e.Graphics.Transform = new Matrix(zoom, 0, 0, zoom, -bounds.X * zoom, -bounds.Y * zoom);
 
 
 			using (Pen BlackPen = new Pen(Color.Black, 1.0F))
@@ -1680,37 +1694,28 @@ namespace CityTrafficSimulator
 			if (zoomComboBox.SelectedIndex >= 0)
 				{
 				// daGridClippingRect aktualisieren
-				renderOptionsDaGrid.clippingRect.X = (int)Math.Floor(-daGridAutoscrollPosition.X * zoomMultipliers[zoomComboBox.SelectedIndex, 1]);
-				renderOptionsDaGrid.clippingRect.Y = (int)Math.Floor(-daGridAutoscrollPosition.Y * zoomMultipliers[zoomComboBox.SelectedIndex, 1]);
+				renderOptionsDaGrid.clippingRect.X = daGridScrollPosition.X;
+				renderOptionsDaGrid.clippingRect.Y = daGridScrollPosition.Y;
 				renderOptionsDaGrid.clippingRect.Width = (int)Math.Ceiling(pnlMainGrid.ClientSize.Width * zoomMultipliers[zoomComboBox.SelectedIndex, 1]);
 				renderOptionsDaGrid.clippingRect.Height = (int)Math.Ceiling(pnlMainGrid.ClientSize.Height * zoomMultipliers[zoomComboBox.SelectedIndex, 1]);
-				}
-			}
 
-		/// <summary>
-		/// aktualisiert die Thumbnailansicht
-		/// </summary>
-		private void UpdateThumbGridRect()
-			{
-			if (zoomComboBox.SelectedIndex >= 0)
-				{
-				// Zoomfaktor berechnen
-				float zoom = (float)thumbGrid.ClientSize.Width / DaGrid.ClientSize.Width;
+				daGridViewCenter = new PointF(
+					daGridScrollPosition.X + (pnlMainGrid.ClientSize.Width / 2 * zoomMultipliers[zoomComboBox.SelectedIndex, 1]),
+					daGridScrollPosition.Y + (pnlMainGrid.ClientSize.Height / 2 * zoomMultipliers[zoomComboBox.SelectedIndex, 1]));
 
-				thumbGridWorldRect = new Rectangle(
-					(int)Math.Round(-daGridAutoscrollPosition.X * zoomMultipliers[zoomComboBox.SelectedIndex, 1]),
-					(int)Math.Round(-daGridAutoscrollPosition.Y * zoomMultipliers[zoomComboBox.SelectedIndex, 1]),
-					(int)Math.Round(pnlMainGrid.ClientSize.Width * zoomMultipliers[zoomComboBox.SelectedIndex, 1]),
-					(int)Math.Round(pnlMainGrid.ClientSize.Height * zoomMultipliers[zoomComboBox.SelectedIndex, 1]));
+				RectangleF bounds = nodeSteuerung.GetLineNodeBounds();
+				float zoom = Math.Min(1.0f, Math.Min((float)thumbGrid.ClientSize.Width / bounds.Width, (float)thumbGrid.ClientSize.Height / bounds.Height));
+
+				thumbGridWorldRect = new Rectangle(daGridScrollPosition, pnlMainGrid.ClientSize);
 
 				thumbGridClientRect = new Rectangle(
-					(int)Math.Round(-daGridAutoscrollPosition.X * zoom * zoomMultipliers[zoomComboBox.SelectedIndex, 1]),
-					(int)Math.Round(-daGridAutoscrollPosition.Y * zoom * zoomMultipliers[zoomComboBox.SelectedIndex, 1]),
-					(int)Math.Round(pnlMainGrid.ClientSize.Width * zoom * zoomMultipliers[zoomComboBox.SelectedIndex, 1]),
-					(int)Math.Round(pnlMainGrid.ClientSize.Height * zoom * zoomMultipliers[zoomComboBox.SelectedIndex, 1]));
+					(int)Math.Round((daGridScrollPosition.X - bounds.X) * zoom),
+					(int)Math.Round((daGridScrollPosition.Y - bounds.Y) * zoom),
+					(int)Math.Round(pnlMainGrid.ClientSize.Width * zoomMultipliers[zoomComboBox.SelectedIndex, 1] * zoom),
+					(int)Math.Round(pnlMainGrid.ClientSize.Height * zoomMultipliers[zoomComboBox.SelectedIndex, 1] * zoom));
 
-
-				thumbGrid.Invalidate();
+				lblScrollPosition.Text = daGridScrollPosition.ToString();
+				lblViewCenter.Text = daGridViewCenter.ToString();
 				}
 			}
 
@@ -1760,7 +1765,7 @@ namespace CityTrafficSimulator
 
 					// neuzeichnen
 					Invalidate(InvalidationLevel.ALL);
-
+					thumbGrid.Invalidate();
 					}
 				}
 			}
@@ -1899,19 +1904,16 @@ namespace CityTrafficSimulator
 		private void zoomComboBox_SelectedIndexChanged(object sender, EventArgs e)
 			{
 			// neue Autoscrollposition berechnen und setzen
-			pnlMainGrid.ScrollControlIntoView(DaGrid);
-			pnlMainGrid.AutoScrollPosition = new Point(
-/*				(int)Math.Round((daGridAutoscrollPosition.X - pnlMainGrid.Width/2) * zoomMultipliers[zoomComboBox.SelectedIndex, 0]), 
-				(int)Math.Round((daGridAutoscrollPosition.Y - pnlMainGrid.Height/2) * zoomMultipliers[zoomComboBox.SelectedIndex, 0]));*/
-				(int)Math.Round((daGridZoomPosition.X * zoomMultipliers[zoomComboBox.SelectedIndex, 0]) - (pnlMainGrid.Width / 2)),
-				(int)Math.Round((daGridZoomPosition.Y * zoomMultipliers[zoomComboBox.SelectedIndex, 0]) - (pnlMainGrid.Height / 2)));
+			daGridScrollPosition = new Point(
+				(int)Math.Round(daGridViewCenter.X - (pnlMainGrid.ClientSize.Width / 2 * zoomMultipliers[zoomComboBox.SelectedIndex, 1])),
+				(int)Math.Round(daGridViewCenter.Y - (pnlMainGrid.ClientSize.Height / 2 * zoomMultipliers[zoomComboBox.SelectedIndex, 1])));
 			
 			// Bitmap umrechnen:
 			UpdateBackgroundImage();
 
 			UpdateDaGridClippingRect();
+			thumbGrid.Invalidate();
 			DaGrid.Invalidate();
-			UpdateThumbGridRect();
 			}
 
 
@@ -1934,44 +1936,9 @@ namespace CityTrafficSimulator
 			a.Show();
 			}
 
-		private void DaGrid_Leave(object sender, EventArgs e)
-			{
-			daGridAutoscrollPosition = pnlMainGrid.AutoScrollPosition;
-			}
-
-		#region AutoScroll Bug von DaGrid und timeline umgehen
-
-		/// <summary>
-		/// Delegate für Funktion die AutoScrollPosition wiederherstellt
-		/// </summary>
-		/// <param name="sender">Objekt auf das die Funktion angewendet werden soll</param>
-		/// <param name="p">AutoScrollPosition, die gesetzt weden soll</param>
-		delegate void AutoScrollPositionDelegate(ScrollableControl sender, Point p);
-
-		private void SetAutoScrollPosition(ScrollableControl sender, Point p)
-			{
-			p.X = Math.Abs(p.X);
-			p.Y = Math.Abs(p.Y);
-			sender.AutoScrollPosition = p;
-			}
-
-		private void DaGrid_Enter(object sender, EventArgs e)
-			{
-			if (howToDrag != DragNDrop.MOVE_THUMB_RECT)
-				{
-				Point p = pnlMainGrid.AutoScrollPosition;
-				AutoScrollPositionDelegate del = new AutoScrollPositionDelegate(SetAutoScrollPosition);
-				Object[] args = { pnlMainGrid, p };
-				BeginInvoke(del, args);
-				}
-			}
-
-		#endregion
-
 		private void thumbGrid_Resize(object sender, EventArgs e)
 			{
 			UpdateDaGridClippingRect();
-			UpdateThumbGridRect();
 			}
 
 		private void carsAllowedCheckBox_CheckedChanged(object sender, EventArgs e)
@@ -2017,28 +1984,6 @@ namespace CityTrafficSimulator
 		private void visualizationCheckBox_CheckedChanged(object sender, EventArgs e)
 			{
 			nodeSteuerung.setVisualizationInNodeConnections(cbRenderStatistics.Checked);
-			DaGrid.Invalidate();
-			}
-
-		private void Form1_ResizeEnd(object sender, EventArgs e)
-			{
-			UpdateDaGridClippingRect();
-			DaGrid.Invalidate();
-			}
-
-		private void removeLineChangePoints_Click(object sender, EventArgs e)
-			{
-			if (selectedNodeConnection != null)
-				{
-				nodeSteuerung.RemoveLineChangePoints(selectedNodeConnection, true, true);
-				}
-			else
-				{
-				foreach (NodeConnection nc in nodeSteuerung.connections)
-					{
-					nodeSteuerung.RemoveLineChangePoints(nc, true, false);
-					}
-				}
 			DaGrid.Invalidate();
 			}
 
@@ -2159,18 +2104,6 @@ namespace CityTrafficSimulator
 		private void backgroundImageScalingSpinEdit_ValueChanged(object sender, EventArgs e)
 			{
 			UpdateBackgroundImage();
-			DaGrid.Invalidate();
-			}
-
-		private void canvasWidthSpinEdit_ValueChanged(object sender, EventArgs e)
-			{
-			DaGrid.Width = (int)canvasWidthSpinEdit.Value;
-			DaGrid.Invalidate();
-			}
-
-		private void canvasHeigthSpinEdit_ValueChanged(object sender, EventArgs e)
-			{
-			DaGrid.Height = (int)canvasHeigthSpinEdit.Value;
 			DaGrid.Invalidate();
 			}
 
@@ -2425,6 +2358,12 @@ namespace CityTrafficSimulator
 					e.Graphics.DrawLine(blackPen, i - 1, val1, i, val2);
 					}
 				}
+			}
+
+		private void DaGrid_Resize(object sender, EventArgs e)
+			{
+			UpdateDaGridClippingRect();
+			Invalidate(InvalidationLevel.ONLY_MAIN_CANVAS);
 			}
 
 		}
