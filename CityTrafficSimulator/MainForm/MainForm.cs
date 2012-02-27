@@ -421,10 +421,6 @@ namespace CityTrafficSimulator
 
 
 		/// <summary>
-		/// Thumbnail Rectangle World-Koordinaten
-		/// </summary>
-		private Rectangle thumbGridWorldRect;
-		/// <summary>
 		/// Thumbnail Rectangle Client-Koordinaten
 		/// </summary>
 		private Rectangle thumbGridClientRect;
@@ -432,7 +428,7 @@ namespace CityTrafficSimulator
 		/// <summary>
 		/// vorläufige Standardgruppe für LSA
 		/// </summary>
-		private TimelineGroup unsortedGroup = new TimelineGroup("unsortierte LSA", false);
+		private TimelineGroup unsortedGroup = new TimelineGroup("Unsorted Traffic Lights", false);
 
 
 		/// <summary>
@@ -1054,7 +1050,7 @@ namespace CityTrafficSimulator
 			Vector2 clickedPosition = new Vector2(e.X, e.Y);
 			clickedPosition *= zoomMultipliers[zoomComboBox.SelectedIndex, 1];
 			clickedPosition += daGridScrollPosition;
-			lblMouseCoordinates.Text = clickedPosition.ToString();
+			lblMouseCoordinates.Text = "Current Mouse Coordinates (m): " + (clickedPosition * 0.1).ToString();
 
 			if (selectedLineNodes != null)
 				{
@@ -1482,7 +1478,7 @@ namespace CityTrafficSimulator
 			if (resampledBackgroundImage != null)
 				{
 				resampledBackgroundImage.SetResolution(e.Graphics.DpiX, e.Graphics.DpiY);
-				e.Graphics.DrawImage(resampledBackgroundImage, new Point(0, 0));
+				e.Graphics.DrawImage(resampledBackgroundImage, new Point((int)Math.Round(-daGridScrollPosition.X * zoomMultipliers[zoomComboBox.SelectedIndex, 0]), (int)Math.Round(-daGridScrollPosition.Y * zoomMultipliers[zoomComboBox.SelectedIndex, 0])));
 				}
 
 			if (satelliteImages != null)
@@ -1501,6 +1497,24 @@ namespace CityTrafficSimulator
 						}
 					if (satelliteImages[i, 0] != null)
 						y += satelliteImages[i, 0].Height;
+					}
+				}
+
+			if (cbRenderGrid.Checked)
+				{
+				using (Pen GrayPen = new Pen(Color.LightGray, 1.0f))
+					{
+					int countX = (int)Math.Ceiling(DaGrid.ClientSize.Width * zoomMultipliers[zoomComboBox.SelectedIndex, 1] / ((float)spinGridSpacing.Value * 10.0f));
+					int countY = (int)Math.Ceiling(DaGrid.ClientSize.Height * zoomMultipliers[zoomComboBox.SelectedIndex, 1] / ((float)spinGridSpacing.Value * 10.0f));
+
+					for (int i = 0; i < countX; i++)
+						{
+						e.Graphics.DrawLine(GrayPen, i * (float)spinGridSpacing.Value * 10.0f * zoomMultipliers[zoomComboBox.SelectedIndex, 0], 0, i * (float)spinGridSpacing.Value * 10.0f * zoomMultipliers[zoomComboBox.SelectedIndex, 0], DaGrid.ClientSize.Height);
+						}
+					for (int i = 0; i < countY; i++)
+						{
+						e.Graphics.DrawLine(GrayPen, 0, i * (float)spinGridSpacing.Value * 10.0f * zoomMultipliers[zoomComboBox.SelectedIndex, 0], DaGrid.ClientSize.Width, i * (float)spinGridSpacing.Value * 10.0f * zoomMultipliers[zoomComboBox.SelectedIndex, 0]);
+						}
 					}
 				}
 
@@ -1706,16 +1720,13 @@ namespace CityTrafficSimulator
 				RectangleF bounds = nodeSteuerung.GetLineNodeBounds();
 				float zoom = Math.Min(1.0f, Math.Min((float)thumbGrid.ClientSize.Width / bounds.Width, (float)thumbGrid.ClientSize.Height / bounds.Height));
 
-				thumbGridWorldRect = new Rectangle(daGridScrollPosition, pnlMainGrid.ClientSize);
-
 				thumbGridClientRect = new Rectangle(
 					(int)Math.Round((daGridScrollPosition.X - bounds.X) * zoom),
 					(int)Math.Round((daGridScrollPosition.Y - bounds.Y) * zoom),
 					(int)Math.Round(pnlMainGrid.ClientSize.Width * zoomMultipliers[zoomComboBox.SelectedIndex, 1] * zoom),
 					(int)Math.Round(pnlMainGrid.ClientSize.Height * zoomMultipliers[zoomComboBox.SelectedIndex, 1] * zoom));
 
-				lblScrollPosition.Text = daGridScrollPosition.ToString();
-				lblViewCenter.Text = daGridViewCenter.ToString();
+				lblScrollPosition.Text = "Canvas Location (dm): (" + daGridScrollPosition.X + ", " + daGridScrollPosition.Y + ") -> (" + (daGridScrollPosition.X + renderOptionsDaGrid.clippingRect.Width) + ", " + (daGridScrollPosition.Y + renderOptionsDaGrid.clippingRect.Height) + ")";
 				}
 			}
 
@@ -2363,6 +2374,22 @@ namespace CityTrafficSimulator
 		private void DaGrid_Resize(object sender, EventArgs e)
 			{
 			UpdateDaGridClippingRect();
+			Invalidate(InvalidationLevel.ONLY_MAIN_CANVAS);
+			}
+
+		private void cbRenderGrid_SizeChanged(object sender, EventArgs e)
+			{
+			spinGridSpacing.Location = new System.Drawing.Point(cbRenderGrid.Location.X + cbRenderGrid.Width + 5, spinGridSpacing.Location.Y);
+			lblMeters.Location = new System.Drawing.Point(spinGridSpacing.Location.X + spinGridSpacing.Width + 5, lblMeters.Location.Y);
+			}
+
+		private void spinGridSpacing_ValueChanged(object sender, EventArgs e)
+			{
+			Invalidate(InvalidationLevel.ONLY_MAIN_CANVAS);
+			}
+
+		private void cbRenderGrid_CheckedChanged(object sender, EventArgs e)
+			{
 			Invalidate(InvalidationLevel.ONLY_MAIN_CANVAS);
 			}
 

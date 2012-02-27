@@ -630,7 +630,7 @@ namespace CityTrafficSimulator
 
 				foreach (NodeConnection nc2 in _connections)
 					{
-					if (nc2.enableIncomingLineChange && (nc2.carsAllowed || nc2.busAllowed) && nc != nc2)
+					if (nc2.enableIncomingLineChange && (nc2.carsAllowed || nc2.busAllowed) && nc != nc2 && nc.startNode.networkLayer == nc2.startNode.networkLayer && nc.endNode.networkLayer == nc2.endNode.networkLayer)
 						{
 						// LINKS: Zeitparameterpaare ermitteln 
 						List<Pair<double>> intersectionTimes = CalculateIntersections(leftLS, nc2.lineSegment, 0d, 1d, 0d, 1d, 8, leftLS, nc2.lineSegment);
