@@ -494,18 +494,17 @@ namespace CityTrafficSimulator
 				// BoundingBox A ist schon klein genug, aber BoundingBox B sollte nochmal näher untersucht werden:
 				else if ((aBounds.Width <= tolerance) && (aBounds.Height <= tolerance))
 					{
-					Pair<LineSegment> bDivided = bSegment.Subdivide();
 					double bTimeMiddle = bTimeStart + ((bTimeEnd - bTimeStart) / 2);
 
 					foundIntersections = MergeIntersectionPairs(foundIntersections, CalculateIntersections(
-							aSegment, bDivided.Left,
+							aSegment, bSegment.subdividedFirst,
 							aTimeStart, aTimeEnd,
 							bTimeStart, bTimeMiddle,
 							tolerance,
 							aOriginalSegment, bOriginalSegment), aOriginalSegment, bOriginalSegment, 2*tolerance);
 
 					foundIntersections = MergeIntersectionPairs(foundIntersections, CalculateIntersections(
-							aSegment, bDivided.Right,
+							aSegment, bSegment.subdividedSecond,
 							aTimeStart, aTimeEnd,
 							bTimeMiddle, bTimeEnd,
 							tolerance,
@@ -515,17 +514,16 @@ namespace CityTrafficSimulator
 				// BoundingBox B ist schon klein genug, aber BoundingBox A sollte nochmal näher untersucht werden:
 				else if ((bBounds.Width <= tolerance) && (bBounds.Height <= tolerance))
 					{
-					Pair<LineSegment> aDivided = aSegment.Subdivide();
 					double aTimeMiddle = aTimeStart + ((aTimeEnd - aTimeStart) / 2);
 
 					foundIntersections = MergeIntersectionPairs(foundIntersections, CalculateIntersections(
-							aDivided.Left, bSegment,
+							aSegment.subdividedFirst, bSegment,
 							aTimeStart, aTimeMiddle,
 							bTimeStart, bTimeEnd,
 							tolerance,
 							aOriginalSegment, bOriginalSegment), aOriginalSegment, bOriginalSegment, 2 * tolerance);
 					foundIntersections = MergeIntersectionPairs(foundIntersections, CalculateIntersections(
-							aDivided.Right, bSegment,
+							aSegment.subdividedSecond, bSegment,
 							aTimeMiddle, aTimeEnd,
 							bTimeStart, bTimeEnd,
 							tolerance,
@@ -535,33 +533,30 @@ namespace CityTrafficSimulator
 				// die BoundingBoxen sind noch zu groß - Linie aufteilen und die 2x2 Teile auf Schnittpunkte untersuchen
 				else
 					{
-					Pair<LineSegment> aDivided = aSegment.Subdivide();
-					Pair<LineSegment> bDivided = bSegment.Subdivide();
-
 					double aTimeMiddle = aTimeStart + ((aTimeEnd - aTimeStart) / 2);
 					double bTimeMiddle = bTimeStart + ((bTimeEnd - bTimeStart) / 2);
 
 					foundIntersections = MergeIntersectionPairs(foundIntersections, CalculateIntersections(
-							aDivided.Left, bDivided.Left,
+							aSegment.subdividedFirst, bSegment.subdividedFirst,
 							aTimeStart, aTimeMiddle,
 							bTimeStart, bTimeMiddle,
 							tolerance,
 							aOriginalSegment, bOriginalSegment), aOriginalSegment, bOriginalSegment, 2 * tolerance);
 					foundIntersections = MergeIntersectionPairs(foundIntersections, CalculateIntersections(
-							aDivided.Right, bDivided.Left,
+							aSegment.subdividedSecond, bSegment.subdividedFirst,
 							aTimeMiddle, aTimeEnd,
 							bTimeStart, bTimeMiddle,
 							tolerance,
 							aOriginalSegment, bOriginalSegment), aOriginalSegment, bOriginalSegment, 2 * tolerance);
 
 					foundIntersections = MergeIntersectionPairs(foundIntersections, CalculateIntersections(
-							aDivided.Left, bDivided.Right,
+							aSegment.subdividedFirst, bSegment.subdividedSecond,
 							aTimeStart, aTimeMiddle,
 							bTimeMiddle, bTimeEnd,
 							tolerance,
 							aOriginalSegment, bOriginalSegment), aOriginalSegment, bOriginalSegment, 2 * tolerance);
 					foundIntersections = MergeIntersectionPairs(foundIntersections, CalculateIntersections(
-							aDivided.Right, bDivided.Right,
+							aSegment.subdividedSecond, bSegment.subdividedSecond,
 							aTimeMiddle, aTimeEnd,
 							bTimeMiddle, bTimeEnd,
 							tolerance,
@@ -890,17 +885,15 @@ namespace CityTrafficSimulator
 			LineNode startNode = nc.startNode;
 			LineNode endNode = nc.endNode;
 
-			Pair<LineSegment> divided = nc.lineSegment.Subdivide();
-
 			// Mittelknoten erstellen
-			LineNode middleNode = new LineNode(divided.Left.p3, nc.startNode.networkLayer);
-			middleNode.inSlopeAbs = divided.Left.p2;
-			middleNode.outSlopeAbs = divided.Right.p1;
+			LineNode middleNode = new LineNode(nc.lineSegment.subdividedFirst.p3, nc.startNode.networkLayer);
+			middleNode.inSlopeAbs = nc.lineSegment.subdividedFirst.p2;
+			middleNode.outSlopeAbs = nc.lineSegment.subdividedSecond.p1;
 			nodes.Add(middleNode);
 
 			// Anfangs- und Endknoten bearbeiten
-			startNode.outSlopeAbs = divided.Left.p1;
-			endNode.inSlopeAbs = divided.Right.p2;
+			startNode.outSlopeAbs = nc.lineSegment.subdividedFirst.p1;
+			endNode.inSlopeAbs = nc.lineSegment.subdividedSecond.p2;
 
 			// Alte Connections lösen
 			Disconnect(startNode, endNode);
@@ -1314,7 +1307,8 @@ namespace CityTrafficSimulator
 				foreach (LineNode ln in nodes)
 					{
 					ln.PrepareForSave();
-					ln.networkLayer._nodeHashes.Add(ln.hashcode);
+					if (ln.networkLayer != null)
+						ln.networkLayer._nodeHashes.Add(ln.hashcode);
 					}
 				foreach (NodeConnection nc in connections)
 					{

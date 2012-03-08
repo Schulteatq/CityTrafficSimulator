@@ -247,7 +247,7 @@ namespace CityTrafficSimulator
 			// 
 			this.simulationSpeedSpinEdit.Location = new System.Drawing.Point(188, 3);
 			this.simulationSpeedSpinEdit.Maximum = new decimal(new int[] {
-            4,
+            10,
             0,
             0,
             0});

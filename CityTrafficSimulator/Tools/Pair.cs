@@ -61,12 +61,12 @@ namespace CityTrafficSimulator
 		/// <summary>
 		/// linker Teil des Paares
 		/// </summary>
-		public S left;
+		public S Left;
 
 		/// <summary>
 		/// rechter Teil des Paares
 		/// </summary>
-		public T right;
+		public T Right;
 
 		/// <summary>
 		/// Standardkonstruktor für ein Paar vom Typ S, T
@@ -75,8 +75,8 @@ namespace CityTrafficSimulator
 		/// <param name="right">rechter Teil des Paares</param>
 		public Pair(S left, T right)
 			{
-			this.left = left;
-			this.right = right;
+			this.Left = left;
+			this.Right = right;
 			}
 		}
     }

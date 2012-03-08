@@ -157,6 +157,7 @@ namespace CityTrafficSimulator
             {
             return new Vector2(v1._x - v2._x, v1._y - v2._y);
             }
+
         #endregion
         
 		/// <summary>
@@ -341,5 +342,14 @@ namespace CityTrafficSimulator
 			{
 			return (_x == 0 && _y == 0);
 			}
-        }
+
+		/// <summary>
+		/// Returns whether this vector is not a zero vector
+		/// </summary>
+		/// <returns>X != 0 OR Y != 0</returns>
+		public bool IsNotZeroVector()
+			{
+			return (_x != 0 || _y != 0);
+			}
+		}
     }

@@ -47,7 +47,7 @@ namespace CityTrafficSimulator
 		/// <summary>
 		/// maximale Entfernung zwischen zwei parallelen NodeConnections, für einen LineChangePoint
 		/// </summary>
-		public const double maxDistanceToParallelConnection = 42;
+		public const double maxDistanceToParallelConnection = 48;
 
 		/// <summary>
 		/// maximaler Winkel zwischen zwei NodeConnections, damit sie für LineChangePoints als parallel angesehen werden

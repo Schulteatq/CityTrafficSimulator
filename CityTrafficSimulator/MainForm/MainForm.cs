@@ -112,7 +112,14 @@ namespace CityTrafficSimulator
 
 			if (File.Exists("GUILayout.xml"))
 				{
-				_dockingManager.LoadConfigFromFile("GUILayout.xml");
+				try
+					{
+					_dockingManager.LoadConfigFromFile("GUILayout.xml");
+					}
+				catch (System.Xml.XmlException)
+					{
+					// do nothing here
+					}
 				}
 
 			_dockingManager.ContentHiding += new DockingManager.ContentHidingHandler(_dockingManager_ContentHiding);
@@ -355,6 +362,9 @@ namespace CityTrafficSimulator
 		
 		private Bitmap backgroundImage;
 		private Bitmap resampledBackgroundImage;
+
+		private Bitmap _connectionsRenderCacheBmp;
+		private System.Drawing.TextureBrush _connectionsRenderCache;
 
 		private DragNDrop howToDrag = DragNDrop.NONE;
 
@@ -1478,7 +1488,7 @@ namespace CityTrafficSimulator
 			if (resampledBackgroundImage != null)
 				{
 				resampledBackgroundImage.SetResolution(e.Graphics.DpiX, e.Graphics.DpiY);
-				e.Graphics.DrawImage(resampledBackgroundImage, new Point((int)Math.Round(-daGridScrollPosition.X * zoomMultipliers[zoomComboBox.SelectedIndex, 0]), (int)Math.Round(-daGridScrollPosition.Y * zoomMultipliers[zoomComboBox.SelectedIndex, 0])));
+				e.Graphics.DrawImageUnscaled(resampledBackgroundImage, new Point((int)Math.Round(-daGridScrollPosition.X * zoomMultipliers[zoomComboBox.SelectedIndex, 0]), (int)Math.Round(-daGridScrollPosition.Y * zoomMultipliers[zoomComboBox.SelectedIndex, 0])));
 				}
 
 			if (satelliteImages != null)
@@ -1517,6 +1527,16 @@ namespace CityTrafficSimulator
 						}
 					}
 				}
+
+			/*if (_connectionsRenderCache != null)
+				{
+				e.Graphics.FillRectangle(_connectionsRenderCache, 0, 0, DaGrid.ClientSize.Width, DaGrid.ClientSize.Height);
+				}*/
+			/*if (_connectionsRenderCacheBmp != null)
+				{
+				_connectionsRenderCacheBmp.SetResolution(e.Graphics.DpiX, e.Graphics.DpiY);
+				e.Graphics.DrawImageUnscaled(_connectionsRenderCacheBmp, 0, 0, DaGrid.ClientSize.Width, DaGrid.ClientSize.Height);
+				}*/
 
 			e.Graphics.Transform = new Matrix(
 				zoomMultipliers[zoomComboBox.SelectedIndex, 0], 0, 
@@ -1727,6 +1747,8 @@ namespace CityTrafficSimulator
 					(int)Math.Round(pnlMainGrid.ClientSize.Height * zoomMultipliers[zoomComboBox.SelectedIndex, 1] * zoom));
 
 				lblScrollPosition.Text = "Canvas Location (dm): (" + daGridScrollPosition.X + ", " + daGridScrollPosition.Y + ") -> (" + (daGridScrollPosition.X + renderOptionsDaGrid.clippingRect.Width) + ", " + (daGridScrollPosition.Y + renderOptionsDaGrid.clippingRect.Height) + ")";
+
+				UpdateConnectionsRenderCache();
 				}
 			}
 
@@ -1844,12 +1866,47 @@ namespace CityTrafficSimulator
 
 		private Bitmap ResizeBitmap(Bitmap b, int nWidth, int nHeight)
 			{
-			Bitmap result = new Bitmap(nWidth, nHeight, System.Drawing.Imaging.PixelFormat.Format16bppRgb565);
+			Bitmap result = new Bitmap(nWidth, nHeight, System.Drawing.Imaging.PixelFormat.Format32bppPArgb);
 			using (Graphics g = Graphics.FromImage((Image)result))
 				{
 				g.DrawImage(b, 0, 0, nWidth, nHeight);
 				}
 			return result;
+			}
+
+		private void UpdateConnectionsRenderCache()
+			{
+			/*int w = Math.Max(1, DaGrid.ClientSize.Width);
+			int h = Math.Max(1, DaGrid.ClientSize.Height);
+			_connectionsRenderCacheBmp = new Bitmap(w, h, System.Drawing.Imaging.PixelFormat.Format32bppPArgb);
+			using (Graphics g = Graphics.FromImage((Image)_connectionsRenderCacheBmp))
+				{
+				switch (renderQualityComboBox.SelectedIndex)
+					{
+					case 0:
+						g.SmoothingMode = SmoothingMode.HighQuality;
+						g.InterpolationMode = InterpolationMode.HighQualityBicubic;
+						break;
+					case 1:
+						g.SmoothingMode = SmoothingMode.HighSpeed;
+						g.InterpolationMode = InterpolationMode.Low;
+						break;
+					} 
+				
+				NodeSteuerung.RenderOptions ro = new NodeSteuerung.RenderOptions();
+				ro.renderLineNodes = false;
+				ro.renderNodeConnections = true;
+				ro.renderVehicles = false;
+				ro.clippingRect = renderOptionsDaGrid.clippingRect;
+
+				g.Transform = new Matrix(
+					zoomMultipliers[zoomComboBox.SelectedIndex, 0], 0,
+					0, zoomMultipliers[zoomComboBox.SelectedIndex, 0],
+					-daGridScrollPosition.X * zoomMultipliers[zoomComboBox.SelectedIndex, 0], -daGridScrollPosition.Y * zoomMultipliers[zoomComboBox.SelectedIndex, 0]);
+
+				nodeSteuerung.RenderNetwork(g, ro);
+				_connectionsRenderCache = new System.Drawing.TextureBrush(_connectionsRenderCacheBmp);
+				}*/
 			}
 
 		private void Form1_Load(object sender, EventArgs e)

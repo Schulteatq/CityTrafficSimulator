@@ -98,19 +98,22 @@ namespace CityTrafficSimulator.Vehicle
 					state.positionAbs,
 					GetPositionAbsAtArcPos(currentPosition - 100),
 									  };
-				Vector2[] normals = {
+				if ((positions[0] - positions[1]).IsNotZeroVector())
+					{
+					Vector2[] normals = {
 					(positions[0] - positions[1]).RotatedClockwise.Normalized,
 								  };
 
-				PointF[] frontPoints = { 
-					positions[0]  -  10*normals[0],
-					positions[0]  +  10*normals[0],
-					positions[1]  +  10*normals[0],
-					positions[1]  -  10*normals[0],
-                };
+					PointF[] frontPoints = { 
+						positions[0]  -  10*normals[0],
+						positions[0]  +  10*normals[0],
+						positions[1]  +  10*normals[0],
+						positions[1]  -  10*normals[0],
+					};
 
-				front.AddPolygon(frontPoints);
-				g.FillPath(new SolidBrush(color), front);
+					front.AddPolygon(frontPoints);
+					g.FillPath(new SolidBrush(color), front);
+					}
 				}
 			// Sattelzug
 			else
@@ -121,28 +124,31 @@ namespace CityTrafficSimulator.Vehicle
 					GetPositionAbsAtArcPos(currentPosition - 45),
 					GetPositionAbsAtArcPos(currentPosition - 165)
 									  };
-				Vector2[] normals = {
+				if ((positions[0] - positions[1]).IsNotZeroVector() && (positions[2] - positions[3]).IsNotZeroVector())
+					{
+					Vector2[] normals = {
 					(positions[0] - positions[1]).RotatedClockwise.Normalized,
 					(positions[2] - positions[3]).RotatedClockwise.Normalized
 								  };
 
-				PointF[] frontPoints = { 
-					positions[0]  -  10*normals[0],
-					positions[0]  +  10*normals[0],
-					positions[1]  +  10*normals[0],
-					positions[1]  -  10*normals[0],
-                };
-				PointF[] backPoints = { 
-					positions[2]  -  10*normals[1],
-					positions[2]  +  10*normals[1],
-					positions[3]  +  10*normals[1],
-					positions[3]  -  10*normals[1],
-                };
+					PointF[] frontPoints = { 
+						positions[0]  -  10*normals[0],
+						positions[0]  +  10*normals[0],
+						positions[1]  +  10*normals[0],
+						positions[1]  -  10*normals[0],
+					};
+					PointF[] backPoints = { 
+						positions[2]  -  10*normals[1],
+						positions[2]  +  10*normals[1],
+						positions[3]  +  10*normals[1],
+						positions[3]  -  10*normals[1],
+	                };
 
-				front.AddPolygon(frontPoints);
-				g.FillPath(new SolidBrush(color), front);
-				back.AddPolygon(backPoints);
-				g.FillPath(new SolidBrush(color), back);
+					front.AddPolygon(frontPoints);
+					g.FillPath(new SolidBrush(color), front);
+					back.AddPolygon(backPoints);
+					g.FillPath(new SolidBrush(color), back);
+					}
 				}
 			}
 

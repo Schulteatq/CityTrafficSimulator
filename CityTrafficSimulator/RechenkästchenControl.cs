@@ -192,8 +192,9 @@ namespace CityTrafficSimulator
 		/// <param name="e">PaintEvent-Argumente</param>
         private void RechenkaestchenControl_Paint(object sender, PaintEventArgs e)
             {
+			e.Graphics.Clear(Color.White);
             // zunächst die ganze Geschichte weiß streichen
-            using (Pen BackPen = new Pen(Color.White))
+/*            using (Pen BackPen = new Pen(Color.White))
                 {
                 using (SolidBrush BackBrush = new SolidBrush(Color.White))
                     {
@@ -221,7 +222,7 @@ namespace CityTrafficSimulator
                         }
                     }
                 } 
-
+			*/
             }
         #endregion
 

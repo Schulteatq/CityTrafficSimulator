@@ -1229,6 +1229,9 @@ namespace CityTrafficSimulator.Vehicle
 				return 0;
 				}
 
+			// distance is in dm, velocity in m/s. For easier calculations, we transform the distance unit to meters.
+			distance /= 10;
+
 			if (keepVelocity)
 				{
 				return distance / physics.velocity;
@@ -1248,10 +1251,11 @@ namespace CityTrafficSimulator.Vehicle
 				double alreadyCoveredDistance = 0;
 				int alreadySpentTime = 0;
 				double currentVelocity = physics.velocity;
+				double effDesVel = effectiveDesiredVelocity;
 
 				while (alreadyCoveredDistance <= distance)
 					{
-					currentVelocity += CalculateAcceleration(currentVelocity, effectiveDesiredVelocity);
+					currentVelocity += CalculateAcceleration(currentVelocity, effDesVel);
 					alreadyCoveredDistance += currentVelocity;
 					alreadySpentTime++;
 					}
@@ -1633,29 +1637,41 @@ namespace CityTrafficSimulator.Vehicle
 		public virtual void Draw(Graphics g)
 			{
 			GraphicsPath gp = new GraphicsPath();
-			if (! currentlyChangingLine)
+			if (!currentlyChangingLine)
 				{
-				PointF[] ppoints = 
-					{ 
-					state.positionAbs  -  8*state.orientation.RotatedClockwise.Normalized,
-					state.positionAbs  +  8*state.orientation.RotatedClockwise.Normalized,
-					state.positionAbs  -  length*state.orientation.Normalized  +  8*state.orientation.RotatedClockwise.Normalized,
-					state.positionAbs  -  length*state.orientation.Normalized  -  8*state.orientation.RotatedClockwise.Normalized,
-	                };
-				gp.AddPolygon(ppoints);
+				Vector2 direction = state.orientation;
+				if (!direction.IsZeroVector())
+					{
+					Vector2 orientation = direction.Normalized;
+					Vector2 normal = direction.RotatedClockwise.Normalized;
+
+					PointF[] ppoints = 
+						{ 
+						state.positionAbs  -  8 * normal,
+						state.positionAbs  +  8 * normal,
+						state.positionAbs  -  length * orientation  +  8 * normal,
+						state.positionAbs  -  length * orientation  -  8 * normal,
+						};
+					gp.AddPolygon(ppoints);
+					}
 				}
 			else
 				{
 				Vector2 positionOnLcp = currentLineChangePoint.lineSegment.AtPosition(currentPositionOnLineChangePoint);
 				Vector2 derivate = currentLineChangePoint.lineSegment.DerivateAtTime(currentLineChangePoint.lineSegment.PosToTime(currentPositionOnLineChangePoint));
-				PointF[] ppoints = 
-					{ 
-					positionOnLcp  -  8*derivate.RotatedClockwise.Normalized,
-					positionOnLcp  +  8*derivate.RotatedClockwise.Normalized,
-					positionOnLcp  -  length*derivate.Normalized  +  8*derivate.RotatedClockwise.Normalized,
-					positionOnLcp  -  length*derivate.Normalized  -  8*derivate.RotatedClockwise.Normalized,
-					};
-				gp.AddPolygon(ppoints);
+				if (! derivate.IsZeroVector())
+					{
+					Vector2 orientation = derivate.Normalized;
+					Vector2 normal = derivate.RotatedClockwise.Normalized;
+					PointF[] ppoints = 
+						{ 
+						positionOnLcp  -  8 * normal,
+						positionOnLcp  +  8 * normal,
+						positionOnLcp  -  length * orientation  +  8 * normal,
+						positionOnLcp  -  length * orientation  -  8 * normal,
+						};
+					gp.AddPolygon(ppoints);
+					}
 				}
 			g.FillPath(new SolidBrush(color), gp);
 			}

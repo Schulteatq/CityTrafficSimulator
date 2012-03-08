@@ -128,13 +128,21 @@ namespace CityTrafficSimulator.Vehicle
 					positions[5]  -  11*normals[2],
 					};
 
-
-				wagons[0].AddPolygon(frontPoints);
-				g.FillPath(new SolidBrush(color), wagons[0]);
-				wagons[1].AddPolygon(midPoints);
-				g.FillPath(new SolidBrush(color), wagons[1]);
-				wagons[2].AddPolygon(backPoints);
-				g.FillPath(new SolidBrush(color), wagons[2]);
+				if (positions[0] != positions[1])
+					{
+					wagons[0].AddPolygon(frontPoints);
+					g.FillPath(new SolidBrush(color), wagons[0]);
+					}
+				if (positions[2] != positions[3])
+					{
+					wagons[1].AddPolygon(midPoints);
+					g.FillPath(new SolidBrush(color), wagons[1]);
+					}
+				if (positions[4] != positions[5])
+					{
+					wagons[2].AddPolygon(backPoints);
+					g.FillPath(new SolidBrush(color), wagons[2]);
+					}
 				}
 			// 40-Meter-Zug
 			else
@@ -198,18 +206,31 @@ namespace CityTrafficSimulator.Vehicle
 					positions[9]  -  11*normals[4],
 					};
 
-
-				wagons[0].AddPolygon(firstPoints);
-				g.FillPath(new SolidBrush(color), wagons[0]);
-				wagons[1].AddPolygon(secondPoints);
-				g.FillPath(new SolidBrush(color), wagons[1]);
-				wagons[2].AddPolygon(thirdPoints);
-				g.FillPath(new SolidBrush(color), wagons[2]);
-				wagons[3].AddPolygon(forthPoints);
-				g.FillPath(new SolidBrush(color), wagons[3]);
-				wagons[4].AddPolygon(fifthPoints);
-				g.FillPath(new SolidBrush(color), wagons[4]);
-
+				if ((positions[0] - positions[1]).IsNotZeroVector())
+					{
+					wagons[0].AddPolygon(firstPoints);
+					g.FillPath(new SolidBrush(color), wagons[0]);
+					}
+				if ((positions[2] - positions[3]).IsNotZeroVector())
+					{
+					wagons[1].AddPolygon(secondPoints);
+					g.FillPath(new SolidBrush(color), wagons[1]);
+					}
+				if ((positions[4] - positions[5]).IsNotZeroVector())
+					{
+					wagons[2].AddPolygon(thirdPoints);
+					g.FillPath(new SolidBrush(color), wagons[2]);
+					}
+				if ((positions[6] - positions[7]).IsNotZeroVector())
+					{
+					wagons[3].AddPolygon(forthPoints);
+					g.FillPath(new SolidBrush(color), wagons[3]);
+					}
+				if ((positions[8] - positions[9]).IsNotZeroVector())
+					{
+					wagons[4].AddPolygon(fifthPoints);
+					g.FillPath(new SolidBrush(color), wagons[4]);
+					}
 				}
 			}
 

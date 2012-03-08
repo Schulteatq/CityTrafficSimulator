@@ -57,7 +57,31 @@ namespace CityTrafficSimulator
             {
             get { return _posInterval; }
             }
-	
+
+		/// <summary>
+		/// First Bézier curve when this curve is subdivided by De-Casteljau's algorithm into two halfs.
+		/// </summary>
+		private LineSegment _subdividedFirst;
+		/// <summary>
+		/// Second Bézier curve when this curve is subdivided by De-Casteljau's algorithm into two halfs.
+		/// </summary>
+		private LineSegment _subdividedSecond;
+
+		/// <summary>
+		/// First Bézier curve when this curve is subdivided by De-Casteljau's algorithm into two halfs.
+		/// </summary>
+		public LineSegment subdividedFirst
+			{
+			get { if (_subdividedFirst == null) Subdivide(); return _subdividedFirst; }
+			}
+
+		/// <summary>
+		/// Second Bézier curve when this curve is subdivided by De-Casteljau's algorithm into two halfs.
+		/// </summary>
+		public LineSegment subdividedSecond
+			{
+			get { if (_subdividedSecond == null) Subdivide(); return _subdividedSecond; }
+			}
 
         #region Stützpunkte
 		/// <summary>
@@ -305,8 +329,7 @@ namespace CityTrafficSimulator
 		/// Teilt das LineSegment in zwei LineSegments auf
 		/// Verwendet wird der De-Casteljau Algorithmus
 		/// </summary>
-		/// <returns>Ein Paar LineSegmente, die hintereinander das Ursprüngliche LineSegment ergeben</returns>
-        public Pair<LineSegment> Subdivide()
+        private void Subdivide()
 			{
 			// Erste Iteration:
 			Vector2 p01 = p0 + ((p1 - p0) * 0.5d);
@@ -320,7 +343,8 @@ namespace CityTrafficSimulator
 			// Dritte Iteration:
 			Vector2 p03 = p02 + ((p12 - p02) * 0.5d);
 
-			return new Pair<LineSegment>(new LineSegment(0, p0, p01, p02, p03), new LineSegment(0, p03, p12, p21, p3));
+			_subdividedFirst = new LineSegment(0, p0, p01, p02, p03);
+			_subdividedSecond = new LineSegment(0, p03, p12, p21, p3);
 			}
 
 		/// <summary>
@@ -372,16 +396,14 @@ namespace CityTrafficSimulator
 				while ((boundingBox.Height > tolerance) || (boundingBox.Width > tolerance))
 					{
 					// Linie aufsplitten und Einzelteile prüfen
-					Pair<LineSegment> divided = ls.Subdivide();
-
-					if (divided.Left.GetBounds(lineWidth).Contains(position))
+					if (ls.subdividedFirst.GetBounds(lineWidth).Contains(position))
 						{
-						ls = divided.Left;
+						ls = ls.subdividedFirst;
 						boundingBox = ls.GetBounds(lineWidth);
 						}
-					else if (divided.Right.GetBounds(lineWidth).Contains(position))
+					else if (ls.subdividedSecond.GetBounds(lineWidth).Contains(position))
 						{
-						ls = divided.Right;
+						ls = ls.subdividedSecond;
 						boundingBox = ls.GetBounds(lineWidth);
 						}
 					else
