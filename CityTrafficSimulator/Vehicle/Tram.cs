@@ -36,7 +36,7 @@ namespace CityTrafficSimulator.Vehicle
 			length = (rnd.Next(2) == 0) ? 250 : 400;
 
 			_physics = p;
-			_color = Color.FromArgb(rnd.Next(256), rnd.Next(256), rnd.Next(256));
+			color = Color.FromArgb(rnd.Next(256), rnd.Next(256), rnd.Next(256));
 
 			// maximale Beschleunigung
 			a = 1.0;
@@ -77,16 +77,12 @@ namespace CityTrafficSimulator.Vehicle
 			}
 
 		/// <summary>
-		/// Zeichnet das Vehicle auf der Zeichenfläche g
+		/// Generates the GraphicsPath for rendering the vehicle. Should be overloaded by subclasses with distinct rendering.
 		/// </summary>
-		/// <param name="g">Die Zeichenfläche auf der gezeichnet werden soll</param>
-		public override void Draw(Graphics g)
+		/// <returns>A GraphicsPath in world coordinates for rendering the vehicle at the current position.</returns>
+		protected override GraphicsPath BuildGraphicsPath()
 			{
-			// wagons-Array initialisieren
-			for (int i = 0; i < 5; i++)
-				{
-				wagons[i] = new GraphicsPath();
-				}
+			GraphicsPath toReturn = new GraphicsPath();
 
 			// 25-Meter-Zug
 			if (_length == 250)
@@ -129,20 +125,11 @@ namespace CityTrafficSimulator.Vehicle
 					};
 
 				if (positions[0] != positions[1])
-					{
-					wagons[0].AddPolygon(frontPoints);
-					g.FillPath(new SolidBrush(color), wagons[0]);
-					}
+					toReturn.AddPolygon(frontPoints);
 				if (positions[2] != positions[3])
-					{
-					wagons[1].AddPolygon(midPoints);
-					g.FillPath(new SolidBrush(color), wagons[1]);
-					}
+					toReturn.AddPolygon(midPoints);
 				if (positions[4] != positions[5])
-					{
-					wagons[2].AddPolygon(backPoints);
-					g.FillPath(new SolidBrush(color), wagons[2]);
-					}
+					toReturn.AddPolygon(backPoints);
 				}
 			// 40-Meter-Zug
 			else
@@ -207,31 +194,18 @@ namespace CityTrafficSimulator.Vehicle
 					};
 
 				if ((positions[0] - positions[1]).IsNotZeroVector())
-					{
-					wagons[0].AddPolygon(firstPoints);
-					g.FillPath(new SolidBrush(color), wagons[0]);
-					}
+					toReturn.AddPolygon(firstPoints);
 				if ((positions[2] - positions[3]).IsNotZeroVector())
-					{
-					wagons[1].AddPolygon(secondPoints);
-					g.FillPath(new SolidBrush(color), wagons[1]);
-					}
+					toReturn.AddPolygon(secondPoints);
 				if ((positions[4] - positions[5]).IsNotZeroVector())
-					{
-					wagons[2].AddPolygon(thirdPoints);
-					g.FillPath(new SolidBrush(color), wagons[2]);
-					}
+					toReturn.AddPolygon(thirdPoints);
 				if ((positions[6] - positions[7]).IsNotZeroVector())
-					{
-					wagons[3].AddPolygon(forthPoints);
-					g.FillPath(new SolidBrush(color), wagons[3]);
-					}
+					toReturn.AddPolygon(forthPoints);
 				if ((positions[8] - positions[9]).IsNotZeroVector())
-					{
-					wagons[4].AddPolygon(fifthPoints);
-					g.FillPath(new SolidBrush(color), wagons[4]);
-					}
+					toReturn.AddPolygon(fifthPoints);
 				}
+
+			return toReturn;
 			}
 
 		/// <summary>

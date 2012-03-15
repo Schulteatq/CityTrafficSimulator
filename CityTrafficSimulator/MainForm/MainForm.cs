@@ -66,7 +66,7 @@ namespace CityTrafficSimulator
 			_dockingManager.InnerControl = pnlMainGrid;
 
 			// Setup right docks: Most setup panels
-			Content connectionContent = _dockingManager.Contents.Add(pnlConnectionSetup, "Connection Setup");
+			Content connectionContent = _dockingManager.Contents.Add(pnlConnectionSetup, "Network Setup");
 			SetContentDefaultSettings(connectionContent, pnlConnectionSetup.Size);
 			Content networkContent = _dockingManager.Contents.Add(pnlNetworkInfo, "Network Info");
 			SetContentDefaultSettings(networkContent, pnlNetworkInfo.Size);
@@ -125,10 +125,11 @@ namespace CityTrafficSimulator
 			_dockingManager.ContentHiding += new DockingManager.ContentHidingHandler(_dockingManager_ContentHiding);
 			statusleiste.Visible = false;
 
-			if (!statisticsContent.Visible)
-				statisticsContent.BringToFront();
-			if (!layersContent.Visible)
-				layersContent.BringToFront();
+			foreach (Content c in _dockingManager.Contents)
+				{
+				if (!c.Visible)
+					c.BringToFront();
+				}
 			}
 
 		void _dockingManager_ContentHiding(Content c, CancelEventArgs cea)
@@ -513,6 +514,7 @@ namespace CityTrafficSimulator
 						trafficLightForm.selectedEntry = null;
 						}
 
+					cbStopSign.Checked = m_selectedLineNodes[0].stopSign;
 					selectedNodeConnection = null;
 					}
 				else
@@ -524,6 +526,12 @@ namespace CityTrafficSimulator
 				// set network layer combo box to appropriate value
 				if (m_selectedLineNodes.Count > 0)
 					{
+					cbStopSign.Checked = m_selectedLineNodes[0].stopSign;
+					foreach (LineNode ln in m_selectedLineNodes)
+						{
+						cbStopSign.Checked &= ln.stopSign;
+						}
+
 					NetworkLayer tmp = m_selectedLineNodes[0].networkLayer;
 					bool same = true;
 					foreach (LineNode ln in m_selectedLineNodes)
@@ -612,6 +620,14 @@ namespace CityTrafficSimulator
 		/// </summary>
 		public MainForm()
 			{
+			List<Color> tmp = new List<Color>();
+			tmp.Add(Color.DarkRed);
+			tmp.Add(Color.Yellow);
+			tmp.Add(Color.DarkGreen);
+			Tools.Colormap cm = new Tools.Colormap(tmp);
+			IVehicle._colormap = cm;
+			NodeConnection._colormap = cm;
+
 			timelineSteuerung.maxTime = 50;
 
 			InitializeComponent();
@@ -778,6 +794,8 @@ namespace CityTrafficSimulator
 			switch (e.Button)
 				{
 				case MouseButtons.Left:
+					this.Cursor = Cursors.Default;
+
 					#region Nodes hinzufügen
 					if ((Control.ModifierKeys & Keys.Control) == Keys.Control)
 						{
@@ -800,7 +818,7 @@ namespace CityTrafficSimulator
 							if (!((Control.ModifierKeys & Keys.Shift) == Keys.Shift))
 								{
 								// ersten Line Node erstellen
-								nodesToAdd.Add(new LineNode(DaGrid.DockToGrid(clickedPosition, dockToGrid), cbNetworkLayer.SelectedItem as NetworkLayer));
+								nodesToAdd.Add(new LineNode(DaGrid.DockToGrid(clickedPosition, dockToGrid), cbNetworkLayer.SelectedItem as NetworkLayer, cbStopSign.Checked));
 								selectedLineNodesMovingOffset.Add(m_selectedLineNodes[0].outSlope);
 
 								// in/outSlope berechnen
@@ -827,7 +845,7 @@ namespace CityTrafficSimulator
 									selectedLineNodesMovingOffset.Add(offset);
 
 									// Line Node erstellen
-									nodesToAdd.Add(new LineNode(DaGrid.DockToGrid(clickedPosition - offset, dockToGrid), cbNetworkLayer.SelectedItem as NetworkLayer));
+									nodesToAdd.Add(new LineNode(DaGrid.DockToGrid(clickedPosition - offset, dockToGrid), cbNetworkLayer.SelectedItem as NetworkLayer, cbStopSign.Checked));
 
 									// in/outSlope berechnen
 									nodesToAdd[i].outSlope = 30 * Vector2.Normalize(nodesToAdd[i].position - midpoint);
@@ -851,7 +869,7 @@ namespace CityTrafficSimulator
 							else
 								{
 								// ersten Line Node erstellen
-								nodesToAdd.Add(new LineNode(DaGrid.DockToGrid(clickedPosition, dockToGrid), cbNetworkLayer.SelectedItem as NetworkLayer));
+								nodesToAdd.Add(new LineNode(DaGrid.DockToGrid(clickedPosition, dockToGrid), cbNetworkLayer.SelectedItem as NetworkLayer, cbStopSign.Checked));
 								selectedLineNodesMovingOffset.Add(m_selectedLineNodes[0].outSlope);
 
 
@@ -879,7 +897,7 @@ namespace CityTrafficSimulator
 									selectedLineNodesMovingOffset.Add(offset);
 
 									// Line Node erstellen
-									nodesToAdd.Add(new LineNode(DaGrid.DockToGrid(clickedPosition - offset, dockToGrid), cbNetworkLayer.SelectedItem as NetworkLayer));
+									nodesToAdd.Add(new LineNode(DaGrid.DockToGrid(clickedPosition - offset, dockToGrid), cbNetworkLayer.SelectedItem as NetworkLayer, cbStopSign.Checked));
 
 									// in/outSlope berechnen
 									nodesToAdd[i].outSlope = 30 * Vector2.Normalize(nodesToAdd[i].position - midpoint);
@@ -903,7 +921,7 @@ namespace CityTrafficSimulator
 						else
 							{
 							// ersten Line Node erstellen
-							nodesToAdd.Add(new LineNode(DaGrid.DockToGrid(clickedPosition, dockToGrid), cbNetworkLayer.SelectedItem as NetworkLayer));
+							nodesToAdd.Add(new LineNode(DaGrid.DockToGrid(clickedPosition, dockToGrid), cbNetworkLayer.SelectedItem as NetworkLayer, cbStopSign.Checked));
 							selectedLineNodesMovingOffset.Add(new Vector2(0, 0));
 							}
 
@@ -1028,6 +1046,7 @@ namespace CityTrafficSimulator
 					if ((Control.ModifierKeys & Keys.Control) == Keys.Control)
 						{
 						#region Nodes löschen
+						this.Cursor = Cursors.Default;
 						// LineNode entfernen
 						LineNode nodeToDelete = nodeSteuerung.GetLineNodeAt(clickedPosition);
 						// checken ob gefunden
@@ -1046,9 +1065,16 @@ namespace CityTrafficSimulator
 						#region move main grid
 						howToDrag = DragNDrop.MOVE_MAIN_GRID;
 						daGridRubberband.Location = clickedPosition;
+						this.Cursor = Cursors.SizeAll;
 						#endregion
 						}
 
+					break;
+				case MouseButtons.XButton1:
+					daGridScrollPosition.Y += 10 * e.Delta;
+					UpdateDaGridClippingRect();
+					DaGrid.Invalidate();
+					thumbGrid.Invalidate();
 					break;
 				}
 
@@ -1061,6 +1087,8 @@ namespace CityTrafficSimulator
 			clickedPosition *= zoomMultipliers[zoomComboBox.SelectedIndex, 1];
 			clickedPosition += daGridScrollPosition;
 			lblMouseCoordinates.Text = "Current Mouse Coordinates (m): " + (clickedPosition * 0.1).ToString();
+
+			this.Cursor = (howToDrag == DragNDrop.MOVE_MAIN_GRID) ? Cursors.SizeAll : Cursors.Default;
 
 			if (selectedLineNodes != null)
 				{
@@ -1178,6 +1206,7 @@ namespace CityTrafficSimulator
 			Vector2 clickedPosition = new Vector2(e.X, e.Y);
 			clickedPosition *= zoomMultipliers[zoomComboBox.SelectedIndex, 1];
 			clickedPosition += daGridScrollPosition;
+			this.Cursor = Cursors.Default;
 
 			switch (howToDrag)
 				{
@@ -2448,6 +2477,20 @@ namespace CityTrafficSimulator
 		private void cbRenderGrid_CheckedChanged(object sender, EventArgs e)
 			{
 			Invalidate(InvalidationLevel.ONLY_MAIN_CANVAS);
+			}
+
+		private void cbStopSign_Click(object sender, EventArgs e)
+			{
+			foreach (LineNode ln in m_selectedLineNodes)
+				{
+				ln.stopSign = cbStopSign.Checked;
+				}
+			Invalidate(InvalidationLevel.ONLY_MAIN_CANVAS);
+			}
+
+		private void cbVehicleVelocityMapping_CheckedChanged(object sender, EventArgs e)
+			{
+			renderOptionsDaGrid.vehicleVelocityMapping = cbVehicleVelocityMapping.Checked;
 			}
 
 		}

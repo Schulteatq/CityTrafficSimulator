@@ -43,7 +43,7 @@ namespace CityTrafficSimulator.Vehicle
 
 			_physics.targetVelocity += ((rnd.NextDouble() - 0.5) * 4);
 
-			_color = Color.FromArgb(rnd.Next(256), rnd.Next(256), rnd.Next(256));
+			color = Color.FromArgb(rnd.Next(256), rnd.Next(256), rnd.Next(256));
 			_vehicleType = VehicleTypes.CAR;
 			}
         

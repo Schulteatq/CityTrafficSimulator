@@ -34,7 +34,7 @@ namespace CityTrafficSimulator.Vehicle
 			length = (rnd.Next(2) == 0) ? 120 : 180;
 
 			_physics = p;
-			_color = Color.FromArgb(rnd.Next(256), rnd.Next(256), rnd.Next(256));
+			color = Color.FromArgb(rnd.Next(256), rnd.Next(256), rnd.Next(256));
 			_vehicleType = VehicleTypes.BUS;
 
 			// maximale Beschleunigung
@@ -74,13 +74,12 @@ namespace CityTrafficSimulator.Vehicle
 			}
 
 		/// <summary>
-		/// Zeichnet das Vehicle auf der Zeichenfläche g
+		/// Generates the GraphicsPath for rendering the vehicle. Should be overloaded by subclasses with distinct rendering.
 		/// </summary>
-		/// <param name="g">Die Zeichenfläche auf der gezeichnet werden soll</param>
-		public override void Draw(Graphics g)
+		/// <returns>A GraphicsPath in world coordinates for rendering the vehicle at the current position.</returns>
+		protected override GraphicsPath BuildGraphicsPath()
 			{
-			GraphicsPath front = new GraphicsPath();
-			GraphicsPath back = new GraphicsPath();
+			GraphicsPath toReturn = new GraphicsPath();
 
 			// Solobus
 			if (_length == 120)
@@ -102,8 +101,7 @@ namespace CityTrafficSimulator.Vehicle
 						positions[1]  -  11*normals[0],
 					};
 
-					front.AddPolygon(frontPoints);
-					g.FillPath(new SolidBrush(color), front);
+					toReturn.AddPolygon(frontPoints);
 					}
 				}
 			// Gelenkbus
@@ -135,12 +133,12 @@ namespace CityTrafficSimulator.Vehicle
 						positions[3]  -  11*normals[1],
 					};
 
-					front.AddPolygon(frontPoints);
-					g.FillPath(new SolidBrush(color), front);
-					back.AddPolygon(backPoints);
-					g.FillPath(new SolidBrush(color), back);
+					toReturn.AddPolygon(frontPoints);
+					toReturn.AddPolygon(backPoints);
 					}
 				}
+
+			return toReturn;
 			}
 
 		/// <summary>

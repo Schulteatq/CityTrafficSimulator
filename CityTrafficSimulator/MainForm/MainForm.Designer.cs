@@ -66,6 +66,8 @@ namespace CityTrafficSimulator
 			this.btnAddLayer = new System.Windows.Forms.Button();
 			this.tlpLayers = new System.Windows.Forms.TableLayoutPanel();
 			this.pnlStatistics = new System.Windows.Forms.Panel();
+			this.thumbGrid = new CityTrafficSimulator.RechenkaestchenControl();
+			this.DaGrid = new CityTrafficSimulator.RechenkaestchenControl();
 			this.pnlNetworkInfo = new System.Windows.Forms.Panel();
 			this.SpeichernButton = new System.Windows.Forms.Button();
 			this.label7 = new System.Windows.Forms.Label();
@@ -90,12 +92,16 @@ namespace CityTrafficSimulator
 			this.cbRenderLineNodesDebug = new System.Windows.Forms.CheckBox();
 			this.pnlSignalAssignment = new System.Windows.Forms.Panel();
 			this.freeNodeButton = new System.Windows.Forms.Button();
+			this.trafficLightTreeView = new CityTrafficSimulator.Timeline.TrafficLightTreeView(this.components);
 			this.pnlCanvasSetup = new System.Windows.Forms.Panel();
 			this.groupBox1 = new System.Windows.Forms.GroupBox();
 			this.spinLongitude = new System.Windows.Forms.NumericUpDown();
 			this.spinLatitude = new System.Windows.Forms.NumericUpDown();
 			this.btnSetWorldCoordinates = new System.Windows.Forms.Button();
 			this.groupBox2 = new System.Windows.Forms.GroupBox();
+			this.lblMeters = new System.Windows.Forms.Label();
+			this.cbRenderGrid = new System.Windows.Forms.CheckBox();
+			this.spinGridSpacing = new System.Windows.Forms.NumericUpDown();
 			this.lblMouseCoordinates = new System.Windows.Forms.Label();
 			this.lblScrollPosition = new System.Windows.Forms.Label();
 			this.lockNodesCheckBox = new System.Windows.Forms.CheckBox();
@@ -106,29 +112,27 @@ namespace CityTrafficSimulator
 			this.BildLadenButton = new System.Windows.Forms.Button();
 			this.backgroundImageEdit = new System.Windows.Forms.TextBox();
 			this.pnlConnectionSetup = new System.Windows.Forms.Panel();
-			this.label3 = new System.Windows.Forms.Label();
+			this.groupBox4 = new System.Windows.Forms.GroupBox();
+			this.cbStopSign = new System.Windows.Forms.CheckBox();
 			this.cbNetworkLayer = new System.Windows.Forms.ComboBox();
-			this.spinTargetVelocity = new System.Windows.Forms.NumericUpDown();
-			this.label1 = new System.Windows.Forms.Label();
-			this.enableIncomingLineChangeCheckBox = new System.Windows.Forms.CheckBox();
-			this.findLineChangePointsButton = new System.Windows.Forms.Button();
-			this.label4 = new System.Windows.Forms.Label();
-			this.enableOutgoingLineChangeCheckBox = new System.Windows.Forms.CheckBox();
+			this.label3 = new System.Windows.Forms.Label();
+			this.groupBox3 = new System.Windows.Forms.GroupBox();
 			this.nodeConnectionPrioritySpinEdit = new System.Windows.Forms.NumericUpDown();
-			this.tramAllowedCheckBox = new System.Windows.Forms.CheckBox();
+			this.spinTargetVelocity = new System.Windows.Forms.NumericUpDown();
+			this.label4 = new System.Windows.Forms.Label();
+			this.enableIncomingLineChangeCheckBox = new System.Windows.Forms.CheckBox();
+			this.label1 = new System.Windows.Forms.Label();
+			this.findLineChangePointsButton = new System.Windows.Forms.Button();
 			this.carsAllowedCheckBox = new System.Windows.Forms.CheckBox();
+			this.enableOutgoingLineChangeCheckBox = new System.Windows.Forms.CheckBox();
 			this.busAllowedCheckBox = new System.Windows.Forms.CheckBox();
+			this.tramAllowedCheckBox = new System.Windows.Forms.CheckBox();
 			this.statusleiste = new System.Windows.Forms.StatusStrip();
 			this.statusMenu = new System.Windows.Forms.ToolStripDropDownButton();
 			this.statusLabel = new System.Windows.Forms.ToolStripStatusLabel();
 			this.button1 = new System.Windows.Forms.Button();
 			this.button2 = new System.Windows.Forms.Button();
-			this.spinGridSpacing = new System.Windows.Forms.NumericUpDown();
-			this.cbRenderGrid = new System.Windows.Forms.CheckBox();
-			this.lblMeters = new System.Windows.Forms.Label();
-			this.thumbGrid = new CityTrafficSimulator.RechenkaestchenControl();
-			this.DaGrid = new CityTrafficSimulator.RechenkaestchenControl();
-			this.trafficLightTreeView = new CityTrafficSimulator.Timeline.TrafficLightTreeView(this.components);
+			this.cbVehicleVelocityMapping = new System.Windows.Forms.CheckBox();
 			this.pnlSimulationSetup.SuspendLayout();
 			((System.ComponentModel.ISupportInitialize)(this.stepsPerSecondSpinEdit)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this.simulationSpeedSpinEdit)).BeginInit();
@@ -142,13 +146,15 @@ namespace CityTrafficSimulator
 			((System.ComponentModel.ISupportInitialize)(this.spinLongitude)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this.spinLatitude)).BeginInit();
 			this.groupBox2.SuspendLayout();
+			((System.ComponentModel.ISupportInitialize)(this.spinGridSpacing)).BeginInit();
 			this.HintergrundbildGroupBox.SuspendLayout();
 			((System.ComponentModel.ISupportInitialize)(this.backgroundImageScalingSpinEdit)).BeginInit();
 			this.pnlConnectionSetup.SuspendLayout();
-			((System.ComponentModel.ISupportInitialize)(this.spinTargetVelocity)).BeginInit();
+			this.groupBox4.SuspendLayout();
+			this.groupBox3.SuspendLayout();
 			((System.ComponentModel.ISupportInitialize)(this.nodeConnectionPrioritySpinEdit)).BeginInit();
+			((System.ComponentModel.ISupportInitialize)(this.spinTargetVelocity)).BeginInit();
 			this.statusleiste.SuspendLayout();
-			((System.ComponentModel.ISupportInitialize)(this.spinGridSpacing)).BeginInit();
 			this.SuspendLayout();
 			// 
 			// timerSimulation
@@ -290,9 +296,9 @@ namespace CityTrafficSimulator
 			this.pnlLayers.AutoScroll = true;
 			this.pnlLayers.Controls.Add(this.btnAddLayer);
 			this.pnlLayers.Controls.Add(this.tlpLayers);
-			this.pnlLayers.Location = new System.Drawing.Point(482, 418);
+			this.pnlLayers.Location = new System.Drawing.Point(482, 471);
 			this.pnlLayers.Name = "pnlLayers";
-			this.pnlLayers.Size = new System.Drawing.Size(307, 199);
+			this.pnlLayers.Size = new System.Drawing.Size(307, 146);
 			this.pnlLayers.TabIndex = 18;
 			this.pnlLayers.Resize += new System.EventHandler(this.pnlLayers_Resize_1);
 			// 
@@ -325,11 +331,56 @@ namespace CityTrafficSimulator
 			// pnlStatistics
 			// 
 			this.pnlStatistics.BackColor = System.Drawing.Color.White;
-			this.pnlStatistics.Location = new System.Drawing.Point(169, 418);
+			this.pnlStatistics.Location = new System.Drawing.Point(169, 525);
 			this.pnlStatistics.Name = "pnlStatistics";
 			this.pnlStatistics.Size = new System.Drawing.Size(307, 199);
 			this.pnlStatistics.TabIndex = 16;
 			this.pnlStatistics.Paint += new System.Windows.Forms.PaintEventHandler(this.pnlStatistics_Paint);
+			// 
+			// thumbGrid
+			// 
+			this.thumbGrid.BackColor = System.Drawing.Color.White;
+			this.thumbGrid.CellHeight = 0;
+			this.thumbGrid.CellSize = new System.Drawing.Size(0, 0);
+			this.thumbGrid.CellWidth = 0;
+			this.thumbGrid.Dimension = new System.Drawing.Point(0, 0);
+			this.thumbGrid.DrawGrid = false;
+			this.thumbGrid.Location = new System.Drawing.Point(0, 106);
+			this.thumbGrid.Max_X = 0;
+			this.thumbGrid.Max_Y = 0;
+			this.thumbGrid.Name = "thumbGrid";
+			this.thumbGrid.Size = new System.Drawing.Size(139, 127);
+			this.thumbGrid.TabIndex = 15;
+			this.thumbGrid.MouseLeave += new System.EventHandler(this.thumbGrid_MouseLeave);
+			this.thumbGrid.Paint += new System.Windows.Forms.PaintEventHandler(this.thumbGrid_Paint);
+			this.thumbGrid.MouseMove += new System.Windows.Forms.MouseEventHandler(this.thumbGrid_MouseMove);
+			this.thumbGrid.MouseDown += new System.Windows.Forms.MouseEventHandler(this.thumbGrid_MouseDown);
+			this.thumbGrid.Resize += new System.EventHandler(this.thumbGrid_Resize);
+			this.thumbGrid.MouseUp += new System.Windows.Forms.MouseEventHandler(this.thumbGrid_MouseUp);
+			// 
+			// DaGrid
+			// 
+			this.DaGrid.AllowDrop = true;
+			this.DaGrid.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+			this.DaGrid.AutoValidate = System.Windows.Forms.AutoValidate.Disable;
+			this.DaGrid.BackColor = System.Drawing.SystemColors.ButtonFace;
+			this.DaGrid.CellHeight = 16;
+			this.DaGrid.CellSize = new System.Drawing.Size(16, 16);
+			this.DaGrid.CellWidth = 16;
+			this.DaGrid.Dimension = new System.Drawing.Point(64, 64);
+			this.DaGrid.DrawGrid = false;
+			this.DaGrid.Location = new System.Drawing.Point(0, 0);
+			this.DaGrid.Max_X = 64;
+			this.DaGrid.Max_Y = 64;
+			this.DaGrid.Name = "DaGrid";
+			this.DaGrid.Size = new System.Drawing.Size(100, 100);
+			this.DaGrid.TabIndex = 3;
+			this.DaGrid.Paint += new System.Windows.Forms.PaintEventHandler(this.DaGrid_Paint);
+			this.DaGrid.MouseMove += new System.Windows.Forms.MouseEventHandler(this.DaGrid_MouseMove);
+			this.DaGrid.MouseDown += new System.Windows.Forms.MouseEventHandler(this.DaGrid_MouseDown);
+			this.DaGrid.Resize += new System.EventHandler(this.DaGrid_Resize);
+			this.DaGrid.MouseUp += new System.Windows.Forms.MouseEventHandler(this.DaGrid_MouseUp);
+			this.DaGrid.KeyDown += new System.Windows.Forms.KeyEventHandler(this.DaGrid_KeyDown);
 			// 
 			// pnlNetworkInfo
 			// 
@@ -407,6 +458,7 @@ namespace CityTrafficSimulator
 			// pnlRenderSetup
 			// 
 			this.pnlRenderSetup.AutoScroll = true;
+			this.pnlRenderSetup.Controls.Add(this.cbVehicleVelocityMapping);
 			this.pnlRenderSetup.Controls.Add(this.cbRenderFps);
 			this.pnlRenderSetup.Controls.Add(this.cbRenderLineChangePoints);
 			this.pnlRenderSetup.Controls.Add(this.label2);
@@ -423,7 +475,7 @@ namespace CityTrafficSimulator
 			this.pnlRenderSetup.Controls.Add(this.cbRenderLineNodesDebug);
 			this.pnlRenderSetup.Location = new System.Drawing.Point(482, 223);
 			this.pnlRenderSetup.Name = "pnlRenderSetup";
-			this.pnlRenderSetup.Size = new System.Drawing.Size(307, 189);
+			this.pnlRenderSetup.Size = new System.Drawing.Size(307, 223);
 			this.pnlRenderSetup.TabIndex = 4;
 			// 
 			// cbRenderFps
@@ -613,6 +665,15 @@ namespace CityTrafficSimulator
 			this.freeNodeButton.UseVisualStyleBackColor = true;
 			this.freeNodeButton.Click += new System.EventHandler(this.freeNodeButton_Click);
 			// 
+			// trafficLightTreeView
+			// 
+			this.trafficLightTreeView.Location = new System.Drawing.Point(3, 3);
+			this.trafficLightTreeView.Name = "trafficLightTreeView";
+			this.trafficLightTreeView.Size = new System.Drawing.Size(261, 127);
+			this.trafficLightTreeView.steuerung = null;
+			this.trafficLightTreeView.TabIndex = 1;
+			this.trafficLightTreeView.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.trafficLightTreeView_AfterSelect);
+			// 
 			// pnlCanvasSetup
 			// 
 			this.pnlCanvasSetup.AutoScroll = true;
@@ -697,6 +758,46 @@ namespace CityTrafficSimulator
 			this.groupBox2.TabIndex = 23;
 			this.groupBox2.TabStop = false;
 			this.groupBox2.Text = "Network Canvas";
+			// 
+			// lblMeters
+			// 
+			this.lblMeters.AutoSize = true;
+			this.lblMeters.Location = new System.Drawing.Point(192, 21);
+			this.lblMeters.Name = "lblMeters";
+			this.lblMeters.Size = new System.Drawing.Size(38, 13);
+			this.lblMeters.TabIndex = 17;
+			this.lblMeters.Text = "meters";
+			// 
+			// cbRenderGrid
+			// 
+			this.cbRenderGrid.AutoSize = true;
+			this.cbRenderGrid.Location = new System.Drawing.Point(6, 20);
+			this.cbRenderGrid.Name = "cbRenderGrid";
+			this.cbRenderGrid.Size = new System.Drawing.Size(112, 17);
+			this.cbRenderGrid.TabIndex = 16;
+			this.cbRenderGrid.Text = "Render Grid every";
+			this.cbRenderGrid.UseVisualStyleBackColor = true;
+			this.cbRenderGrid.LocationChanged += new System.EventHandler(this.cbRenderGrid_SizeChanged);
+			this.cbRenderGrid.CheckedChanged += new System.EventHandler(this.cbRenderGrid_CheckedChanged);
+			this.cbRenderGrid.SizeChanged += new System.EventHandler(this.cbRenderGrid_SizeChanged);
+			// 
+			// spinGridSpacing
+			// 
+			this.spinGridSpacing.Location = new System.Drawing.Point(124, 19);
+			this.spinGridSpacing.Minimum = new decimal(new int[] {
+            1,
+            0,
+            0,
+            0});
+			this.spinGridSpacing.Name = "spinGridSpacing";
+			this.spinGridSpacing.Size = new System.Drawing.Size(62, 20);
+			this.spinGridSpacing.TabIndex = 15;
+			this.spinGridSpacing.Value = new decimal(new int[] {
+            10,
+            0,
+            0,
+            0});
+			this.spinGridSpacing.ValueChanged += new System.EventHandler(this.spinGridSpacing_ValueChanged);
 			// 
 			// lblMouseCoordinates
 			// 
@@ -802,45 +903,95 @@ namespace CityTrafficSimulator
 			// pnlConnectionSetup
 			// 
 			this.pnlConnectionSetup.AutoScroll = true;
-			this.pnlConnectionSetup.Controls.Add(this.label3);
-			this.pnlConnectionSetup.Controls.Add(this.cbNetworkLayer);
-			this.pnlConnectionSetup.Controls.Add(this.spinTargetVelocity);
-			this.pnlConnectionSetup.Controls.Add(this.label1);
-			this.pnlConnectionSetup.Controls.Add(this.enableIncomingLineChangeCheckBox);
-			this.pnlConnectionSetup.Controls.Add(this.findLineChangePointsButton);
-			this.pnlConnectionSetup.Controls.Add(this.label4);
-			this.pnlConnectionSetup.Controls.Add(this.enableOutgoingLineChangeCheckBox);
-			this.pnlConnectionSetup.Controls.Add(this.nodeConnectionPrioritySpinEdit);
-			this.pnlConnectionSetup.Controls.Add(this.tramAllowedCheckBox);
-			this.pnlConnectionSetup.Controls.Add(this.carsAllowedCheckBox);
-			this.pnlConnectionSetup.Controls.Add(this.busAllowedCheckBox);
+			this.pnlConnectionSetup.Controls.Add(this.groupBox4);
+			this.pnlConnectionSetup.Controls.Add(this.groupBox3);
 			this.pnlConnectionSetup.Location = new System.Drawing.Point(169, 223);
 			this.pnlConnectionSetup.Name = "pnlConnectionSetup";
-			this.pnlConnectionSetup.Size = new System.Drawing.Size(307, 189);
+			this.pnlConnectionSetup.Size = new System.Drawing.Size(307, 242);
 			this.pnlConnectionSetup.TabIndex = 6;
 			// 
-			// label3
+			// groupBox4
 			// 
-			this.label3.AutoSize = true;
-			this.label3.Location = new System.Drawing.Point(3, 62);
-			this.label3.Name = "label3";
-			this.label3.Size = new System.Drawing.Size(121, 13);
-			this.label3.TabIndex = 24;
-			this.label3.Text = "Layer (per-node setting):";
+			this.groupBox4.Controls.Add(this.cbStopSign);
+			this.groupBox4.Controls.Add(this.cbNetworkLayer);
+			this.groupBox4.Controls.Add(this.label3);
+			this.groupBox4.Location = new System.Drawing.Point(4, 154);
+			this.groupBox4.Name = "groupBox4";
+			this.groupBox4.Size = new System.Drawing.Size(271, 69);
+			this.groupBox4.TabIndex = 26;
+			this.groupBox4.TabStop = false;
+			this.groupBox4.Text = "Node Settings";
+			// 
+			// cbStopSign
+			// 
+			this.cbStopSign.AutoSize = true;
+			this.cbStopSign.Location = new System.Drawing.Point(9, 48);
+			this.cbStopSign.Name = "cbStopSign";
+			this.cbStopSign.Size = new System.Drawing.Size(72, 17);
+			this.cbStopSign.TabIndex = 25;
+			this.cbStopSign.Text = "Stop Sign";
+			this.cbStopSign.UseVisualStyleBackColor = true;
+			this.cbStopSign.Click += new System.EventHandler(this.cbStopSign_Click);
 			// 
 			// cbNetworkLayer
 			// 
 			this.cbNetworkLayer.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
 			this.cbNetworkLayer.FormattingEnabled = true;
-			this.cbNetworkLayer.Location = new System.Drawing.Point(165, 59);
+			this.cbNetworkLayer.Location = new System.Drawing.Point(154, 19);
 			this.cbNetworkLayer.Name = "cbNetworkLayer";
 			this.cbNetworkLayer.Size = new System.Drawing.Size(111, 21);
 			this.cbNetworkLayer.TabIndex = 23;
 			this.cbNetworkLayer.SelectionChangeCommitted += new System.EventHandler(this.cbNetworkLayer_SelectionChangeCommitted);
 			// 
+			// label3
+			// 
+			this.label3.AutoSize = true;
+			this.label3.Location = new System.Drawing.Point(6, 22);
+			this.label3.Name = "label3";
+			this.label3.Size = new System.Drawing.Size(121, 13);
+			this.label3.TabIndex = 24;
+			this.label3.Text = "Layer (per-node setting):";
+			// 
+			// groupBox3
+			// 
+			this.groupBox3.Controls.Add(this.nodeConnectionPrioritySpinEdit);
+			this.groupBox3.Controls.Add(this.spinTargetVelocity);
+			this.groupBox3.Controls.Add(this.label4);
+			this.groupBox3.Controls.Add(this.enableIncomingLineChangeCheckBox);
+			this.groupBox3.Controls.Add(this.label1);
+			this.groupBox3.Controls.Add(this.findLineChangePointsButton);
+			this.groupBox3.Controls.Add(this.carsAllowedCheckBox);
+			this.groupBox3.Controls.Add(this.enableOutgoingLineChangeCheckBox);
+			this.groupBox3.Controls.Add(this.busAllowedCheckBox);
+			this.groupBox3.Controls.Add(this.tramAllowedCheckBox);
+			this.groupBox3.Location = new System.Drawing.Point(4, 6);
+			this.groupBox3.Name = "groupBox3";
+			this.groupBox3.Size = new System.Drawing.Size(272, 142);
+			this.groupBox3.TabIndex = 25;
+			this.groupBox3.TabStop = false;
+			this.groupBox3.Text = "Connection Settings";
+			// 
+			// nodeConnectionPrioritySpinEdit
+			// 
+			this.nodeConnectionPrioritySpinEdit.Location = new System.Drawing.Point(178, 19);
+			this.nodeConnectionPrioritySpinEdit.Minimum = new decimal(new int[] {
+            1,
+            0,
+            0,
+            0});
+			this.nodeConnectionPrioritySpinEdit.Name = "nodeConnectionPrioritySpinEdit";
+			this.nodeConnectionPrioritySpinEdit.Size = new System.Drawing.Size(88, 20);
+			this.nodeConnectionPrioritySpinEdit.TabIndex = 0;
+			this.nodeConnectionPrioritySpinEdit.Value = new decimal(new int[] {
+            5,
+            0,
+            0,
+            0});
+			this.nodeConnectionPrioritySpinEdit.ValueChanged += new System.EventHandler(this.nodeConnectionPrioritySpinEdit_ValueChanged);
+			// 
 			// spinTargetVelocity
 			// 
-			this.spinTargetVelocity.Location = new System.Drawing.Point(188, 33);
+			this.spinTargetVelocity.Location = new System.Drawing.Point(178, 45);
 			this.spinTargetVelocity.Maximum = new decimal(new int[] {
             1000,
             0,
@@ -861,21 +1012,21 @@ namespace CityTrafficSimulator
             0});
 			this.spinTargetVelocity.ValueChanged += new System.EventHandler(this.spinTargetVelocity_ValueChanged);
 			// 
-			// label1
+			// label4
 			// 
-			this.label1.AutoSize = true;
-			this.label1.Location = new System.Drawing.Point(3, 35);
-			this.label1.Name = "label1";
-			this.label1.Size = new System.Drawing.Size(108, 13);
-			this.label1.TabIndex = 7;
-			this.label1.Text = "Target Velocity (m/s):";
+			this.label4.AutoSize = true;
+			this.label4.Location = new System.Drawing.Point(6, 21);
+			this.label4.Name = "label4";
+			this.label4.Size = new System.Drawing.Size(98, 13);
+			this.label4.TabIndex = 1;
+			this.label4.Text = "Connection Priority:";
 			// 
 			// enableIncomingLineChangeCheckBox
 			// 
 			this.enableIncomingLineChangeCheckBox.AutoSize = true;
 			this.enableIncomingLineChangeCheckBox.Checked = true;
 			this.enableIncomingLineChangeCheckBox.CheckState = System.Windows.Forms.CheckState.Checked;
-			this.enableIncomingLineChangeCheckBox.Location = new System.Drawing.Point(6, 109);
+			this.enableIncomingLineChangeCheckBox.Location = new System.Drawing.Point(6, 93);
 			this.enableIncomingLineChangeCheckBox.Name = "enableIncomingLineChangeCheckBox";
 			this.enableIncomingLineChangeCheckBox.Size = new System.Drawing.Size(160, 17);
 			this.enableIncomingLineChangeCheckBox.TabIndex = 6;
@@ -883,9 +1034,18 @@ namespace CityTrafficSimulator
 			this.enableIncomingLineChangeCheckBox.UseVisualStyleBackColor = true;
 			this.enableIncomingLineChangeCheckBox.Click += new System.EventHandler(this.enableIncomingLineChangeCheckBox_Click);
 			// 
+			// label1
+			// 
+			this.label1.AutoSize = true;
+			this.label1.Location = new System.Drawing.Point(6, 47);
+			this.label1.Name = "label1";
+			this.label1.Size = new System.Drawing.Size(108, 13);
+			this.label1.TabIndex = 7;
+			this.label1.Text = "Target Velocity (m/s):";
+			// 
 			// findLineChangePointsButton
 			// 
-			this.findLineChangePointsButton.Location = new System.Drawing.Point(6, 129);
+			this.findLineChangePointsButton.Location = new System.Drawing.Point(6, 113);
 			this.findLineChangePointsButton.Name = "findLineChangePointsButton";
 			this.findLineChangePointsButton.Size = new System.Drawing.Size(160, 23);
 			this.findLineChangePointsButton.TabIndex = 22;
@@ -893,63 +1053,12 @@ namespace CityTrafficSimulator
 			this.findLineChangePointsButton.UseVisualStyleBackColor = true;
 			this.findLineChangePointsButton.Click += new System.EventHandler(this.findLineChangePointsButton_Click);
 			// 
-			// label4
-			// 
-			this.label4.AutoSize = true;
-			this.label4.Location = new System.Drawing.Point(3, 9);
-			this.label4.Name = "label4";
-			this.label4.Size = new System.Drawing.Size(98, 13);
-			this.label4.TabIndex = 1;
-			this.label4.Text = "Connection Priority:";
-			// 
-			// enableOutgoingLineChangeCheckBox
-			// 
-			this.enableOutgoingLineChangeCheckBox.AutoSize = true;
-			this.enableOutgoingLineChangeCheckBox.Checked = true;
-			this.enableOutgoingLineChangeCheckBox.CheckState = System.Windows.Forms.CheckState.Checked;
-			this.enableOutgoingLineChangeCheckBox.Location = new System.Drawing.Point(6, 86);
-			this.enableOutgoingLineChangeCheckBox.Name = "enableOutgoingLineChangeCheckBox";
-			this.enableOutgoingLineChangeCheckBox.Size = new System.Drawing.Size(160, 17);
-			this.enableOutgoingLineChangeCheckBox.TabIndex = 5;
-			this.enableOutgoingLineChangeCheckBox.Text = "Allow Outgoing Line Change";
-			this.enableOutgoingLineChangeCheckBox.UseVisualStyleBackColor = true;
-			this.enableOutgoingLineChangeCheckBox.Click += new System.EventHandler(this.enableOutgoingLineChangeCheckBox_Click);
-			// 
-			// nodeConnectionPrioritySpinEdit
-			// 
-			this.nodeConnectionPrioritySpinEdit.Location = new System.Drawing.Point(188, 7);
-			this.nodeConnectionPrioritySpinEdit.Minimum = new decimal(new int[] {
-            1,
-            0,
-            0,
-            0});
-			this.nodeConnectionPrioritySpinEdit.Name = "nodeConnectionPrioritySpinEdit";
-			this.nodeConnectionPrioritySpinEdit.Size = new System.Drawing.Size(88, 20);
-			this.nodeConnectionPrioritySpinEdit.TabIndex = 0;
-			this.nodeConnectionPrioritySpinEdit.Value = new decimal(new int[] {
-            5,
-            0,
-            0,
-            0});
-			this.nodeConnectionPrioritySpinEdit.ValueChanged += new System.EventHandler(this.nodeConnectionPrioritySpinEdit_ValueChanged);
-			// 
-			// tramAllowedCheckBox
-			// 
-			this.tramAllowedCheckBox.AutoSize = true;
-			this.tramAllowedCheckBox.Location = new System.Drawing.Point(190, 132);
-			this.tramAllowedCheckBox.Name = "tramAllowedCheckBox";
-			this.tramAllowedCheckBox.Size = new System.Drawing.Size(83, 17);
-			this.tramAllowedCheckBox.TabIndex = 4;
-			this.tramAllowedCheckBox.Text = "Allow Trams";
-			this.tramAllowedCheckBox.UseVisualStyleBackColor = true;
-			this.tramAllowedCheckBox.CheckedChanged += new System.EventHandler(this.tramAllowedCheckBox_CheckedChanged);
-			// 
 			// carsAllowedCheckBox
 			// 
 			this.carsAllowedCheckBox.AutoSize = true;
 			this.carsAllowedCheckBox.Checked = true;
 			this.carsAllowedCheckBox.CheckState = System.Windows.Forms.CheckState.Checked;
-			this.carsAllowedCheckBox.Location = new System.Drawing.Point(190, 86);
+			this.carsAllowedCheckBox.Location = new System.Drawing.Point(178, 71);
 			this.carsAllowedCheckBox.Name = "carsAllowedCheckBox";
 			this.carsAllowedCheckBox.Size = new System.Drawing.Size(75, 17);
 			this.carsAllowedCheckBox.TabIndex = 2;
@@ -957,16 +1066,40 @@ namespace CityTrafficSimulator
 			this.carsAllowedCheckBox.UseVisualStyleBackColor = true;
 			this.carsAllowedCheckBox.CheckedChanged += new System.EventHandler(this.carsAllowedCheckBox_CheckedChanged);
 			// 
+			// enableOutgoingLineChangeCheckBox
+			// 
+			this.enableOutgoingLineChangeCheckBox.AutoSize = true;
+			this.enableOutgoingLineChangeCheckBox.Checked = true;
+			this.enableOutgoingLineChangeCheckBox.CheckState = System.Windows.Forms.CheckState.Checked;
+			this.enableOutgoingLineChangeCheckBox.Location = new System.Drawing.Point(6, 70);
+			this.enableOutgoingLineChangeCheckBox.Name = "enableOutgoingLineChangeCheckBox";
+			this.enableOutgoingLineChangeCheckBox.Size = new System.Drawing.Size(160, 17);
+			this.enableOutgoingLineChangeCheckBox.TabIndex = 5;
+			this.enableOutgoingLineChangeCheckBox.Text = "Allow Outgoing Line Change";
+			this.enableOutgoingLineChangeCheckBox.UseVisualStyleBackColor = true;
+			this.enableOutgoingLineChangeCheckBox.Click += new System.EventHandler(this.enableOutgoingLineChangeCheckBox_Click);
+			// 
 			// busAllowedCheckBox
 			// 
 			this.busAllowedCheckBox.AutoSize = true;
-			this.busAllowedCheckBox.Location = new System.Drawing.Point(190, 109);
+			this.busAllowedCheckBox.Location = new System.Drawing.Point(178, 94);
 			this.busAllowedCheckBox.Name = "busAllowedCheckBox";
 			this.busAllowedCheckBox.Size = new System.Drawing.Size(88, 17);
 			this.busAllowedCheckBox.TabIndex = 3;
 			this.busAllowedCheckBox.Text = "Allow Busses";
 			this.busAllowedCheckBox.UseVisualStyleBackColor = true;
 			this.busAllowedCheckBox.CheckedChanged += new System.EventHandler(this.busAllowedCheckBox_CheckedChanged);
+			// 
+			// tramAllowedCheckBox
+			// 
+			this.tramAllowedCheckBox.AutoSize = true;
+			this.tramAllowedCheckBox.Location = new System.Drawing.Point(178, 117);
+			this.tramAllowedCheckBox.Name = "tramAllowedCheckBox";
+			this.tramAllowedCheckBox.Size = new System.Drawing.Size(83, 17);
+			this.tramAllowedCheckBox.TabIndex = 4;
+			this.tramAllowedCheckBox.Text = "Allow Trams";
+			this.tramAllowedCheckBox.UseVisualStyleBackColor = true;
+			this.tramAllowedCheckBox.CheckedChanged += new System.EventHandler(this.tramAllowedCheckBox_CheckedChanged);
 			// 
 			// statusleiste
 			// 
@@ -1011,99 +1144,16 @@ namespace CityTrafficSimulator
 			this.button2.Text = "Laden";
 			this.button2.UseVisualStyleBackColor = true;
 			// 
-			// spinGridSpacing
+			// cbVehicleVelocityMapping
 			// 
-			this.spinGridSpacing.Location = new System.Drawing.Point(124, 19);
-			this.spinGridSpacing.Minimum = new decimal(new int[] {
-            1,
-            0,
-            0,
-            0});
-			this.spinGridSpacing.Name = "spinGridSpacing";
-			this.spinGridSpacing.Size = new System.Drawing.Size(62, 20);
-			this.spinGridSpacing.TabIndex = 15;
-			this.spinGridSpacing.Value = new decimal(new int[] {
-            10,
-            0,
-            0,
-            0});
-			this.spinGridSpacing.ValueChanged += new System.EventHandler(this.spinGridSpacing_ValueChanged);
-			// 
-			// cbRenderGrid
-			// 
-			this.cbRenderGrid.AutoSize = true;
-			this.cbRenderGrid.Location = new System.Drawing.Point(6, 20);
-			this.cbRenderGrid.Name = "cbRenderGrid";
-			this.cbRenderGrid.Size = new System.Drawing.Size(112, 17);
-			this.cbRenderGrid.TabIndex = 16;
-			this.cbRenderGrid.Text = "Render Grid every";
-			this.cbRenderGrid.UseVisualStyleBackColor = true;
-			this.cbRenderGrid.LocationChanged += new System.EventHandler(this.cbRenderGrid_SizeChanged);
-			this.cbRenderGrid.CheckedChanged += new System.EventHandler(this.cbRenderGrid_CheckedChanged);
-			this.cbRenderGrid.SizeChanged += new System.EventHandler(this.cbRenderGrid_SizeChanged);
-			// 
-			// lblMeters
-			// 
-			this.lblMeters.AutoSize = true;
-			this.lblMeters.Location = new System.Drawing.Point(192, 21);
-			this.lblMeters.Name = "lblMeters";
-			this.lblMeters.Size = new System.Drawing.Size(38, 13);
-			this.lblMeters.TabIndex = 17;
-			this.lblMeters.Text = "meters";
-			// 
-			// thumbGrid
-			// 
-			this.thumbGrid.BackColor = System.Drawing.Color.White;
-			this.thumbGrid.CellHeight = 0;
-			this.thumbGrid.CellSize = new System.Drawing.Size(0, 0);
-			this.thumbGrid.CellWidth = 0;
-			this.thumbGrid.Dimension = new System.Drawing.Point(0, 0);
-			this.thumbGrid.DrawGrid = false;
-			this.thumbGrid.Location = new System.Drawing.Point(0, 106);
-			this.thumbGrid.Max_X = 0;
-			this.thumbGrid.Max_Y = 0;
-			this.thumbGrid.Name = "thumbGrid";
-			this.thumbGrid.Size = new System.Drawing.Size(139, 127);
-			this.thumbGrid.TabIndex = 15;
-			this.thumbGrid.MouseLeave += new System.EventHandler(this.thumbGrid_MouseLeave);
-			this.thumbGrid.Paint += new System.Windows.Forms.PaintEventHandler(this.thumbGrid_Paint);
-			this.thumbGrid.MouseMove += new System.Windows.Forms.MouseEventHandler(this.thumbGrid_MouseMove);
-			this.thumbGrid.MouseDown += new System.Windows.Forms.MouseEventHandler(this.thumbGrid_MouseDown);
-			this.thumbGrid.Resize += new System.EventHandler(this.thumbGrid_Resize);
-			this.thumbGrid.MouseUp += new System.Windows.Forms.MouseEventHandler(this.thumbGrid_MouseUp);
-			// 
-			// DaGrid
-			// 
-			this.DaGrid.AllowDrop = true;
-			this.DaGrid.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-			this.DaGrid.AutoValidate = System.Windows.Forms.AutoValidate.Disable;
-			this.DaGrid.BackColor = System.Drawing.SystemColors.ButtonFace;
-			this.DaGrid.CellHeight = 16;
-			this.DaGrid.CellSize = new System.Drawing.Size(16, 16);
-			this.DaGrid.CellWidth = 16;
-			this.DaGrid.Dimension = new System.Drawing.Point(64, 64);
-			this.DaGrid.DrawGrid = false;
-			this.DaGrid.Location = new System.Drawing.Point(0, 0);
-			this.DaGrid.Max_X = 64;
-			this.DaGrid.Max_Y = 64;
-			this.DaGrid.Name = "DaGrid";
-			this.DaGrid.Size = new System.Drawing.Size(100, 100);
-			this.DaGrid.TabIndex = 3;
-			this.DaGrid.Paint += new System.Windows.Forms.PaintEventHandler(this.DaGrid_Paint);
-			this.DaGrid.MouseMove += new System.Windows.Forms.MouseEventHandler(this.DaGrid_MouseMove);
-			this.DaGrid.MouseDown += new System.Windows.Forms.MouseEventHandler(this.DaGrid_MouseDown);
-			this.DaGrid.Resize += new System.EventHandler(this.DaGrid_Resize);
-			this.DaGrid.MouseUp += new System.Windows.Forms.MouseEventHandler(this.DaGrid_MouseUp);
-			this.DaGrid.KeyDown += new System.Windows.Forms.KeyEventHandler(this.DaGrid_KeyDown);
-			// 
-			// trafficLightTreeView
-			// 
-			this.trafficLightTreeView.Location = new System.Drawing.Point(3, 3);
-			this.trafficLightTreeView.Name = "trafficLightTreeView";
-			this.trafficLightTreeView.Size = new System.Drawing.Size(261, 127);
-			this.trafficLightTreeView.steuerung = null;
-			this.trafficLightTreeView.TabIndex = 1;
-			this.trafficLightTreeView.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.trafficLightTreeView_AfterSelect);
+			this.cbVehicleVelocityMapping.AutoSize = true;
+			this.cbVehicleVelocityMapping.Location = new System.Drawing.Point(6, 186);
+			this.cbVehicleVelocityMapping.Name = "cbVehicleVelocityMapping";
+			this.cbVehicleVelocityMapping.Size = new System.Drawing.Size(107, 17);
+			this.cbVehicleVelocityMapping.TabIndex = 24;
+			this.cbVehicleVelocityMapping.Text = "Velocity Mapping";
+			this.cbVehicleVelocityMapping.UseVisualStyleBackColor = true;
+			this.cbVehicleVelocityMapping.CheckedChanged += new System.EventHandler(this.cbVehicleVelocityMapping_CheckedChanged);
 			// 
 			// MainForm
 			// 
@@ -1135,16 +1185,19 @@ namespace CityTrafficSimulator
 			((System.ComponentModel.ISupportInitialize)(this.spinLatitude)).EndInit();
 			this.groupBox2.ResumeLayout(false);
 			this.groupBox2.PerformLayout();
+			((System.ComponentModel.ISupportInitialize)(this.spinGridSpacing)).EndInit();
 			this.HintergrundbildGroupBox.ResumeLayout(false);
 			this.HintergrundbildGroupBox.PerformLayout();
 			((System.ComponentModel.ISupportInitialize)(this.backgroundImageScalingSpinEdit)).EndInit();
 			this.pnlConnectionSetup.ResumeLayout(false);
-			this.pnlConnectionSetup.PerformLayout();
-			((System.ComponentModel.ISupportInitialize)(this.spinTargetVelocity)).EndInit();
+			this.groupBox4.ResumeLayout(false);
+			this.groupBox4.PerformLayout();
+			this.groupBox3.ResumeLayout(false);
+			this.groupBox3.PerformLayout();
 			((System.ComponentModel.ISupportInitialize)(this.nodeConnectionPrioritySpinEdit)).EndInit();
+			((System.ComponentModel.ISupportInitialize)(this.spinTargetVelocity)).EndInit();
 			this.statusleiste.ResumeLayout(false);
 			this.statusleiste.PerformLayout();
-			((System.ComponentModel.ISupportInitialize)(this.spinGridSpacing)).EndInit();
 			this.ResumeLayout(false);
 			this.PerformLayout();
 
@@ -1229,6 +1282,10 @@ namespace CityTrafficSimulator
 		private System.Windows.Forms.Label lblMeters;
 		private System.Windows.Forms.CheckBox cbRenderGrid;
 		private System.Windows.Forms.NumericUpDown spinGridSpacing;
+		private System.Windows.Forms.GroupBox groupBox3;
+		private System.Windows.Forms.GroupBox groupBox4;
+		private System.Windows.Forms.CheckBox cbStopSign;
+		private System.Windows.Forms.CheckBox cbVehicleVelocityMapping;
 
         }
     }

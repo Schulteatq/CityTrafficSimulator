@@ -67,7 +67,9 @@
     <ErrorReport>prompt</ErrorReport>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="MagicLibrary, Version=1.7.0.0, Culture=neutral, PublicKeyToken=3a6eb82f876a49bc" />
+    <Reference Include="MagicLibrary, Version=1.7.0.0, Culture=neutral, PublicKeyToken=3a6eb82f876a49bc">
+      <HintPath>bin\Debug\MagicLibrary.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Deployment" />
@@ -84,7 +86,6 @@
     </Compile>
     <Compile Include="Auftrag.cs" />
     <Compile Include="GlobalTime.cs" />
-    <Compile Include="IDrawable.cs" />
     <Compile Include="LoadingForm\LoadingForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -107,6 +108,7 @@
     <Compile Include="Timeline\TrafficLightTreeView.Designer.cs">
       <DependentUpon>TrafficLightTreeView.cs</DependentUpon>
     </Compile>
+    <Compile Include="Tools\Colormap.cs" />
     <Compile Include="Tools\ObserverPattern\IEventListener.cs" />
     <Compile Include="Tools\ObserverPattern\EventManager.cs" />
     <Compile Include="Tools\ObserverPattern\ObserverTreeView.cs">

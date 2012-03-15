@@ -886,7 +886,7 @@ namespace CityTrafficSimulator
 			LineNode endNode = nc.endNode;
 
 			// Mittelknoten erstellen
-			LineNode middleNode = new LineNode(nc.lineSegment.subdividedFirst.p3, nc.startNode.networkLayer);
+			LineNode middleNode = new LineNode(nc.lineSegment.subdividedFirst.p3, nc.startNode.networkLayer, false);
 			middleNode.inSlopeAbs = nc.lineSegment.subdividedFirst.p2;
 			middleNode.outSlopeAbs = nc.lineSegment.subdividedSecond.p1;
 			nodes.Add(middleNode);
@@ -1044,6 +1044,11 @@ namespace CityTrafficSimulator
 			/// Render debug data of Vehicles
 			/// </summary>
 			public bool renderVehicleDebugData = false;
+
+			/// <summary>
+			/// Perform mapping of vehicle's acceleration and velocity to color
+			/// </summary>
+			public bool vehicleVelocityMapping = false;
 			}
 
 		/// <summary>
@@ -1080,7 +1085,7 @@ namespace CityTrafficSimulator
 						{
 						foreach (IVehicle v in nc.vehicles)
 							{
-							v.Draw(g);
+							v.Draw(g, options.vehicleVelocityMapping);
 							}
 						}
 					}

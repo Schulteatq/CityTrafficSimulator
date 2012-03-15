@@ -35,7 +35,7 @@ namespace CityTrafficSimulator
 	/// Verbindung zwischen zwei LineNodes
 	/// </summary>
     [Serializable]
-    public class NodeConnection : ISavable, IDrawable
+    public class NodeConnection : ISavable
 		{
 
 		#region Variablen
@@ -280,6 +280,12 @@ namespace CityTrafficSimulator
 		[XmlIgnore]
 		private Pen drawingPen;
 
+		/// <summary>
+		/// Color map used for velocity color mapping
+		/// </summary>
+		[XmlIgnore]
+		public static Tools.Colormap _colormap;
+
 
 		/// <summary>
 		/// soll die Durchschnittsgeschwindigkeit durch den Zeichenstil visualisiert werden?
@@ -304,34 +310,7 @@ namespace CityTrafficSimulator
 			if (_visualizeAverageSpeed)
 				{
 				float averageSpeed = getAverageSpeedOfVehicles();
-				if (averageSpeed < 2)
-					{
-					drawingPen = new Pen(Color.DarkViolet, 12);
-					}
-				else if (averageSpeed < 4)
-					{
-					drawingPen = new Pen(Color.DarkRed, 12);
-					}
-				else if (averageSpeed < 6)
-					{
-					drawingPen = new Pen(Color.Red, 12);
-					}
-				else if (averageSpeed < 8)
-					{
-					drawingPen = new Pen(Color.Orange, 12);
-					}
-				else if (averageSpeed < 10)
-					{
-					drawingPen = new Pen(Color.Yellow, 12);
-					}
-				else if (averageSpeed < 12)
-					{
-					drawingPen = new Pen(Color.YellowGreen, 12);
-					}
-				else 
-					{
-					drawingPen = new Pen(Color.Lime, 12);
-					}
+				drawingPen = new Pen(_colormap.GetInterpolatedColor(averageSpeed / _targetVelocity), 12);
 				}
 			else
 				{
@@ -1215,7 +1194,6 @@ namespace CityTrafficSimulator
 			return "NodeConnection von #" + startNode.GetHashCode() + " nach #" + endNode.GetHashCode();
 			}
 
-		#region IDrawable Member
 
 		/// <summary>
 		/// Zeichnet das Vehicle auf der Zeichenfläche g
@@ -1262,8 +1240,6 @@ namespace CityTrafficSimulator
 			{
 			g.DrawString(/*"Länge: " + (lineSegment.length/10) + "m\n*/"avg Speed:" + getAverageSpeedOfVehicles() + " m/s", new Font("Arial", 9), new SolidBrush(Color.Black), lineSegment.AtTime(0.5));
 			}
-
-		#endregion
 
 		#region Subklassen
 

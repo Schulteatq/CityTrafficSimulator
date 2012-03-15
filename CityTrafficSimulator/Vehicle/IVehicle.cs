@@ -33,7 +33,7 @@ namespace CityTrafficSimulator.Vehicle
     /// (es werden wohl zunächst nur LKWs und Autos davon abgelitten
     /// </summary>
     [Serializable]
-    public abstract class IVehicle : IDM, IDrawable
+    public abstract class IVehicle : IDM
 		{
 		/// <summary>
 		/// Enum, aller implementierten IVehicles
@@ -330,8 +330,23 @@ namespace CityTrafficSimulator.Vehicle
 		public Color color
 			{
 			get { return _color; }
+			set { _color = value; _fillBrush = new SolidBrush(_color); }
 			}
 
+		/// <summary>
+		/// Color map used for velocity color mapping
+		/// </summary>
+		public static Tools.Colormap _colormap;
+
+		/// <summary>
+		/// Solid brush for filling the vehicle during rendering. Appropriate color has to be set during rendering process.
+		/// </summary>
+		private SolidBrush _fillBrush = new SolidBrush(Color.Black);
+
+		/// <summary>
+		/// Pen for drawing the vehicle outline during rendering. Appropriate color has to be set during rendering process.
+		/// </summary>
+		private Pen _outlinePen = new Pen(Color.Red, 2.0f);
 
 		/// <summary>
 		/// Physik des Fahrzeuges
@@ -399,6 +414,12 @@ namespace CityTrafficSimulator.Vehicle
 		/// checks whether this vehicle is currently stopped
 		/// </summary>
 		public bool isStopped = false;
+
+		/// <summary>
+		/// The stop sign a vehicle shall ignore because, it did already stop in front of it.
+		/// This is a kinda lazy implementation for stop sign handling. Won't work in the (rare) case that a vehicle passes the same stop sign directly twice.
+		/// </summary>
+		private LineNode _stopSignToIgnore = null;
 
 		/// <summary>
 		/// Flag, ob auf der aktuellen NodeConnection ein Spurwechsel nötig ist
@@ -503,6 +524,26 @@ namespace CityTrafficSimulator.Vehicle
 				lowestAcceleration = CalculateAcceleration(physics.velocity, effectiveDesiredVelocity, lookaheadDistance, physics.velocity);
 				}
 
+
+			#endregion
+
+			#region Stop Signs
+
+			Pair<LineNode, double> nextStopSign = GetDistanceToNextStopSignOnRoute(route, arcPos,lookaheadDistance);
+			if (nextStopSign.Left != null && nextStopSign.Left != _stopSignToIgnore)
+				{
+				if (isStopped)
+					{
+					_stopSignToIgnore = nextStopSign.Left;
+					}
+				else
+					{
+					lookaheadDistance = nextStopSign.Right;
+					thinkAboutLineChange = false;
+					lowestAcceleration = CalculateAcceleration(physics.velocity, effectiveDesiredVelocity, nextStopSign.Right, physics.velocity);
+					_state._freeDrive = false;
+					}
+				}
 
 			#endregion
 
@@ -834,7 +875,7 @@ namespace CityTrafficSimulator.Vehicle
 						double startDistance = (currentPosition - currentNodeConnection.lineSegment.length);
 
 						// falls ich mehrere Connections zur Auswahl habe, berechne die mit dem kürzesten Weg
-						// (dieser könnte dich geändert haben, weil dort plötzlich mehr Autos fahren)
+						// (dieser könnte sich geändert haben, weil dort plötzlich mehr Autos fahren)
 						if (currentNodeConnection.endNode.nextConnections.Count > 1)
 							{
 							_wayToGo = Routing.CalculateShortestConenction(currentNodeConnection.endNode, targetNodes, _vehicleType);
@@ -963,6 +1004,31 @@ namespace CityTrafficSimulator.Vehicle
 				}
 
 			return toReturn;
+			}
+
+		/// <summary>
+		/// Searches for the next LineNode with a stop sign on the vehicle's route within the given distance.
+		/// </summary>
+		/// <param name="route">Route of the Vehicle.</param>
+		/// <param name="arcPos">Current arc position of the vehicle on the first NodeConnection on <paramref name="route"/>.</param>
+		/// <param name="distance">Distance to cover during search.</param>
+		/// <returns>Pair of the next LineNode with a stop sign on the vehicle's route that covers the given constraints and the distance to there. Pair of null and <paramref name="distance"/> if no such LineNode exists.</returns>
+		private Pair<LineNode, double> GetDistanceToNextStopSignOnRoute(List<NodeConnection> route, double arcPos, double distance)
+			{
+			Debug.Assert(route.Count > 0);
+
+			double doneDistance = -arcPos;
+			foreach (NodeConnection nc in route)
+				{
+				doneDistance += nc.lineSegment.length;
+				if (doneDistance >= distance)
+					return new Pair<LineNode, double>(null, distance);
+
+				if (nc.endNode.stopSign)
+					return new Pair<LineNode, double>(nc.endNode, doneDistance);
+				}
+
+			return new Pair<LineNode, double>(null, distance);
 			}
 
 		/// <summary>
@@ -1628,15 +1694,13 @@ namespace CityTrafficSimulator.Vehicle
 		/// </summary>
 		protected VehicleTypes _vehicleType;
 
-		#region IDrawable Member
-
 		/// <summary>
-		/// Zeichnet das Vehicle auf der Zeichenfläche g
+		/// Generates the GraphicsPath for rendering the vehicle. Should be overloaded by subclasses with distinct rendering.
 		/// </summary>
-		/// <param name="g">Die Zeichenfläche auf der gezeichnet werden soll</param>
-		public virtual void Draw(Graphics g)
+		/// <returns>A GraphicsPath in world coordinates for rendering the vehicle at the current position.</returns>
+		protected virtual GraphicsPath BuildGraphicsPath()
 			{
-			GraphicsPath gp = new GraphicsPath();
+			GraphicsPath toReturn = new GraphicsPath();
 			if (!currentlyChangingLine)
 				{
 				Vector2 direction = state.orientation;
@@ -1652,14 +1716,14 @@ namespace CityTrafficSimulator.Vehicle
 						state.positionAbs  -  length * orientation  +  8 * normal,
 						state.positionAbs  -  length * orientation  -  8 * normal,
 						};
-					gp.AddPolygon(ppoints);
+					toReturn.AddPolygon(ppoints);
 					}
 				}
 			else
 				{
 				Vector2 positionOnLcp = currentLineChangePoint.lineSegment.AtPosition(currentPositionOnLineChangePoint);
 				Vector2 derivate = currentLineChangePoint.lineSegment.DerivateAtTime(currentLineChangePoint.lineSegment.PosToTime(currentPositionOnLineChangePoint));
-				if (! derivate.IsZeroVector())
+				if (!derivate.IsZeroVector())
 					{
 					Vector2 orientation = derivate.Normalized;
 					Vector2 normal = derivate.RotatedClockwise.Normalized;
@@ -1670,10 +1734,34 @@ namespace CityTrafficSimulator.Vehicle
 						positionOnLcp  -  length * orientation  +  8 * normal,
 						positionOnLcp  -  length * orientation  -  8 * normal,
 						};
-					gp.AddPolygon(ppoints);
+					toReturn.AddPolygon(ppoints);
 					}
 				}
-			g.FillPath(new SolidBrush(color), gp);
+			return toReturn;
+			}
+
+		/// <summary>
+		/// Zeichnet das Vehicle auf der Zeichenfläche g
+		/// </summary>
+		/// <param name="g">Die Zeichenfläche auf der gezeichnet werden soll</param>
+		/// <param name="velocityMapping">Flag whether current velocity and acceleration shall be mapped to color.</param>
+		public virtual void Draw(Graphics g, bool velocityMapping)
+			{
+			GraphicsPath gp = BuildGraphicsPath();
+			if (velocityMapping)
+				_fillBrush.Color = _colormap.GetInterpolatedColor(_physics.velocity / effectiveDesiredVelocity);
+			else
+				_fillBrush.Color = _color;
+			g.FillPath(_fillBrush, gp);
+
+			if (velocityMapping)
+				{
+				if (isStopped)
+					_outlinePen.Color = Color.Red;
+				else
+					_outlinePen.Color = (_physics.acceleration >= 0) ? Color.Green : Color.Orange;
+				g.DrawPath(_outlinePen, gp);
+				}
 			}
 
 		/// <summary>
@@ -1696,8 +1784,6 @@ namespace CityTrafficSimulator.Vehicle
 
 			g.DrawString(hashcode.ToString() + " @ " + currentPosition.ToString("####") + "dm - " + physics.velocity.ToString("##.#") + "m/s - Mult.: " + physics.multiplierTargetVelocity.ToString("#.##") + debugData.ToString(), debugFont, blackBrush, state.positionAbs + new Vector2(0, -10));
 			}
-
-		#endregion
 
 		#region Events
 

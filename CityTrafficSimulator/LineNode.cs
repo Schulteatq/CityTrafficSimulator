@@ -32,7 +32,7 @@ namespace CityTrafficSimulator
 	/// Knotenpunkt zwischen zwei NodeConnections
 	/// </summary>
     [Serializable]
-    public class LineNode : ISavable, ITickable, IDrawable
+    public class LineNode : ISavable, ITickable
 		{
 		#region statische Felder zum Zeichnen
 
@@ -41,6 +41,19 @@ namespace CityTrafficSimulator
 		private static Brush greenBrush = new SolidBrush(Color.Green);
 		private static Brush redBrush = new SolidBrush(Color.Red);
 
+		private static PointF[] _stopSignEdgeOffsets = null;
+		private static void InitStopSignEdgeOffsets()
+			{
+			if (_stopSignEdgeOffsets == null)
+				{
+				_stopSignEdgeOffsets = new PointF[8];
+				for (int i = 0; i < 8; ++i)
+					{
+					_stopSignEdgeOffsets[i] = new PointF((float)(10 * Math.Sin((2 * i + 1) * Math.PI / 8.0)), (float)(10 * Math.Cos((2 * i + 1) * Math.PI / 8.0)));
+					}
+				}
+			}
+
 		#endregion
 
 		/// <summary>
@@ -48,6 +61,19 @@ namespace CityTrafficSimulator
 		/// </summary>
 		[XmlIgnore]
 		public TrafficLight tLight;
+
+		/// <summary>
+		/// Flag whether this LineNode models a stop sign
+		/// </summary>
+		private bool _stopSign;
+		/// <summary>
+		/// Flag whether this LineNode models a stop sign
+		/// </summary>
+		public bool stopSign
+			{
+			get { return _stopSign; }
+			set { _stopSign = value; }
+			}
 
         #region Positionen der Stützpunkte
         /// <summary>
@@ -233,6 +259,7 @@ namespace CityTrafficSimulator
             this.outSlope = new Vector2(0, 0);
 			
 			hashcode = hashcodeIndex++;
+			InitStopSignEdgeOffsets();
             }
 
 		/// <summary>
@@ -241,16 +268,19 @@ namespace CityTrafficSimulator
 		/// </summary>
 		/// <param name="position">absolute Position</param>
 		/// <param name="nl">Network layer of this LineNode</param>
-		public LineNode(Vector2 position, NetworkLayer nl)
+		/// <param name="stopSign">Flag whether this LineNode models a stop sign</param>
+		public LineNode(Vector2 position, NetworkLayer nl, bool stopSign)
             {
             this.position = position;
             this.inSlope = new Vector2(0, 0);
             this.outSlope = new Vector2(0, 0);
 			_networkLayer = nl;
+			_stopSign = stopSign;
 
 			// Hashcode vergeben
 			hashcode = hashcodeIndex++;
-            }
+			InitStopSignEdgeOffsets();
+			}
 
 		/// <summary>
 		/// Konstruktor, erstell einen neuen LineNode an der Position position.
@@ -259,16 +289,19 @@ namespace CityTrafficSimulator
 		/// <param name="inSlope">eingehender Richtungsvektor</param>
 		/// <param name="outSlope">ausgehender Richtungsvektor</param>
 		/// <param name="nl">Network layer of this LineNode</param>
-        public LineNode(Vector2 Position, Vector2 inSlope, Vector2 outSlope, NetworkLayer nl)
+		/// <param name="stopSign">Flag whether this LineNode models a stop sign</param>
+		public LineNode(Vector2 Position, Vector2 inSlope, Vector2 outSlope, NetworkLayer nl, bool stopSign)
             {
             this.position = Position;
             this.inSlope = inSlope;
 			this.outSlope = outSlope;
 			_networkLayer = nl;
+			_stopSign = stopSign;
 
 			// Hashcode vergeben
 			hashcode = hashcodeIndex++;
-            }
+			InitStopSignEdgeOffsets();
+			}
 
         #endregion
 
@@ -554,14 +587,22 @@ namespace CityTrafficSimulator
                 }
             }
 
-		#region IDrawable Member
-
 		/// <summary>
 		/// Zeichnet das Vehicle auf der Zeichenfläche g
 		/// </summary>
 		/// <param name="g">Die Zeichenfläche auf der gezeichnet werden soll</param>
 		public void Draw(Graphics g)
 			{
+			if (_stopSign)
+				{
+				PointF[] poly = new PointF[8];
+				for (int i = 0; i < 8; ++i)
+					{
+					poly[i] = new PointF((float)(_position.X + _stopSignEdgeOffsets[i].X), (float)(_position.Y + _stopSignEdgeOffsets[i].Y));
+					}
+				g.FillPolygon(redBrush, poly);
+				}
+
 			// Node malen
 			g.DrawRectangle(blackPen, positionRect.X, positionRect.Y, positionRect.Width, positionRect.Height);
 
@@ -587,7 +628,5 @@ namespace CityTrafficSimulator
 			{
 			g.DrawString(hashcode.ToString(), new Font("Arial", 8), blackBrush, position);
 			}
-
-		#endregion
 		}
     }
