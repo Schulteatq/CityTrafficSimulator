@@ -34,12 +34,6 @@ namespace CityTrafficSimulator
     public class Auftrag : ITickable, ISavable
         {
 		/// <summary>
-		/// Zufallsgenerator
-		/// </summary>
-		private static Random rnd = new Random();
-
-
-		/// <summary>
 		/// Multiplikator für Fahrzeuge/Stunde
 		/// </summary>
 		public static decimal trafficDensityMultiplier = 1;
@@ -176,7 +170,7 @@ namespace CityTrafficSimulator
 				{
 				int zufallsvariable = 0;
 				if (trafficDensityMultiplier != 0)
-					zufallsvariable = rnd.Next(failedCount, Decimal.ToInt32((decimal)m_häufigkeit / trafficDensityMultiplier));
+					zufallsvariable = GlobalRandom.Instance.Next(failedCount, Decimal.ToInt32((decimal)m_häufigkeit / trafficDensityMultiplier));
 				else
 					zufallsvariable = 1;
 
@@ -214,7 +208,7 @@ namespace CityTrafficSimulator
 			switch (m_vehicleType)
 				{
 				case IVehicle.VehicleTypes.CAR:
-					if (rnd.Next(100) < truckRatio)
+					if (GlobalRandom.Instance.Next(100) < truckRatio)
 						{
 						v = new Truck(p);
 						}
@@ -232,11 +226,11 @@ namespace CityTrafficSimulator
 				}
 
 			// Neue Linie zum Weiterfahren bestimmen
-			LineNode start = startNodes[rnd.Next(startNodes.Count)];
+			LineNode start = startNodes[GlobalRandom.Instance.Next(startNodes.Count)];
 
 			if (start.nextConnections.Count > 0)
-				{	
-				int foo = rnd.Next(start.nextConnections.Count);
+				{
+				int foo = GlobalRandom.Instance.Next(start.nextConnections.Count);
 
 				IVehicle.State state = new IVehicle.State(start.nextConnections[foo], 0);
 				v.state = state;

@@ -126,34 +126,6 @@ namespace CityTrafficSimulator
 
 		#endregion
 
-		#region Methoden für IVehicles
-
-		/// <summary>
-		/// Erstellt ein neues IVehicle, welches von startNode nach targetNode fahren möchte
-		/// </summary>
-		/// <param name="v">zu erstellendes IVehicle</param>
-		/// <param name="startNode">Startknoten</param>
-		/// <param name="targetNodes">Liste von Zielknoten</param>
-		public void AddVehicle(IVehicle v, LineNode startNode, List<LineNode> targetNodes)
-			{
-			if (startNode.nextConnections.Count > 0)
-				{
-				// Neue Linie zum Weiterfahren bestimmen
-				Random rnd = new Random();
-				int foo = rnd.Next(startNode.nextConnections.Count);
-
-				IVehicle.State state = new IVehicle.State(startNode.nextConnections[foo], 0);
-				v.state = state;
-				v.targetNodes = targetNodes;
-				
-				startNode.nextConnections[foo].AddVehicle(v);
-
-				rnd = null;
-				}
-			}
-
-		#endregion
-
 		#region Methoden für LineNodes
 
 		/// <summary>

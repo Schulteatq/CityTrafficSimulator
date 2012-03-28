@@ -54,6 +54,9 @@ namespace CityTrafficSimulator
 			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
 			this.timerSimulation = new System.Windows.Forms.Timer(this.components);
 			this.pnlSimulationSetup = new System.Windows.Forms.Panel();
+			this.btnReset = new System.Windows.Forms.Button();
+			this.label5 = new System.Windows.Forms.Label();
+			this.spinSimulationDuration = new System.Windows.Forms.NumericUpDown();
 			this.stepsPerSecondSpinEdit = new System.Windows.Forms.NumericUpDown();
 			this.label11 = new System.Windows.Forms.Label();
 			this.label12 = new System.Windows.Forms.Label();
@@ -76,6 +79,7 @@ namespace CityTrafficSimulator
 			this.LadenButton = new System.Windows.Forms.Button();
 			this.infoEdit = new System.Windows.Forms.TextBox();
 			this.pnlRenderSetup = new System.Windows.Forms.Panel();
+			this.cbVehicleVelocityMapping = new System.Windows.Forms.CheckBox();
 			this.cbRenderFps = new System.Windows.Forms.CheckBox();
 			this.cbRenderLineChangePoints = new System.Windows.Forms.CheckBox();
 			this.label2 = new System.Windows.Forms.Label();
@@ -132,8 +136,10 @@ namespace CityTrafficSimulator
 			this.statusLabel = new System.Windows.Forms.ToolStripStatusLabel();
 			this.button1 = new System.Windows.Forms.Button();
 			this.button2 = new System.Windows.Forms.Button();
-			this.cbVehicleVelocityMapping = new System.Windows.Forms.CheckBox();
+			this.spinRandomSeed = new System.Windows.Forms.NumericUpDown();
+			this.label6 = new System.Windows.Forms.Label();
 			this.pnlSimulationSetup.SuspendLayout();
+			((System.ComponentModel.ISupportInitialize)(this.spinSimulationDuration)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this.stepsPerSecondSpinEdit)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this.simulationSpeedSpinEdit)).BeginInit();
 			this.pnlMainGrid.SuspendLayout();
@@ -155,6 +161,7 @@ namespace CityTrafficSimulator
 			((System.ComponentModel.ISupportInitialize)(this.nodeConnectionPrioritySpinEdit)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this.spinTargetVelocity)).BeginInit();
 			this.statusleiste.SuspendLayout();
+			((System.ComponentModel.ISupportInitialize)(this.spinRandomSeed)).BeginInit();
 			this.SuspendLayout();
 			// 
 			// timerSimulation
@@ -165,6 +172,11 @@ namespace CityTrafficSimulator
 			// pnlSimulationSetup
 			// 
 			this.pnlSimulationSetup.AutoScroll = true;
+			this.pnlSimulationSetup.Controls.Add(this.label6);
+			this.pnlSimulationSetup.Controls.Add(this.spinRandomSeed);
+			this.pnlSimulationSetup.Controls.Add(this.btnReset);
+			this.pnlSimulationSetup.Controls.Add(this.label5);
+			this.pnlSimulationSetup.Controls.Add(this.spinSimulationDuration);
 			this.pnlSimulationSetup.Controls.Add(this.stepsPerSecondSpinEdit);
 			this.pnlSimulationSetup.Controls.Add(this.label11);
 			this.pnlSimulationSetup.Controls.Add(this.label12);
@@ -176,6 +188,47 @@ namespace CityTrafficSimulator
 			this.pnlSimulationSetup.Name = "pnlSimulationSetup";
 			this.pnlSimulationSetup.Size = new System.Drawing.Size(307, 203);
 			this.pnlSimulationSetup.TabIndex = 9;
+			// 
+			// btnReset
+			// 
+			this.btnReset.Location = new System.Drawing.Point(206, 107);
+			this.btnReset.Name = "btnReset";
+			this.btnReset.Size = new System.Drawing.Size(70, 23);
+			this.btnReset.TabIndex = 30;
+			this.btnReset.Text = "Reset";
+			this.btnReset.UseVisualStyleBackColor = true;
+			this.btnReset.Click += new System.EventHandler(this.btnReset_Click);
+			// 
+			// label5
+			// 
+			this.label5.AutoSize = true;
+			this.label5.Location = new System.Drawing.Point(3, 57);
+			this.label5.Name = "label5";
+			this.label5.Size = new System.Drawing.Size(64, 13);
+			this.label5.TabIndex = 28;
+			this.label5.Text = "Duration (s):";
+			// 
+			// spinSimulationDuration
+			// 
+			this.spinSimulationDuration.Location = new System.Drawing.Point(188, 55);
+			this.spinSimulationDuration.Maximum = new decimal(new int[] {
+            10000,
+            0,
+            0,
+            0});
+			this.spinSimulationDuration.Minimum = new decimal(new int[] {
+            1,
+            0,
+            0,
+            0});
+			this.spinSimulationDuration.Name = "spinSimulationDuration";
+			this.spinSimulationDuration.Size = new System.Drawing.Size(88, 20);
+			this.spinSimulationDuration.TabIndex = 27;
+			this.spinSimulationDuration.Value = new decimal(new int[] {
+            300,
+            0,
+            0,
+            0});
 			// 
 			// stepsPerSecondSpinEdit
 			// 
@@ -221,7 +274,7 @@ namespace CityTrafficSimulator
 			// timerOnCheckBox
 			// 
 			this.timerOnCheckBox.AutoSize = true;
-			this.timerOnCheckBox.Location = new System.Drawing.Point(6, 59);
+			this.timerOnCheckBox.Location = new System.Drawing.Point(6, 111);
 			this.timerOnCheckBox.Name = "timerOnCheckBox";
 			this.timerOnCheckBox.Size = new System.Drawing.Size(110, 17);
 			this.timerOnCheckBox.TabIndex = 6;
@@ -231,9 +284,9 @@ namespace CityTrafficSimulator
 			// 
 			// stepButton
 			// 
-			this.stepButton.Location = new System.Drawing.Point(188, 55);
+			this.stepButton.Location = new System.Drawing.Point(130, 107);
 			this.stepButton.Name = "stepButton";
-			this.stepButton.Size = new System.Drawing.Size(88, 23);
+			this.stepButton.Size = new System.Drawing.Size(70, 23);
 			this.stepButton.TabIndex = 9;
 			this.stepButton.Text = "Single Step";
 			this.stepButton.UseVisualStyleBackColor = true;
@@ -241,9 +294,9 @@ namespace CityTrafficSimulator
 			// 
 			// killAllVehiclesButton
 			// 
-			this.killAllVehiclesButton.Location = new System.Drawing.Point(114, 84);
+			this.killAllVehiclesButton.Location = new System.Drawing.Point(130, 138);
 			this.killAllVehiclesButton.Name = "killAllVehiclesButton";
-			this.killAllVehiclesButton.Size = new System.Drawing.Size(162, 23);
+			this.killAllVehiclesButton.Size = new System.Drawing.Size(146, 23);
 			this.killAllVehiclesButton.TabIndex = 11;
 			this.killAllVehiclesButton.Text = "Remove all Vehicles";
 			this.killAllVehiclesButton.UseVisualStyleBackColor = true;
@@ -331,9 +384,9 @@ namespace CityTrafficSimulator
 			// pnlStatistics
 			// 
 			this.pnlStatistics.BackColor = System.Drawing.Color.White;
-			this.pnlStatistics.Location = new System.Drawing.Point(169, 525);
+			this.pnlStatistics.Location = new System.Drawing.Point(169, 471);
 			this.pnlStatistics.Name = "pnlStatistics";
-			this.pnlStatistics.Size = new System.Drawing.Size(307, 199);
+			this.pnlStatistics.Size = new System.Drawing.Size(307, 108);
 			this.pnlStatistics.TabIndex = 16;
 			this.pnlStatistics.Paint += new System.Windows.Forms.PaintEventHandler(this.pnlStatistics_Paint);
 			// 
@@ -477,6 +530,17 @@ namespace CityTrafficSimulator
 			this.pnlRenderSetup.Name = "pnlRenderSetup";
 			this.pnlRenderSetup.Size = new System.Drawing.Size(307, 223);
 			this.pnlRenderSetup.TabIndex = 4;
+			// 
+			// cbVehicleVelocityMapping
+			// 
+			this.cbVehicleVelocityMapping.AutoSize = true;
+			this.cbVehicleVelocityMapping.Location = new System.Drawing.Point(6, 186);
+			this.cbVehicleVelocityMapping.Name = "cbVehicleVelocityMapping";
+			this.cbVehicleVelocityMapping.Size = new System.Drawing.Size(107, 17);
+			this.cbVehicleVelocityMapping.TabIndex = 24;
+			this.cbVehicleVelocityMapping.Text = "Velocity Mapping";
+			this.cbVehicleVelocityMapping.UseVisualStyleBackColor = true;
+			this.cbVehicleVelocityMapping.CheckedChanged += new System.EventHandler(this.cbVehicleVelocityMapping_CheckedChanged);
 			// 
 			// cbRenderFps
 			// 
@@ -1144,16 +1208,36 @@ namespace CityTrafficSimulator
 			this.button2.Text = "Laden";
 			this.button2.UseVisualStyleBackColor = true;
 			// 
-			// cbVehicleVelocityMapping
+			// spinRandomSeed
 			// 
-			this.cbVehicleVelocityMapping.AutoSize = true;
-			this.cbVehicleVelocityMapping.Location = new System.Drawing.Point(6, 186);
-			this.cbVehicleVelocityMapping.Name = "cbVehicleVelocityMapping";
-			this.cbVehicleVelocityMapping.Size = new System.Drawing.Size(107, 17);
-			this.cbVehicleVelocityMapping.TabIndex = 24;
-			this.cbVehicleVelocityMapping.Text = "Velocity Mapping";
-			this.cbVehicleVelocityMapping.UseVisualStyleBackColor = true;
-			this.cbVehicleVelocityMapping.CheckedChanged += new System.EventHandler(this.cbVehicleVelocityMapping_CheckedChanged);
+			this.spinRandomSeed.Location = new System.Drawing.Point(188, 81);
+			this.spinRandomSeed.Maximum = new decimal(new int[] {
+            2147483647,
+            0,
+            0,
+            0});
+			this.spinRandomSeed.Minimum = new decimal(new int[] {
+            -2147483648,
+            0,
+            0,
+            -2147483648});
+			this.spinRandomSeed.Name = "spinRandomSeed";
+			this.spinRandomSeed.Size = new System.Drawing.Size(88, 20);
+			this.spinRandomSeed.TabIndex = 31;
+			this.spinRandomSeed.Value = new decimal(new int[] {
+            42,
+            0,
+            0,
+            0});
+			// 
+			// label6
+			// 
+			this.label6.AutoSize = true;
+			this.label6.Location = new System.Drawing.Point(3, 83);
+			this.label6.Name = "label6";
+			this.label6.Size = new System.Drawing.Size(78, 13);
+			this.label6.TabIndex = 32;
+			this.label6.Text = "Random Seed:";
 			// 
 			// MainForm
 			// 
@@ -1169,6 +1253,7 @@ namespace CityTrafficSimulator
 			this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.MainForm_FormClosed);
 			this.pnlSimulationSetup.ResumeLayout(false);
 			this.pnlSimulationSetup.PerformLayout();
+			((System.ComponentModel.ISupportInitialize)(this.spinSimulationDuration)).EndInit();
 			((System.ComponentModel.ISupportInitialize)(this.stepsPerSecondSpinEdit)).EndInit();
 			((System.ComponentModel.ISupportInitialize)(this.simulationSpeedSpinEdit)).EndInit();
 			this.pnlMainGrid.ResumeLayout(false);
@@ -1198,6 +1283,7 @@ namespace CityTrafficSimulator
 			((System.ComponentModel.ISupportInitialize)(this.spinTargetVelocity)).EndInit();
 			this.statusleiste.ResumeLayout(false);
 			this.statusleiste.PerformLayout();
+			((System.ComponentModel.ISupportInitialize)(this.spinRandomSeed)).EndInit();
 			this.ResumeLayout(false);
 			this.PerformLayout();
 
@@ -1286,6 +1372,11 @@ namespace CityTrafficSimulator
 		private System.Windows.Forms.GroupBox groupBox4;
 		private System.Windows.Forms.CheckBox cbStopSign;
 		private System.Windows.Forms.CheckBox cbVehicleVelocityMapping;
+		private System.Windows.Forms.Label label5;
+		private System.Windows.Forms.NumericUpDown spinSimulationDuration;
+		private System.Windows.Forms.Button btnReset;
+		private System.Windows.Forms.Label label6;
+		private System.Windows.Forms.NumericUpDown spinRandomSeed;
 
         }
     }

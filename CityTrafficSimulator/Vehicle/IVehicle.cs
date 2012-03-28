@@ -490,7 +490,8 @@ namespace CityTrafficSimulator.Vehicle
 			// if necessary, wait for other vehicle to change line
 			if (_state.letVehicleChangeLine)
 				{
-				lookaheadDistance = Math.Max(0, _state.tailPositionOfOtherVehicle - currentPosition);
+				double percentOfLCILeft = (lci == null) ? 0.2 : Math.Max(0.2, (lci.endArcPos - currentPosition - Constants.breakPointBeforeForcedLineChange) / (lci.length - Constants.breakPointBeforeForcedLineChange));
+				lookaheadDistance = Math.Max(3 * percentOfLCILeft * s0, _state.tailPositionOfOtherVehicle - currentPosition);
 				thinkAboutLineChange = false;
 				lowestAcceleration = CalculateAcceleration(physics.velocity, effectiveDesiredVelocity, lookaheadDistance, physics.velocity);
 				_state._freeDrive = false;
@@ -618,7 +619,7 @@ namespace CityTrafficSimulator.Vehicle
 						double myArcPositionOnOtherConnection = lcp.otherStart.arcPosition + (arcPos - lcp.start.arcPosition);
 
 						// check if found LineChangePoint is not too far away to perform the line change
-						if ((myArcPositionOnOtherConnection >= 0) && (Math.Abs(arcPos - lcp.start.arcPosition) < Constants.maxDistanceToLineChangePoint * 0.67))
+						if ((myArcPositionOnOtherConnection >= 0) && (Math.Abs(arcPos - lcp.start.arcPosition) < Constants.maxDistanceToLineChangePoint * 1.25))
 							{
 							// Check the relation to my surrounding vehicles on the target NodeConnection
 							Pair<VehicleDistance> otherVehicles = lcp.otherStart.nc.GetVehiclesAroundArcPosition(myArcPositionOnOtherConnection, Constants.lookaheadDistance);
@@ -712,23 +713,47 @@ namespace CityTrafficSimulator.Vehicle
 							// Line change still necessacy => stop at break point
 							if (lineChangeNeeded)
 								{
-								lowestAcceleration = Math.Min(lowestAcceleration, CalculateAcceleration(physics.velocity, effectiveDesiredVelocity, lci.endArcPos - Constants.breakPointBeforeForcedLineChange - arcPos, physics.velocity));
-
-								if (! _state.letVehicleChangeLine && percentOfLCILeft < 0.6)
+								if (! _state.letVehicleChangeLine && percentOfLCILeft < 0.8)
 									{
-									Pair<VehicleDistance> vd = lcp.otherStart.nc.GetVehiclesAroundArcPosition(myArcPositionOnOtherConnection - ( (_length + s0)), Constants.lookaheadDistance);
-									if (vd.Left != null && vd.Left.vehicle.p >= p)
+									VehicleDistance otherBehind = lcp.otherStart.nc.GetVehicleBeforeArcPosition(myArcPositionOnOtherConnection - ((_length + s0)), Constants.lookaheadDistance);
+
+									// In rare cases deadlocks may appear when a very long and a short vehicle are driving parallel to each other (and both want to change line):
+									// Then, none of the two finds a vehicle behind on the parallel connection. Hence, none of the two will wait for the other one
+									// and both might drive to the end of the line change interval and there block each other.
+									// To avoid this case, if there is no otherBehind, we also look for a parallel vehicle in front of our back (there should be one, otherwise
+									// something went terribly wrong above). The longer one of the two will wait for the shorter one to make sure, no deadlock will occur.
+									if (otherBehind == null)
+										{
+										VehicleDistance otherFront = lcp.otherStart.nc.GetVehicleBehindArcPosition(myArcPositionOnOtherConnection - ((_length + s0)), Constants.lookaheadDistance);
+										if (otherFront.vehicle.lineChangeNeeded && otherFront.vehicle._length > _length)
+											{
+											otherBehind = otherFront;
+											otherBehind.distance *= -1;
+											}
+										}
+
+									//Pair<VehicleDistance> vd = lcp.otherStart.nc.GetVehiclesAroundArcPosition(myArcPositionOnOtherConnection - ( (_length + s0)), Constants.lookaheadDistance);
+									if (otherBehind != null)// && otherBehind.vehicle.p >= p)
 										{
 										// tell the vehicle behind my back to wait for me
-										_state.SetLineChangeVehicleInteraction(this, vd.Left.vehicle, lcp.otherStart.nc, myArcPositionOnOtherConnection - _length);
+										_state.SetLineChangeVehicleInteraction(this, otherBehind.vehicle, lcp.otherStart.nc, myArcPositionOnOtherConnection - _length);
 
 										// In addition, I need to get behind the vehicle in front of the vehicle which waits for me. Therefore I adapt the desired velocity
-										if (vd.Right != null)
+										if (_state.vehicleThatLetsMeChangeLine != null)
 											{
-											_physics.multiplierTargetVelocity = Math2.Clamp(Math2.Cubic((vd.Right.distance - s0) / (_length + 4 * s0)), 0.3, 1);
+											VehicleDistance otherBehindForman = _state.vehicleThatLetsMeChangeLine.currentNodeConnection.GetVehicleBehindArcPosition(_state.vehicleThatLetsMeChangeLine.currentPosition, 2 * (length + s0));
+											if (otherBehindForman != null)
+												{
+												//_physics.multiplierTargetVelocity = Math2.Clamp(Math2.Cubic((otherBehindForman.distance - otherBehind.distance - s0) / (_length + 4 * s0)), 0.3, 1);
+												double multPerDistance = 1 - Math2.Clamp((otherBehind.distance + _length + s0 - otherBehindForman.distance + otherBehindForman.vehicle._length + s0) / (otherBehindForman.vehicle._length), 0.2, 0.75);
+												double multPerSpeedDiff = Math2.Clamp((otherBehindForman.vehicle._physics.velocity - _physics.velocity) / 2, 0.25, 0.8);
+												_physics.multiplierTargetVelocity = Math.Min(multPerDistance, multPerSpeedDiff);
+												}
 											}
 										}
 									}
+
+								lowestAcceleration = Math.Min(lowestAcceleration, CalculateAcceleration(physics.velocity, effectiveDesiredVelocity, lci.endArcPos - Constants.breakPointBeforeForcedLineChange - arcPos, physics.velocity));
 								}
 							}
 						}

@@ -27,16 +27,14 @@ namespace CityTrafficSimulator.Vehicle
 	{
 	class Tram : IVehicle
 		{
-		private static Random rnd = new Random();
-
 		private GraphicsPath[] wagons = new GraphicsPath[5];
 
 		public Tram(IVehicle.Physics p)
 			{
-			length = (rnd.Next(2) == 0) ? 250 : 400;
+			length = (GlobalRandom.Instance.Next(2) == 0) ? 250 : 400;
 
 			_physics = p;
-			color = Color.FromArgb(rnd.Next(256), rnd.Next(256), rnd.Next(256));
+			color = Color.FromArgb(GlobalRandom.Instance.Next(256), GlobalRandom.Instance.Next(256), GlobalRandom.Instance.Next(256));
 
 			// maximale Beschleunigung
 			a = 1.0;

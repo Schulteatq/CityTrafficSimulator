@@ -33,12 +33,6 @@ namespace CityTrafficSimulator.Verkehr
 	public class TrafficVolume : ITickable
 		{
 		/// <summary>
-		/// Random number generator
-		/// </summary>
-		private static Random rnd = new Random();
-
-
-		/// <summary>
 		/// Multiplikator für Fahrzeuge/Stunde
 		/// </summary>
 		public static decimal trafficDensityMultiplier = 1;
@@ -209,28 +203,28 @@ namespace CityTrafficSimulator.Verkehr
 			if (tickLength > 0)
 				{
 				// enqueue cars
-				int randomValue = trafficVolumeCars > 0 ? rnd.Next((int)Math.Ceiling(3600.0 / (tickLength * trafficVolumeCars))) : -1;
+				int randomValue = trafficVolumeCars > 0 ? GlobalRandom.Instance.Next((int)Math.Ceiling(3600.0 / (tickLength * trafficVolumeCars))) : -1;
 				if (randomValue == 0)
 					{
 					OnVehicleSpawned(new VehicleSpawnedEventArgs(new Car(new IVehicle.Physics()), this));
 					}
 
 				// enqueue trucks
-				randomValue = trafficVolumeTrucks > 0 ? rnd.Next((int)Math.Ceiling(3600.0 / (tickLength * trafficVolumeTrucks))) : -1;
+				randomValue = trafficVolumeTrucks > 0 ? GlobalRandom.Instance.Next((int)Math.Ceiling(3600.0 / (tickLength * trafficVolumeTrucks))) : -1;
 				if (randomValue == 0)
 					{
 					OnVehicleSpawned(new VehicleSpawnedEventArgs(new Truck(new IVehicle.Physics()), this));
 					}
 
 				// enqueue busses
-				randomValue = trafficVolumeBusses > 0 ? rnd.Next((int)Math.Ceiling(3600.0 / (tickLength * trafficVolumeBusses))) : -1;
+				randomValue = trafficVolumeBusses > 0 ? GlobalRandom.Instance.Next((int)Math.Ceiling(3600.0 / (tickLength * trafficVolumeBusses))) : -1;
 				if (randomValue == 0)
 					{
 					OnVehicleSpawned(new VehicleSpawnedEventArgs(new Bus(new IVehicle.Physics()), this));
 					}
 
 				// enqueue trams
-				randomValue = trafficVolumeTrams > 0 ? rnd.Next((int)Math.Ceiling(3600.0 / (tickLength * trafficVolumeTrams))) : -1;
+				randomValue = trafficVolumeTrams > 0 ? GlobalRandom.Instance.Next((int)Math.Ceiling(3600.0 / (tickLength * trafficVolumeTrams))) : -1;
 				if (randomValue == 0)
 					{
 					OnVehicleSpawned(new VehicleSpawnedEventArgs(new Tram(new IVehicle.Physics()), this));

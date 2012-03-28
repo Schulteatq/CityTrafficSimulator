@@ -5,13 +5,13 @@ using System.Runtime.InteropServices;
 // Allgemeine Informationen über eine Assembly werden über die folgenden 
 // Attribute gesteuert. Ändern Sie diese Attributwerte, um die Informationen zu ändern,
 // die mit einer Assembly verknüpft sind.
-[assembly: AssemblyTitle("Rechenkaestchen")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyTitle("CityTrafficSimulator")]
+[assembly: AssemblyDescription("Mircroscopic Traffic Simulation")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("Rechenkaestchen")]
-[assembly: AssemblyCopyright("Copyright ©  2006")]
-[assembly: AssemblyTrademark("")]
+[assembly: AssemblyCompany("Christian Schulte zu Berge")]
+[assembly: AssemblyProduct("CityTrafficSimulator")]
+[assembly: AssemblyCopyright("Copyright © 2006-2012")]
+[assembly: AssemblyTrademark("Christian Schulte zu Berge")]
 [assembly: AssemblyCulture("")]
 
 // Durch Festlegen von ComVisible auf "false" werden die Typen in dieser Assembly unsichtbar 
@@ -29,5 +29,5 @@ using System.Runtime.InteropServices;
 //      Buildnummer
 //      Revision
 //
-[assembly: AssemblyVersion("1.0.0.0")]
-[assembly: AssemblyFileVersion("1.0.0.0")]
+[assembly: AssemblyVersion("0.6.7.0")]
+[assembly: AssemblyFileVersion("0.6.7.0")]

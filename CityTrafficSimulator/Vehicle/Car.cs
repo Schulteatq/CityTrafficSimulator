@@ -27,23 +27,21 @@ namespace CityTrafficSimulator.Vehicle
     {
     class Car : IVehicle
         {
-		private static Random rnd = new Random();
-
         public Car(IVehicle.Physics p)
             {
-			length = rnd.Next(28, 45);
+			length = GlobalRandom.Instance.Next(28, 45);
 
 			_physics = p;
 
 			// etwas Zufall:
-			a *= (rnd.NextDouble() + 0.5);
-			b *= (rnd.NextDouble() + 0.5);
-			s0 *= (rnd.NextDouble() + 0.5);
-			T *= (rnd.NextDouble() + 0.5);
+			a *= (GlobalRandom.Instance.NextDouble() + 0.5);
+			b *= (GlobalRandom.Instance.NextDouble() + 0.5);
+			s0 *= (GlobalRandom.Instance.NextDouble() + 0.5);
+			T *= (GlobalRandom.Instance.NextDouble() + 0.5);
 
-			_physics.targetVelocity += ((rnd.NextDouble() - 0.5) * 4);
+			_physics.targetVelocity += ((GlobalRandom.Instance.NextDouble() - 0.5) * 4);
 
-			color = Color.FromArgb(rnd.Next(256), rnd.Next(256), rnd.Next(256));
+			color = Color.FromArgb(GlobalRandom.Instance.Next(256), GlobalRandom.Instance.Next(256), GlobalRandom.Instance.Next(256));
 			_vehicleType = VehicleTypes.CAR;
 			}
         

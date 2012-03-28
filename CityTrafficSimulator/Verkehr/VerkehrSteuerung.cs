@@ -37,11 +37,6 @@ namespace CityTrafficSimulator.Verkehr
 		{
 		#region Klassenmember inklusive Modifikationsmethoden
 
-		/// <summary>
-		/// Random number generator
-		/// </summary>
-		private static Random rnd = new Random();
-
 		#region Startpunkte
 
 		/// <summary>
@@ -819,10 +814,10 @@ namespace CityTrafficSimulator.Verkehr
 
 		private bool SpawnVehicle(TrafficVolume.VehicleSpawnedEventArgs e)
 			{
-			LineNode start = e.tv.startNodes.nodes[rnd.Next(e.tv.startNodes.nodes.Count)];
+			LineNode start = e.tv.startNodes.nodes[GlobalRandom.Instance.Next(e.tv.startNodes.nodes.Count)];
 			if (start.nextConnections.Count > 0)
 				{
-				int foo = rnd.Next(start.nextConnections.Count);
+				int foo = GlobalRandom.Instance.Next(start.nextConnections.Count);
 				NodeConnection nc = start.nextConnections[foo];
 
 				e.vehicleToSpawn.state = new IVehicle.State(nc, 0);

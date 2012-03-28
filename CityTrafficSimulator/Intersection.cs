@@ -304,8 +304,8 @@ namespace CityTrafficSimulator
 			{
 			Debug.Assert(nc == _aConnection || nc == _bConnection);
 			// TODO: add some safety space before and behind
-			double blockingStartTime = currentTime + CalculateArrivingTime(v, distance - (_frontWaitingDistance / 2)) - v.SafetyTime/2;
-			double blockingEndTime = currentTime + CalculateArrivingTime(v, distance + v.length) + v.SafetyTime/2;
+			double blockingStartTime = currentTime + CalculateArrivingTime(v, distance - (_frontWaitingDistance / 2)) - v.SafetyTime/8;
+			double blockingEndTime = currentTime + CalculateArrivingTime(v, distance + v.length) + v.SafetyTime/8;
 			double originalArrivingTime = currentTime + v.GetTimeToCoverDistance(distance, false);
 
 			if (nc == _aConnection)
@@ -331,8 +331,8 @@ namespace CityTrafficSimulator
 			{
 			Debug.Assert(nc == _aConnection || nc == _bConnection);
 			// TODO: add some safety space before and behind
-			double blockingStartTime = currentTime + CalculateArrivingTime(v, distance - (_frontWaitingDistance / 2)) - v.SafetyTime / 2;
-			double blockingEndTime = currentTime + CalculateArrivingTime(v, distance + v.length) + v.SafetyTime / 2;
+			double blockingStartTime = currentTime + CalculateArrivingTime(v, distance - (_frontWaitingDistance / 2)) - v.SafetyTime / 8;
+			double blockingEndTime = currentTime + CalculateArrivingTime(v, distance + v.length) + v.SafetyTime / 8;
 
 			if (nc == _aConnection)
 				{

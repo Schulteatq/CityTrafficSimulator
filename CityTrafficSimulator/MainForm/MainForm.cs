@@ -354,8 +354,6 @@ namespace CityTrafficSimulator
 
 		private Image[,] satelliteImages;
 
-		private Random rnd = new Random();
-
 		private bool dockToGrid = false;
 
 		private NodeSteuerung.RenderOptions renderOptionsDaGrid = new NodeSteuerung.RenderOptions();
@@ -1826,6 +1824,7 @@ namespace CityTrafficSimulator
 					nodeSteuerung.ResetAverageVelocities();
 
 					// neuzeichnen
+					UpdateDaGridClippingRect();
 					Invalidate(InvalidationLevel.ALL);
 					thumbGrid.Invalidate();
 					}
@@ -2491,6 +2490,11 @@ namespace CityTrafficSimulator
 		private void cbVehicleVelocityMapping_CheckedChanged(object sender, EventArgs e)
 			{
 			renderOptionsDaGrid.vehicleVelocityMapping = cbVehicleVelocityMapping.Checked;
+			}
+
+		private void btnReset_Click(object sender, EventArgs e)
+			{
+			GlobalRandom.Instance.Reset((int)spinRandomSeed.Value);
 			}
 
 		}

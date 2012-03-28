@@ -27,14 +27,12 @@ namespace CityTrafficSimulator.Vehicle
 	{
 	class Bus : IVehicle
 		{
-		private static Random rnd = new Random();
-
 		public Bus(IVehicle.Physics p)
 			{
-			length = (rnd.Next(2) == 0) ? 120 : 180;
+			length = (GlobalRandom.Instance.Next(2) == 0) ? 120 : 180;
 
 			_physics = p;
-			color = Color.FromArgb(rnd.Next(256), rnd.Next(256), rnd.Next(256));
+			color = Color.FromArgb(GlobalRandom.Instance.Next(256), GlobalRandom.Instance.Next(256), GlobalRandom.Instance.Next(256));
 			_vehicleType = VehicleTypes.BUS;
 
 			// maximale Beschleunigung
