@@ -1839,8 +1839,11 @@ namespace CityTrafficSimulator
 			thinkStopwatch.Start();
 
 			double tickLength = 1.0d / (double)stepsPerSecondSpinEdit.Value;
-			timelineSteuerung.Advance(tickLength);
 
+			if (GlobalTime.Instance.currentTime < (double)spinSimulationDuration.Value && (GlobalTime.Instance.currentTime + tickLength) >= (double)spinSimulationDuration.Value)
+				cbEnableSimulation.Checked = false;
+
+			timelineSteuerung.Advance(tickLength);
 			GlobalTime.Instance.Advance(tickLength);
 
 			//tickCount++;
@@ -1858,7 +1861,7 @@ namespace CityTrafficSimulator
 
 		private void timerOnCheckBox_CheckedChanged(object sender, EventArgs e)
 			{
-			timerSimulation.Enabled = timerOnCheckBox.Checked;
+			timerSimulation.Enabled = cbEnableSimulation.Checked;
 			}
 
 		private void BildLadenButton_Click(object sender, EventArgs e)
@@ -2494,7 +2497,11 @@ namespace CityTrafficSimulator
 
 		private void btnReset_Click(object sender, EventArgs e)
 			{
+			killAllVehiclesButton_Click(this, new EventArgs());
 			GlobalRandom.Instance.Reset((int)spinRandomSeed.Value);
+			trafficVolumeSteuerung.ResetTrafficVolumes();
+			GlobalTime.Instance.Reset();
+			timelineSteuerung.AdvanceTo(0);
 			}
 
 		}

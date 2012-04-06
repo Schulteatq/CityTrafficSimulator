@@ -370,6 +370,20 @@ namespace CityTrafficSimulator.Verkehr
 			OnDestinationPointsChanged(new DestinationPointsChangedEventArgs());
 			}
 
+
+		/// <summary>
+		/// Resets the statistics and enqueued vehicles of all handled TrafficVolumes
+		/// </summary>
+		public void ResetTrafficVolumes()
+			{
+			_vehiclesToSpawn.Clear();
+
+			foreach (TrafficVolume tv in _trafficVolumes)
+				{
+				tv.statistics.Reset();
+				}
+			}
+
 		#endregion
 
 		#region Save/Load

@@ -219,10 +219,7 @@ namespace CityTrafficSimulator.Timeline
 		/// <param name="time">Zeit zu der sich die Timeline weiterbewegen soll</param>
 		public void AdvanceTo(double time)
 			{
-			if (time >= 0)
-				_currentTime = time;
-			else
-				_currentTime = 0;
+			_currentTime = time % _maxTime;
 
 			// Nun noch bei jedem TimelineEntry Advance() aufrufen
 			foreach (TimelineGroup tg in _groups)

@@ -132,6 +132,18 @@ namespace CityTrafficSimulator.Verkehr
 			/// Sum of total milage
 			/// </summary>
 			public double sumMilage;
+
+			/// <summary>
+			/// Resets the statistics
+			/// </summary>
+			public void Reset()
+				{
+				numVehicles = 0;
+				numVehiclesReachedDestination = 0;
+				numStops = 0;
+				sumTravelTime = 0;
+				sumMilage = 0;
+				}
 			}
 
 		/// <summary>
