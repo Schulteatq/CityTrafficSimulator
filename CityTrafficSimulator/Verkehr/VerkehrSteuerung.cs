@@ -494,6 +494,8 @@ namespace CityTrafficSimulator.Verkehr
 				XmlSerializer xs = new XmlSerializer(typeof(BunchOfNodes));
 				BunchOfNodes bof = (BunchOfNodes)xs.Deserialize(tr);
 				bof.RecoverFromLoad(saveVersion, nodesList);
+				// ensure that no hashcode is assigned twice
+				BunchOfNodes.hashcodeIndex = Math.Max(bof.hashcode + 1, BunchOfNodes.hashcodeIndex);
 				_destinationPoints.Add(bof);
 				}
 

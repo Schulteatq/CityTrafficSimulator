@@ -37,7 +37,7 @@ namespace CityTrafficSimulator.Verkehr
 		/// <summary>
 		/// Class variable which stores the last used hash code - needs to be incremented on every class instantiation.
 		/// </summary>
-		private static int hashcodeIndex = 0;
+		public static int hashcodeIndex = 0;
 
 		/// <summary>
 		/// Hash code of this very object.
