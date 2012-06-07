@@ -618,17 +618,17 @@ namespace CityTrafficSimulator
 		/// </summary>
 		public MainForm()
 			{
+
+			timelineSteuerung.maxTime = 50;
+
+			InitializeComponent();
+
 			List<Color> tmp = new List<Color>();
 			tmp.Add(Color.DarkRed);
 			tmp.Add(Color.Yellow);
 			tmp.Add(Color.DarkGreen);
 			Tools.Colormap cm = new Tools.Colormap(tmp);
-			IVehicle._colormap = cm;
-			NodeConnection._colormap = cm;
-
-			timelineSteuerung.maxTime = 50;
-
-			InitializeComponent();
+			cmVelocityMapping.colormap = cm;
 
 			_dockingManager = new Crownwood.Magic.Docking.DockingManager(this, VisualStyle.IDE);
 			SetupDockingStuff();
@@ -2502,6 +2502,12 @@ namespace CityTrafficSimulator
 			trafficVolumeSteuerung.ResetTrafficVolumes();
 			GlobalTime.Instance.Reset();
 			timelineSteuerung.AdvanceTo(0);
+			}
+
+		private void cmVelocityMapping_ColorMapChanged(object sender, CityTrafficSimulator.Tools.ColorMapControl.ColorMapChangedEventArgs e)
+			{
+			IVehicle._colormap = cmVelocityMapping.colormap;
+			NodeConnection._colormap = cmVelocityMapping.colormap;
 			}
 
 		}

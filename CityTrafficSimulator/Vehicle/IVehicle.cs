@@ -1351,7 +1351,7 @@ namespace CityTrafficSimulator.Vehicle
 					alreadySpentTime++;
 					}
 
-				return alreadySpentTime - (1 - ((alreadyCoveredDistance - distance) / currentVelocity));
+				return alreadySpentTime - ((alreadyCoveredDistance - distance) / currentVelocity);
 				}
 			}
 

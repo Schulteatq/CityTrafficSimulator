@@ -81,6 +81,8 @@ namespace CityTrafficSimulator
 			this.LadenButton = new System.Windows.Forms.Button();
 			this.infoEdit = new System.Windows.Forms.TextBox();
 			this.pnlRenderSetup = new System.Windows.Forms.Panel();
+			this.label9 = new System.Windows.Forms.Label();
+			this.cmVelocityMapping = new CityTrafficSimulator.Tools.ColorMapControl();
 			this.cbVehicleVelocityMapping = new System.Windows.Forms.CheckBox();
 			this.cbRenderFps = new System.Windows.Forms.CheckBox();
 			this.cbRenderLineChangePoints = new System.Windows.Forms.CheckBox();
@@ -542,6 +544,8 @@ namespace CityTrafficSimulator
 			// pnlRenderSetup
 			// 
 			this.pnlRenderSetup.AutoScroll = true;
+			this.pnlRenderSetup.Controls.Add(this.label9);
+			this.pnlRenderSetup.Controls.Add(this.cmVelocityMapping);
 			this.pnlRenderSetup.Controls.Add(this.cbVehicleVelocityMapping);
 			this.pnlRenderSetup.Controls.Add(this.cbRenderFps);
 			this.pnlRenderSetup.Controls.Add(this.cbRenderLineChangePoints);
@@ -559,13 +563,32 @@ namespace CityTrafficSimulator
 			this.pnlRenderSetup.Controls.Add(this.cbRenderLineNodesDebug);
 			this.pnlRenderSetup.Location = new System.Drawing.Point(482, 223);
 			this.pnlRenderSetup.Name = "pnlRenderSetup";
-			this.pnlRenderSetup.Size = new System.Drawing.Size(307, 223);
+			this.pnlRenderSetup.Size = new System.Drawing.Size(307, 231);
 			this.pnlRenderSetup.TabIndex = 4;
+			// 
+			// label9
+			// 
+			this.label9.AutoSize = true;
+			this.label9.Location = new System.Drawing.Point(3, 66);
+			this.label9.Name = "label9";
+			this.label9.Size = new System.Drawing.Size(58, 13);
+			this.label9.TabIndex = 26;
+			this.label9.Text = "Color Map:";
+			// 
+			// cmVelocityMapping
+			// 
+			this.cmVelocityMapping.colormap = null;
+			this.cmVelocityMapping.Location = new System.Drawing.Point(111, 60);
+			this.cmVelocityMapping.Name = "cmVelocityMapping";
+			this.cmVelocityMapping.Size = new System.Drawing.Size(156, 23);
+			this.cmVelocityMapping.TabIndex = 25;
+			this.cmVelocityMapping.Text = "colorMapControl1";
+			this.cmVelocityMapping.ColorMapChanged += new CityTrafficSimulator.Tools.ColorMapControl.ColorMapChangedEventHandler(this.cmVelocityMapping_ColorMapChanged);
 			// 
 			// cbVehicleVelocityMapping
 			// 
 			this.cbVehicleVelocityMapping.AutoSize = true;
-			this.cbVehicleVelocityMapping.Location = new System.Drawing.Point(6, 186);
+			this.cbVehicleVelocityMapping.Location = new System.Drawing.Point(6, 204);
 			this.cbVehicleVelocityMapping.Name = "cbVehicleVelocityMapping";
 			this.cbVehicleVelocityMapping.Size = new System.Drawing.Size(107, 17);
 			this.cbVehicleVelocityMapping.TabIndex = 24;
@@ -576,7 +599,7 @@ namespace CityTrafficSimulator
 			// cbRenderFps
 			// 
 			this.cbRenderFps.AutoSize = true;
-			this.cbRenderFps.Location = new System.Drawing.Point(6, 163);
+			this.cbRenderFps.Location = new System.Drawing.Point(6, 181);
 			this.cbRenderFps.Name = "cbRenderFps";
 			this.cbRenderFps.Size = new System.Drawing.Size(105, 17);
 			this.cbRenderFps.TabIndex = 23;
@@ -586,7 +609,7 @@ namespace CityTrafficSimulator
 			// cbRenderLineChangePoints
 			// 
 			this.cbRenderLineChangePoints.AutoSize = true;
-			this.cbRenderLineChangePoints.Location = new System.Drawing.Point(120, 163);
+			this.cbRenderLineChangePoints.Location = new System.Drawing.Point(120, 181);
 			this.cbRenderLineChangePoints.Name = "cbRenderLineChangePoints";
 			this.cbRenderLineChangePoints.Size = new System.Drawing.Size(118, 17);
 			this.cbRenderLineChangePoints.TabIndex = 22;
@@ -606,7 +629,7 @@ namespace CityTrafficSimulator
 			// cbRenderIntersections
 			// 
 			this.cbRenderIntersections.AutoSize = true;
-			this.cbRenderIntersections.Location = new System.Drawing.Point(120, 140);
+			this.cbRenderIntersections.Location = new System.Drawing.Point(120, 158);
 			this.cbRenderIntersections.Name = "cbRenderIntersections";
 			this.cbRenderIntersections.Size = new System.Drawing.Size(86, 17);
 			this.cbRenderIntersections.TabIndex = 21;
@@ -638,7 +661,7 @@ namespace CityTrafficSimulator
 			// cbRenderVehiclesDebug
 			// 
 			this.cbRenderVehiclesDebug.AutoSize = true;
-			this.cbRenderVehiclesDebug.Location = new System.Drawing.Point(120, 117);
+			this.cbRenderVehiclesDebug.Location = new System.Drawing.Point(120, 135);
 			this.cbRenderVehiclesDebug.Name = "cbRenderVehiclesDebug";
 			this.cbRenderVehiclesDebug.Size = new System.Drawing.Size(156, 17);
 			this.cbRenderVehiclesDebug.TabIndex = 20;
@@ -649,7 +672,7 @@ namespace CityTrafficSimulator
 			// cbRenderStatistics
 			// 
 			this.cbRenderStatistics.AutoSize = true;
-			this.cbRenderStatistics.Location = new System.Drawing.Point(6, 140);
+			this.cbRenderStatistics.Location = new System.Drawing.Point(6, 158);
 			this.cbRenderStatistics.Name = "cbRenderStatistics";
 			this.cbRenderStatistics.Size = new System.Drawing.Size(68, 17);
 			this.cbRenderStatistics.TabIndex = 12;
@@ -662,7 +685,7 @@ namespace CityTrafficSimulator
 			this.cbRenderVehicles.AutoSize = true;
 			this.cbRenderVehicles.Checked = true;
 			this.cbRenderVehicles.CheckState = System.Windows.Forms.CheckState.Checked;
-			this.cbRenderVehicles.Location = new System.Drawing.Point(6, 117);
+			this.cbRenderVehicles.Location = new System.Drawing.Point(6, 135);
 			this.cbRenderVehicles.Name = "cbRenderVehicles";
 			this.cbRenderVehicles.Size = new System.Drawing.Size(66, 17);
 			this.cbRenderVehicles.TabIndex = 19;
@@ -685,7 +708,7 @@ namespace CityTrafficSimulator
 			// cbRenderConnectionsDebug
 			// 
 			this.cbRenderConnectionsDebug.AutoSize = true;
-			this.cbRenderConnectionsDebug.Location = new System.Drawing.Point(120, 94);
+			this.cbRenderConnectionsDebug.Location = new System.Drawing.Point(120, 112);
 			this.cbRenderConnectionsDebug.Name = "cbRenderConnectionsDebug";
 			this.cbRenderConnectionsDebug.Size = new System.Drawing.Size(141, 17);
 			this.cbRenderConnectionsDebug.TabIndex = 18;
@@ -707,7 +730,7 @@ namespace CityTrafficSimulator
 			this.cbRenderConnections.AutoSize = true;
 			this.cbRenderConnections.Checked = true;
 			this.cbRenderConnections.CheckState = System.Windows.Forms.CheckState.Checked;
-			this.cbRenderConnections.Location = new System.Drawing.Point(6, 94);
+			this.cbRenderConnections.Location = new System.Drawing.Point(6, 112);
 			this.cbRenderConnections.Name = "cbRenderConnections";
 			this.cbRenderConnections.Size = new System.Drawing.Size(85, 17);
 			this.cbRenderConnections.TabIndex = 17;
@@ -720,7 +743,7 @@ namespace CityTrafficSimulator
 			this.cbRenderLineNodes.AutoSize = true;
 			this.cbRenderLineNodes.Checked = true;
 			this.cbRenderLineNodes.CheckState = System.Windows.Forms.CheckState.Checked;
-			this.cbRenderLineNodes.Location = new System.Drawing.Point(6, 71);
+			this.cbRenderLineNodes.Location = new System.Drawing.Point(6, 89);
 			this.cbRenderLineNodes.Name = "cbRenderLineNodes";
 			this.cbRenderLineNodes.Size = new System.Drawing.Size(57, 17);
 			this.cbRenderLineNodes.TabIndex = 15;
@@ -731,7 +754,7 @@ namespace CityTrafficSimulator
 			// cbRenderLineNodesDebug
 			// 
 			this.cbRenderLineNodesDebug.AutoSize = true;
-			this.cbRenderLineNodesDebug.Location = new System.Drawing.Point(120, 71);
+			this.cbRenderLineNodesDebug.Location = new System.Drawing.Point(120, 89);
 			this.cbRenderLineNodesDebug.Name = "cbRenderLineNodesDebug";
 			this.cbRenderLineNodesDebug.Size = new System.Drawing.Size(147, 17);
 			this.cbRenderLineNodesDebug.TabIndex = 16;
@@ -1377,6 +1400,8 @@ namespace CityTrafficSimulator
 		private System.Windows.Forms.Button btnReset;
 		private System.Windows.Forms.Label label6;
 		private System.Windows.Forms.NumericUpDown spinRandomSeed;
+		private System.Windows.Forms.Label label9;
+		private CityTrafficSimulator.Tools.ColorMapControl cmVelocityMapping;
 
         }
     }

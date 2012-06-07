@@ -48,7 +48,11 @@ namespace CityTrafficSimulator
 			try
 				{
 				// erstma nen XMLWriter machen
-				XmlWriter xw = XmlWriter.Create(filename);
+				XmlWriterSettings xws = new XmlWriterSettings();
+				xws.Indent = true;
+				xws.NewLineHandling = NewLineHandling.Entitize;
+
+				XmlWriter xw = XmlWriter.Create(filename, xws);
 
 				// leeren XmlSerializerNamespaces Namespace erstellen
 				XmlSerializerNamespaces xsn = new XmlSerializerNamespaces();

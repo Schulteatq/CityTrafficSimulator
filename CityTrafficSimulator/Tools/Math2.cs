@@ -101,5 +101,17 @@ namespace CityTrafficSimulator
 			{
 			return Math.Min(Math.Max(value, min), max);
 			}
-        }
+
+		/// <summary>
+		/// Clamps value to [min, max]
+		/// </summary>
+		/// <param name="value">Value to clamp</param>
+		/// <param name="min">Minimum value to return</param>
+		/// <param name="max">Maximum value to return</param>
+		/// <returns>min(max(value, min), max)</returns>
+		public static int Clamp(int value, int min, int max)
+			{
+			return Math.Min(Math.Max(value, min), max);
+			}
+		}
     }

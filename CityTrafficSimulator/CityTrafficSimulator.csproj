@@ -109,7 +109,9 @@
     <Compile Include="Timeline\TrafficLightTreeView.Designer.cs">
       <DependentUpon>TrafficLightTreeView.cs</DependentUpon>
     </Compile>
-    <Compile Include="Tools\Colormap.cs" />
+    <Compile Include="Tools\Colormap.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="Tools\ObserverPattern\IEventListener.cs" />
     <Compile Include="Tools\ObserverPattern\EventManager.cs" />
     <Compile Include="Tools\ObserverPattern\ObserverTreeView.cs">
@@ -180,6 +182,10 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Timeline\TrafficLightForm.resx">
       <DependentUpon>TrafficLightForm.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Tools\Colormap.resx">
+      <DependentUpon>Colormap.cs</DependentUpon>
       <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="Verkehr\TrafficVolumeForm.resx">

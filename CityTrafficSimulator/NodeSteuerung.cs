@@ -965,6 +965,7 @@ namespace CityTrafficSimulator
 		/// <summary>
 		/// Network rendering options
 		/// </summary>
+		[Serializable]
 		public class RenderOptions
 			{
 			/// <summary>

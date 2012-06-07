@@ -471,37 +471,37 @@ namespace CityTrafficSimulator
 		/// <summary>
 		/// weißer Pen
 		/// </summary>
-		private Pen whitePen = new Pen(Color.White);
+		private static Pen whitePen = new Pen(Color.White);
 
 		/// <summary>
 		/// weißer Brush
 		/// </summary>
-		private SolidBrush whiteBrush = new SolidBrush(Color.White);
+		private static SolidBrush whiteBrush = new SolidBrush(Color.White);
 
 		/// <summary>
 		/// schwarzer Brush
 		/// </summary>
-		private SolidBrush blackBrush = new SolidBrush(Color.Black);
+		private static SolidBrush blackBrush = new SolidBrush(Color.Black);
 
 		/// <summary>
 		/// schwarzer Pen
 		/// </summary>
-		private Pen blackPen = new Pen(Color.Black, 1.0f);
+		private static Pen blackPen = new Pen(Color.Black, 1.0f);
 
 		/// <summary>
 		/// gestrichelter Pen
 		/// </summary>
-		private Pen dottedPen = new Pen(Color.Black);
+		private static Pen dottedPen = new Pen(Color.Black);
 
 		/// <summary>
 		/// Calibri Font
 		/// </summary>
-		private Font calibriFont = new Font("Calibri", 8.0f);
+		private static Font calibriFont = new Font("Calibri", 8.0f);
 
 		/// <summary>
 		/// Brush für Hintergründe von selektierten Einheiten
 		/// </summary>
-		private Brush backgroundBrush = new SolidBrush(Color.LightGray);
+		private static Brush backgroundBrush = new SolidBrush(Color.LightGray);
 
 		/// <summary>
 		/// Zeilenhöhe
@@ -525,14 +525,12 @@ namespace CityTrafficSimulator
 		/// <param name="e">Argumente</param>
 		private void TimelineControl_Paint(object sender, PaintEventArgs e)
 			{
+			// zunächst die ganze Geschichte weiß streichen
+			e.Graphics.Clear(Color.White);
+
 			if (steuerung != null)
 				{
 				int maxWidth = (int)Math.Round(m_zoom * steuerung.maxTime);
-
-				// zunächst die ganze Geschichte weiß streichen
-				e.Graphics.FillRectangle(whiteBrush, this.ClientRectangle);
-				e.Graphics.DrawRectangle(whitePen, this.ClientRectangle);
-
 
 				int row = 0;
 				foreach (TimelineGroup tg in steuerung.groups)
