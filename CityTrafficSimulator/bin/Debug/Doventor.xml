@@ -1,7 +1,57 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<CityTrafficSimulator saveVersion="6">
+<CityTrafficSimulator saveVersion="8">
+  <ProgramSettings>
+    <_simSpeed>1</_simSpeed>
+    <_simSteps>15</_simSteps>
+    <_simDuration>300</_simDuration>
+    <_simRandomSeed>42</_simRandomSeed>
+    <_zoomLevel>3</_zoomLevel>
+    <_renderQuality>0</_renderQuality>
+    <_renderStatistics>false</_renderStatistics>
+    <_renderVelocityMapping>false</_renderVelocityMapping>
+    <_showFPS>false</_showFPS>
+    <_renderOptions>
+      <renderLineNodes>true</renderLineNodes>
+      <renderNodeConnections>true</renderNodeConnections>
+      <renderVehicles>true</renderVehicles>
+      <performClipping>true</performClipping>
+      <clippingRect>
+        <Location>
+          <X>1327</X>
+          <Y>1911</Y>
+        </Location>
+        <Size>
+          <Width>3896</Width>
+          <Height>2324</Height>
+        </Size>
+        <X>1327</X>
+        <Y>1911</Y>
+        <Width>3896</Width>
+        <Height>2324</Height>
+      </clippingRect>
+      <renderIntersections>false</renderIntersections>
+      <renderLineChangePoints>false</renderLineChangePoints>
+      <renderLineNodeDebugData>false</renderLineNodeDebugData>
+      <renderNodeConnectionDebugData>false</renderNodeConnectionDebugData>
+      <renderVehicleDebugData>false</renderVehicleDebugData>
+      <vehicleVelocityMapping>false</vehicleVelocityMapping>
+    </_renderOptions>
+    <_velocityMappingColorMap>
+      <_colors>
+        <SerializableColor>
+          <argbColor>-7667712</argbColor>
+        </SerializableColor>
+        <SerializableColor>
+          <argbColor>-256</argbColor>
+        </SerializableColor>
+        <SerializableColor>
+          <argbColor>-16751616</argbColor>
+        </SerializableColor>
+      </_colors>
+    </_velocityMappingColorMap>
+  </ProgramSettings>
   <Layout>
-    <title>Doventor (Bremen)</title>
+    <title>Doventor, Bremen, Germany</title>
     <infoText></infoText>
     <LineNode>
       <hashcode>0</hashcode>
@@ -2107,11 +2157,11 @@
         <Y>2974.2020988125441</Y>
       </position>
       <inSlope>
-        <X>-114.27633750646965</X>
+        <X>-114.27633750646964</X>
         <Y>-63.797901187455864</Y>
       </inSlope>
       <outSlope>
-        <X>114.27633750646965</X>
+        <X>114.27633750646964</X>
         <Y>63.797901187455864</Y>
       </outSlope>
     </LineNode>
