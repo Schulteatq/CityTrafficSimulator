@@ -336,7 +336,7 @@ namespace CityTrafficSimulator.Vehicle
 		/// <summary>
 		/// Color map used for velocity color mapping
 		/// </summary>
-		public static Tools.Colormap _colormap;
+		public static Tools.ColorMap _colormap;
 
 		/// <summary>
 		/// Solid brush for filling the vehicle during rendering. Appropriate color has to be set during rendering process.

@@ -82,7 +82,7 @@ namespace CityTrafficSimulator
 			this.infoEdit = new System.Windows.Forms.TextBox();
 			this.pnlRenderSetup = new System.Windows.Forms.Panel();
 			this.label9 = new System.Windows.Forms.Label();
-			this.cmVelocityMapping = new CityTrafficSimulator.Tools.ColorMapControl();
+			this.cmcVelocityMapping = new CityTrafficSimulator.Tools.ColorMapControl();
 			this.cbVehicleVelocityMapping = new System.Windows.Forms.CheckBox();
 			this.cbRenderFps = new System.Windows.Forms.CheckBox();
 			this.cbRenderLineChangePoints = new System.Windows.Forms.CheckBox();
@@ -464,6 +464,7 @@ namespace CityTrafficSimulator
 			this.DaGrid.Paint += new System.Windows.Forms.PaintEventHandler(this.DaGrid_Paint);
 			this.DaGrid.MouseMove += new System.Windows.Forms.MouseEventHandler(this.DaGrid_MouseMove);
 			this.DaGrid.MouseDown += new System.Windows.Forms.MouseEventHandler(this.DaGrid_MouseDown);
+			this.DaGrid.MouseWheel += new System.Windows.Forms.MouseEventHandler(this.DaGrid_MouseWheel);
 			this.DaGrid.Resize += new System.EventHandler(this.DaGrid_Resize);
 			this.DaGrid.MouseUp += new System.Windows.Forms.MouseEventHandler(this.DaGrid_MouseUp);
 			this.DaGrid.KeyDown += new System.Windows.Forms.KeyEventHandler(this.DaGrid_KeyDown);
@@ -545,7 +546,7 @@ namespace CityTrafficSimulator
 			// 
 			this.pnlRenderSetup.AutoScroll = true;
 			this.pnlRenderSetup.Controls.Add(this.label9);
-			this.pnlRenderSetup.Controls.Add(this.cmVelocityMapping);
+			this.pnlRenderSetup.Controls.Add(this.cmcVelocityMapping);
 			this.pnlRenderSetup.Controls.Add(this.cbVehicleVelocityMapping);
 			this.pnlRenderSetup.Controls.Add(this.cbRenderFps);
 			this.pnlRenderSetup.Controls.Add(this.cbRenderLineChangePoints);
@@ -577,13 +578,13 @@ namespace CityTrafficSimulator
 			// 
 			// cmVelocityMapping
 			// 
-			this.cmVelocityMapping.colormap = null;
-			this.cmVelocityMapping.Location = new System.Drawing.Point(111, 60);
-			this.cmVelocityMapping.Name = "cmVelocityMapping";
-			this.cmVelocityMapping.Size = new System.Drawing.Size(156, 23);
-			this.cmVelocityMapping.TabIndex = 25;
-			this.cmVelocityMapping.Text = "colorMapControl1";
-			this.cmVelocityMapping.ColorMapChanged += new CityTrafficSimulator.Tools.ColorMapControl.ColorMapChangedEventHandler(this.cmVelocityMapping_ColorMapChanged);
+			this.cmcVelocityMapping.colormap = null;
+			this.cmcVelocityMapping.Location = new System.Drawing.Point(111, 60);
+			this.cmcVelocityMapping.Name = "cmVelocityMapping";
+			this.cmcVelocityMapping.Size = new System.Drawing.Size(156, 23);
+			this.cmcVelocityMapping.TabIndex = 25;
+			this.cmcVelocityMapping.Text = "colorMapControl1";
+			this.cmcVelocityMapping.ColorMapChanged += new CityTrafficSimulator.Tools.ColorMapControl.ColorMapChangedEventHandler(this.cmVelocityMapping_ColorMapChanged);
 			// 
 			// cbVehicleVelocityMapping
 			// 
@@ -1401,7 +1402,7 @@ namespace CityTrafficSimulator
 		private System.Windows.Forms.Label label6;
 		private System.Windows.Forms.NumericUpDown spinRandomSeed;
 		private System.Windows.Forms.Label label9;
-		private CityTrafficSimulator.Tools.ColorMapControl cmVelocityMapping;
+		private CityTrafficSimulator.Tools.ColorMapControl cmcVelocityMapping;
 
         }
     }

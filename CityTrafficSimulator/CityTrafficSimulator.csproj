@@ -117,6 +117,8 @@
     <Compile Include="Tools\ObserverPattern\ObserverTreeView.cs">
       <SubType>Component</SubType>
     </Compile>
+    <Compile Include="Tools\ProgramSettings.cs" />
+    <Compile Include="Tools\SerializableColor.cs" />
     <Compile Include="Tools\SortedLinkedList.cs" />
     <Compile Include="Vehicle\Bus.cs" />
     <Compile Include="Vehicle\Car.cs" />

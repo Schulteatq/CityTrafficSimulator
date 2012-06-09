@@ -19,6 +19,8 @@
 
 using System;
 using System.Collections.Generic;
+using System.Drawing;
+using System.Drawing.Drawing2D;
 using System.Text;
 using System.Windows.Forms;
 using System.IO;
@@ -26,8 +28,9 @@ using System.Xml;
 using System.Xml.Serialization;
 using System.Threading;
 
-using CityTrafficSimulator.Timeline;
 using CityTrafficSimulator.LoadingForm;
+using CityTrafficSimulator.Timeline;
+using CityTrafficSimulator.Tools;
 
 namespace CityTrafficSimulator
 	{
@@ -36,6 +39,7 @@ namespace CityTrafficSimulator
 	/// </summary>
 	public static class XmlSaver
 		{
+
 		/// <summary>
 		/// Speichert den aktuellen Zustand der nodeSteuerung und timelineSteuerung in die XML-Datei filename
 		/// </summary>
@@ -43,7 +47,8 @@ namespace CityTrafficSimulator
 		/// <param name="nodeSteuerung">NodeSteuerung</param>
 		/// <param name="timelineSteuerung">TimelineSteuerung</param>
 		/// <param name="trafficVolumeSteuerung">VerkehrSteuerung</param>
-		public static void SaveToFile(string filename, NodeSteuerung nodeSteuerung, TimelineSteuerung timelineSteuerung, Verkehr.VerkehrSteuerung trafficVolumeSteuerung)
+		/// <param name="ps">ProgramSettings</param>
+		public static void SaveToFile(string filename, NodeSteuerung nodeSteuerung, TimelineSteuerung timelineSteuerung, Verkehr.VerkehrSteuerung trafficVolumeSteuerung, ProgramSettings ps)
 			{
 			try
 				{
@@ -60,10 +65,14 @@ namespace CityTrafficSimulator
 
 				xw.WriteStartElement("CityTrafficSimulator");
 
-					// saveVersion schreiben
+					// write saveVersion
 					xw.WriteStartAttribute("saveVersion");
-					xw.WriteString("6");
+					xw.WriteString("8");
 					xw.WriteEndAttribute();
+
+					// serialize program settings
+					XmlSerializer xsPS = new XmlSerializer(typeof(ProgramSettings));
+					xsPS.Serialize(xw, ps, xsn);
 
 					nodeSteuerung.SaveToFile(xw, xsn);
 					timelineSteuerung.SaveToFile(xw, xsn);
@@ -89,7 +98,7 @@ namespace CityTrafficSimulator
 		/// <param name="nodeSteuerung">NodeSteuerung in das Layout eingelesen werden soll</param>
 		/// <param name="timelineSteuerung">TimelineSteuerung in die die LSA eingelesen werden soll</param>
 		/// <param name="trafficVolumeSteuerung">VerkehrSteurung to load into</param>
-		public static List<Auftrag> LoadFromFile(String filename, NodeSteuerung nodeSteuerung, TimelineSteuerung timelineSteuerung, Verkehr.VerkehrSteuerung trafficVolumeSteuerung)
+		public static ProgramSettings LoadFromFile(String filename, NodeSteuerung nodeSteuerung, TimelineSteuerung timelineSteuerung, Verkehr.VerkehrSteuerung trafficVolumeSteuerung)
 			{
 			LoadingForm.LoadingForm lf = new LoadingForm.LoadingForm();
 			lf.Text = "Loading file '" + filename + "'...";
@@ -108,7 +117,51 @@ namespace CityTrafficSimulator
 			if (saveVersionNode != null)
 				saveVersion = Int32.Parse(saveVersionNode.Value);
 			else
-				saveVersion = 0; 
+				saveVersion = 0;
+
+			ProgramSettings ps;
+			if (saveVersion >= 8)
+				{
+				XmlNode xnlLineNode = xd.SelectSingleNode("//CityTrafficSimulator/ProgramSettings");
+				TextReader tr = new StringReader(xnlLineNode.OuterXml);
+				XmlSerializer xsPS = new XmlSerializer(typeof(ProgramSettings));
+				ps = (ProgramSettings)xsPS.Deserialize(tr);
+				}
+			else
+				{
+				// set some okay default settings
+				ps = new ProgramSettings();
+
+				ps._simSpeed = 1;
+				ps._simSteps = 15;
+				ps._simDuration = 300;
+				ps._simRandomSeed = 42;
+
+				ps._zoomLevel = 7;
+				ps._renderQuality = 0;
+
+				ps._renderStatistics = false;
+				ps._renderVelocityMapping = false;
+				ps._showFPS = false;
+
+				ps._renderOptions = new NodeSteuerung.RenderOptions();
+				ps._renderOptions.renderLineNodes = true;
+				ps._renderOptions.renderNodeConnections = true;
+				ps._renderOptions.renderVehicles = true;
+				ps._renderOptions.performClipping = true;
+				ps._renderOptions.clippingRect = new Rectangle(0, 0, 10000, 10000);
+				ps._renderOptions.renderIntersections = false;
+				ps._renderOptions.renderLineChangePoints = false;
+				ps._renderOptions.renderLineNodeDebugData = false;
+				ps._renderOptions.renderNodeConnectionDebugData = false;
+				ps._renderOptions.renderVehicleDebugData = false;
+
+				List<Color> tmp = new List<Color>();
+				tmp.Add(Color.DarkRed);
+				tmp.Add(Color.Yellow);
+				tmp.Add(Color.DarkGreen);
+				ps._velocityMappingColorMap = new Tools.ColorMap(tmp);
+				}
 			
 			lf.StepUpperProgress("Parsing Network Layout...");
 			List<Auftrag> toReturn = nodeSteuerung.LoadFromFile(xd, lf);
@@ -129,7 +182,7 @@ namespace CityTrafficSimulator
 			lf.Close();
 			lf = null;
 
-			return toReturn;
+			return ps;
 			}
 		}
 	}

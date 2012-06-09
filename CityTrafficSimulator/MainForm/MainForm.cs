@@ -35,7 +35,7 @@ using Crownwood.Magic.Docking;
 
 using CityTrafficSimulator.Timeline;
 using CityTrafficSimulator.Vehicle;
-using CityTrafficSimulator.Tools.ObserverPattern;
+using CityTrafficSimulator.Tools;
 
 
 namespace CityTrafficSimulator
@@ -140,6 +140,27 @@ namespace CityTrafficSimulator
 		#endregion
 
 		#region Hilfsklassen
+
+		/// <summary>
+		/// stores the window state
+		/// </summary>
+		[Serializable]
+		public struct WindowSettings
+			{
+			/// <summary>
+			/// Window state
+			/// </summary>
+			public FormWindowState _windowState;
+			/// <summary>
+			/// Position of window
+			/// </summary>
+			public Point _position;
+			/// <summary>
+			/// Size of window
+			/// </summary>
+			public Size _size;
+			}
+
 		private enum DragNDrop
 			{
 			NONE,
@@ -627,10 +648,12 @@ namespace CityTrafficSimulator
 			tmp.Add(Color.DarkRed);
 			tmp.Add(Color.Yellow);
 			tmp.Add(Color.DarkGreen);
-			Tools.Colormap cm = new Tools.Colormap(tmp);
-			cmVelocityMapping.colormap = cm;
+			Tools.ColorMap cm = new Tools.ColorMap(tmp);
+			cmcVelocityMapping.colormap = cm;
 
 			_dockingManager = new Crownwood.Magic.Docking.DockingManager(this, VisualStyle.IDE);
+			_dockingManager.SaveCustomConfig += new DockingManager.SaveCustomConfigHandler(_dockingManager_SaveCustomConfig);
+			_dockingManager.LoadCustomConfig += new DockingManager.LoadCustomConfigHandler(_dockingManager_LoadCustomConfig);
 			SetupDockingStuff();
 
 			trafficLightTreeView.steuerung = timelineSteuerung;
@@ -669,6 +692,38 @@ namespace CityTrafficSimulator
 			renderOptionsThumbnail.renderLineNodeDebugData = false;
 			renderOptionsThumbnail.renderNodeConnectionDebugData = false;
 			renderOptionsThumbnail.renderVehicleDebugData = false;
+			}
+
+		void _dockingManager_LoadCustomConfig(XmlTextReader xmlIn)
+			{
+			if (xmlIn.Name == "WindowSettings")
+				{
+				XmlSerializer xs = new XmlSerializer(typeof(WindowSettings));
+				WindowSettings ws = (WindowSettings)xs.Deserialize(xmlIn);
+				if (ws._size.IsEmpty || ws._position.IsEmpty)
+					{
+					StartPosition = FormStartPosition.WindowsDefaultLocation;
+					}
+				else
+					{
+					Location = ws._position;
+					Size = ws._size;
+					StartPosition = FormStartPosition.Manual;
+					WindowState = ws._windowState;
+					}
+				}
+			}
+
+		void _dockingManager_SaveCustomConfig(XmlTextWriter xmlOut)
+			{
+			WindowSettings ws = new WindowSettings();
+			ws._windowState = WindowState;
+			ws._position = Location;
+			ws._size = Size;
+			XmlSerializerNamespaces xsn = new XmlSerializerNamespaces();
+			xsn.Add("", "");
+			XmlSerializer xs = new XmlSerializer(typeof(WindowSettings));
+			xs.Serialize(xmlOut, ws, xsn);
 			}
 
 
@@ -1266,6 +1321,11 @@ namespace CityTrafficSimulator
 			Invalidate(InvalidationLevel.ONLY_MAIN_CANVAS);
 			}
 
+		void DaGrid_MouseWheel(object sender, MouseEventArgs e)
+			{
+			zoomComboBox.SelectedIndex = Math2.Clamp(zoomComboBox.SelectedIndex + (e.Delta / 120), 0, zoomComboBox.Items.Count - 1);
+			}
+
 		void DaGrid_KeyDown(object sender, KeyEventArgs e)
 			{
 			// Tastenbehandlung
@@ -1796,7 +1856,20 @@ namespace CityTrafficSimulator
 
 				if (sfd.ShowDialog() == DialogResult.OK)
 					{
-					XmlSaver.SaveToFile(sfd.FileName, nodeSteuerung, timelineSteuerung, trafficVolumeSteuerung);
+					Tools.ProgramSettings ps = new Tools.ProgramSettings();
+					ps._simSpeed = simulationSpeedSpinEdit.Value;
+					ps._simSteps = stepsPerSecondSpinEdit.Value;
+					ps._simDuration = spinSimulationDuration.Value;
+					ps._simRandomSeed = spinRandomSeed.Value;
+					ps._zoomLevel = zoomComboBox.SelectedIndex;
+					ps._renderQuality = renderQualityComboBox.SelectedIndex;
+					ps._renderStatistics = cbRenderStatistics.Checked;
+					ps._renderVelocityMapping = cbVehicleVelocityMapping.Checked;
+					ps._showFPS = cbRenderFps.Checked;
+					ps._renderOptions = renderOptionsDaGrid;
+					ps._velocityMappingColorMap = cmcVelocityMapping.colormap;
+
+					XmlSaver.SaveToFile(sfd.FileName, nodeSteuerung, timelineSteuerung, trafficVolumeSteuerung, ps);
 					}
 				}
 			}
@@ -1817,11 +1890,41 @@ namespace CityTrafficSimulator
 					timelineSteuerung.Clear();
 
 					// Laden
-					XmlSaver.LoadFromFile(ofd.FileName, nodeSteuerung, timelineSteuerung, trafficVolumeSteuerung);
+					Tools.ProgramSettings ps = XmlSaver.LoadFromFile(ofd.FileName, nodeSteuerung, timelineSteuerung, trafficVolumeSteuerung);
 
 					titleEdit.Text = nodeSteuerung.title;
 					infoEdit.Text = nodeSteuerung.infoText;
 					nodeSteuerung.ResetAverageVelocities();
+
+					if (ps._simSpeed >= simulationSpeedSpinEdit.Minimum && ps._simSpeed <= simulationSpeedSpinEdit.Maximum)
+						simulationSpeedSpinEdit.Value = ps._simSpeed;
+					if (ps._simSteps >= stepsPerSecondSpinEdit.Minimum && ps._simSteps <= stepsPerSecondSpinEdit.Maximum) 
+						stepsPerSecondSpinEdit.Value = ps._simSteps;
+					if (ps._simDuration >= spinSimulationDuration.Minimum && ps._simDuration <= spinSimulationDuration.Maximum) 
+						spinSimulationDuration.Value = ps._simDuration;
+					if (ps._simRandomSeed >= spinRandomSeed.Minimum && ps._simRandomSeed <= spinRandomSeed.Maximum) 
+						spinRandomSeed.Value = ps._simRandomSeed;
+					if (ps._zoomLevel >= 0 && ps._zoomLevel < zoomComboBox.Items.Count)
+						zoomComboBox.SelectedIndex = ps._zoomLevel;
+					if (ps._renderQuality >= 0 && ps._renderQuality < renderQualityComboBox.Items.Count)
+						renderQualityComboBox.SelectedIndex = ps._renderQuality;
+
+					cbRenderStatistics.Checked = ps._renderStatistics;
+					cbVehicleVelocityMapping.Checked = ps._renderVelocityMapping;
+					cbRenderFps.Checked = ps._showFPS;
+
+					renderOptionsDaGrid = ps._renderOptions;
+					cbRenderLineNodes.Checked = ps._renderOptions.renderLineNodes;
+					cbRenderConnections.Checked = ps._renderOptions.renderNodeConnections;
+					cbRenderVehicles.Checked = ps._renderOptions.renderVehicles;
+					daGridScrollPosition = ps._renderOptions.clippingRect.Location;
+					cbRenderIntersections.Checked = ps._renderOptions.renderIntersections;
+					cbRenderLineChangePoints.Checked = ps._renderOptions.renderLineChangePoints;
+					cbRenderLineNodesDebug.Checked = ps._renderOptions.renderLineNodeDebugData;
+					cbRenderConnectionsDebug.Checked = ps._renderOptions.renderNodeConnectionDebugData;
+					cbRenderVehiclesDebug.Checked = ps._renderOptions.renderVehicleDebugData;
+
+					cmcVelocityMapping.colormap = ps._velocityMappingColorMap;
 
 					// neuzeichnen
 					UpdateDaGridClippingRect();
@@ -2506,8 +2609,8 @@ namespace CityTrafficSimulator
 
 		private void cmVelocityMapping_ColorMapChanged(object sender, CityTrafficSimulator.Tools.ColorMapControl.ColorMapChangedEventArgs e)
 			{
-			IVehicle._colormap = cmVelocityMapping.colormap;
-			NodeConnection._colormap = cmVelocityMapping.colormap;
+			IVehicle._colormap = cmcVelocityMapping.colormap;
+			NodeConnection._colormap = cmcVelocityMapping.colormap;
 			}
 
 		}

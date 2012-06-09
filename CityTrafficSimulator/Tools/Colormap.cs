@@ -40,11 +40,11 @@ namespace CityTrafficSimulator.Tools
 		/// <summary>
 		/// Colormap object this control is handling.
 		/// </summary>
-		private Colormap _colormap;
+		private ColorMap _colormap;
 		/// <summary>
 		/// Gets or sets the Colormap this control is handling.
 		/// </summary>
-		public Colormap colormap
+		public ColorMap colormap
 			{
 			get { return _colormap; }
 			set 
@@ -53,7 +53,7 @@ namespace CityTrafficSimulator.Tools
 					_colormap.ColorsChanged -= _colormap_ColorsChanged; 
 				_colormap = value;
 				if (_colormap != null)
-					_colormap.ColorsChanged += new Colormap.ColorsChangedEventHandler(_colormap_ColorsChanged); 
+					_colormap.ColorsChanged += new ColorMap.ColorsChangedEventHandler(_colormap_ColorsChanged); 
 				Invalidate();
 				InvokeColorMapChanged(new ColorMapChangedEventArgs());
 				}
@@ -76,7 +76,7 @@ namespace CityTrafficSimulator.Tools
 		/// <summary>
 		/// Temporary Colormap for painting during color moving action. MUST always be the same size as _colormap!
 		/// </summary>
-		private Colormap _tempMap;
+		private ColorMap _tempMap;
 		#endregion
 
 		#region Methods
@@ -94,8 +94,8 @@ namespace CityTrafficSimulator.Tools
 			List<Color> colors = new List<Color>();
 			colors.Add(Color.Black);
 			colors.Add(Color.White);
-			_colormap = new Colormap(colors);
-			_colormap.ColorsChanged += new Colormap.ColorsChangedEventHandler(_colormap_ColorsChanged);
+			_colormap = new ColorMap(colors);
+			_colormap.ColorsChanged += new ColorMap.ColorsChangedEventHandler(_colormap_ColorsChanged);
 
 			if (DesignMode)
 				{
@@ -140,7 +140,7 @@ namespace CityTrafficSimulator.Tools
 					float stepsize = (float)ClientSize.Width / (float)(_colormap.Count - 1);
 					for (int i = 0; i < _colormap.Count - 1; ++i)
 						{
-						Colormap cm = (_draggingColor) ? _tempMap : _colormap;
+						ColorMap cm = (_draggingColor) ? _tempMap : _colormap;
 						using (LinearGradientBrush gradBrush = new LinearGradientBrush(new PointF(0, 0), new PointF(stepsize, 0), cm[i], cm[i + 1]))
 							{
 							e.Graphics.FillRectangle(gradBrush, new RectangleF(stepsize * i, 0, stepsize * (i + 1), ClientSize.Height));
@@ -220,13 +220,13 @@ namespace CityTrafficSimulator.Tools
 				l[origin] = l[destination];
 				l[destination] = c;
 
-				_tempMap = new Colormap(l);
+				_tempMap = new ColorMap(l);
 				_draggingColor = true;
 				Invalidate();
 				}
 			}
 
-		void _colormap_ColorsChanged(object sender, Colormap.ColorsChangedEventArgs e)
+		void _colormap_ColorsChanged(object sender, ColorMap.ColorsChangedEventArgs e)
 			{
 			Invalidate();
 			InvokeColorMapChanged(new ColorMapChangedEventArgs());
@@ -299,14 +299,15 @@ namespace CityTrafficSimulator.Tools
 	/// Wrapper for a list of colors offering interpolation methods.
 	/// </summary>
 	[Serializable]
-	public class Colormap : IEnumerable<Color>
+	public class ColorMap
 		{
 		#region Members
 
 		/// <summary>
 		/// List of all colors in this color map.
 		/// </summary>
-		private List<Color> _colors;
+		public List<SerializableColor> _colors;
+
 
 		/// <summary>
 		/// Returns the number of Colors in this color map
@@ -325,23 +326,34 @@ namespace CityTrafficSimulator.Tools
 		#region Methods
 
 		/// <summary>
+		/// Default Constructor
+		/// ONLY for XML serialization, do not use unless you really know what you're doing.
+		/// </summary>
+		public ColorMap()
+			{
+			}
+
+		/// <summary>
 		/// Creates a new color map containing the colors in <paramref name="colors"/>.
 		/// </summary>
 		/// <param name="colors">List of colors for the color map. Must not be empty.</param>
-		public Colormap(List<Color> colors)
+		public ColorMap(List<Color> colors)
 			{
 			Debug.Assert(colors.Count > 0);
-			_colors = new List<Color>(colors.Count);
-			_colors.AddRange(colors);
+			_colors = new List<SerializableColor>(colors.Count);
+			foreach (Color c in colors)
+				{
+				_colors.Add(c);
+				}
 			}
 
 		/// <summary>
 		/// Creates a new color map containing only the color <paramref name="c"/>
 		/// </summary>
 		/// <param name="c">The initial color of the color map</param>
-		public Colormap(Color c)
+		public ColorMap(Color c)
 			{
-			_colors = new List<Color>();
+			_colors = new List<SerializableColor>();
 			_colors.Add(c);
 			}
 
@@ -392,7 +404,12 @@ namespace CityTrafficSimulator.Tools
 		/// <returns>A copy of the stored color list.</returns>
 		public List<Color> GetListCopy()
 			{
-			return new List<Color>(_colors);
+			List<Color> l = new List<Color>(_colors.Count);
+			foreach (SerializableColor sc in _colors)
+				{
+				l.Add(sc);
+				}
+			return l;
 			}
 
 		/// <summary>
@@ -404,7 +421,7 @@ namespace CityTrafficSimulator.Tools
 			{
 			Debug.Assert(index >= 0 && index <= _colors.Count);
 
-			List<Color> newColors = new List<Color>(_colors.Count + 1);
+			List<SerializableColor> newColors = new List<SerializableColor>(_colors.Count + 1);
 			for (int i = 0; i < index; ++i)
 				newColors.Add(_colors[i]);
 			newColors.Add(c);
@@ -432,7 +449,7 @@ namespace CityTrafficSimulator.Tools
 			{
 			Debug.Assert(index >= 0 && index < _colors.Count);
 
-			List<Color> newColors = new List<Color>(_colors.Count);
+			List<SerializableColor> newColors = new List<SerializableColor>(_colors.Count);
 			for (int i = 0; i < index; ++i)
 				newColors.Add(_colors[i]);
 			for (int i = index+1; i < _colors.Count; ++i)
@@ -489,30 +506,5 @@ namespace CityTrafficSimulator.Tools
 
 		#endregion
 
-		#region IEnumerable<Color> Member
-
-		/// <summary>
-		/// Returns the Enumerator which traverses this color map.
-		/// </summary>
-		/// <returns>_colors.GetEnumerator()</returns>
-		public IEnumerator<Color> GetEnumerator()
-			{
-			return _colors.GetEnumerator();
-			}
-
-		#endregion
-
-		#region IEnumerable Member
-
-		/// <summary>
-		/// Returns the Enumerator which traverses this color map.
-		/// </summary>
-		/// <returns>_colors.GetEnumerator()</returns>
-		System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
-			{
-			return _colors.GetEnumerator();
-			}
-
-		#endregion
 		}
 	}

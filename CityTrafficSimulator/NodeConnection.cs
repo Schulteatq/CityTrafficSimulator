@@ -284,7 +284,7 @@ namespace CityTrafficSimulator
 		/// Color map used for velocity color mapping
 		/// </summary>
 		[XmlIgnore]
-		public static Tools.Colormap _colormap;
+		public static Tools.ColorMap _colormap;
 
 
 		/// <summary>
