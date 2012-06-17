@@ -1672,6 +1672,25 @@ namespace CityTrafficSimulator
 					RectangleF foo2 = m_selectedLineNodes[0].positionRect;
 					foo2.Inflate(4, 4);
 					e.Graphics.DrawEllipse(BlackPen, foo2);
+
+					List<Vector2> points = new List<Vector2>(selectedLineNodes.Count);
+					foreach (LineNode ln in selectedLineNodes)
+						{
+						points.Add(ln.position);
+						}
+					try
+						{
+						// build convex hull
+						GraphicsPath hullPath = AlgorithmicGeometry.roundedConvexHullPath(points, 16);
+
+						e.Graphics.FillPath(new SolidBrush(Color.FromArgb(64, Color.Gold)), hullPath);
+						e.Graphics.DrawPath(new Pen(Color.Gold, 3), hullPath);
+						}
+					catch (System.Exception ex)
+						{
+						MessageBox.Show(ex.Message);
+						}
+
 					}
 
 				// selektierte NodeConnection malen

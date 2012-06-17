@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <CityTrafficSimulator saveVersion="8">
   <ProgramSettings>
-    <_simSpeed>1</_simSpeed>
+    <_simSpeed>10</_simSpeed>
     <_simSteps>15</_simSteps>
     <_simDuration>300</_simDuration>
     <_simRandomSeed>42</_simRandomSeed>
@@ -17,17 +17,17 @@
       <performClipping>true</performClipping>
       <clippingRect>
         <Location>
-          <X>2561</X>
-          <Y>4195</Y>
+          <X>1726</X>
+          <Y>3750</Y>
         </Location>
         <Size>
-          <Width>3896</Width>
-          <Height>2284</Height>
+          <Width>4360</Width>
+          <Height>2728</Height>
         </Size>
-        <X>2561</X>
-        <Y>4195</Y>
-        <Width>3896</Width>
-        <Height>2284</Height>
+        <X>1726</X>
+        <Y>3750</Y>
+        <Width>4360</Width>
+        <Height>2728</Height>
       </clippingRect>
       <renderIntersections>false</renderIntersections>
       <renderLineChangePoints>false</renderLineChangePoints>
@@ -1101,8 +1101,8 @@ The traffic volume is estimated, signal times are fictional.</infoText>
       <hashcode>76</hashcode>
       <stopSign>false</stopSign>
       <position>
-        <X>5981</X>
-        <Y>6107</Y>
+        <X>6049.5</X>
+        <Y>6131</Y>
       </position>
       <inSlope>
         <X>67</X>
@@ -1117,8 +1117,8 @@ The traffic volume is estimated, signal times are fictional.</infoText>
       <hashcode>77</hashcode>
       <stopSign>false</stopSign>
       <position>
-        <X>5716.5</X>
-        <Y>6029</Y>
+        <X>5719.5</X>
+        <Y>6027.5</Y>
       </position>
       <inSlope>
         <X>42.5</X>
@@ -2637,16 +2637,16 @@ The traffic volume is estimated, signal times are fictional.</infoText>
       <hashcode>179</hashcode>
       <stopSign>false</stopSign>
       <position>
-        <X>1774</X>
-        <Y>5499</Y>
+        <X>1629</X>
+        <Y>5509</Y>
       </position>
       <inSlope>
-        <X>-92</X>
-        <Y>11</Y>
+        <X>-163</X>
+        <Y>29</Y>
       </inSlope>
       <outSlope>
-        <X>92</X>
-        <Y>-11</Y>
+        <X>163</X>
+        <Y>-29</Y>
       </outSlope>
     </LineNode>
     <LineNode>
@@ -2657,12 +2657,12 @@ The traffic volume is estimated, signal times are fictional.</infoText>
         <Y>5494</Y>
       </position>
       <inSlope>
-        <X>-82</X>
-        <Y>-15</Y>
+        <X>-90</X>
+        <Y>-21</Y>
       </inSlope>
       <outSlope>
-        <X>82</X>
-        <Y>15</Y>
+        <X>90</X>
+        <Y>21</Y>
       </outSlope>
     </LineNode>
     <LineNode>
@@ -2685,16 +2685,16 @@ The traffic volume is estimated, signal times are fictional.</infoText>
       <hashcode>182</hashcode>
       <stopSign>false</stopSign>
       <position>
-        <X>1775</X>
-        <Y>5469</Y>
+        <X>1625</X>
+        <Y>5480</Y>
       </position>
       <inSlope>
-        <X>-84</X>
-        <Y>9</Y>
+        <X>-148.93244030285379</X>
+        <Y>24.616773442050086</Y>
       </inSlope>
       <outSlope>
-        <X>84</X>
-        <Y>-9</Y>
+        <X>148.93244030285379</X>
+        <Y>-24.616773442050086</Y>
       </outSlope>
     </LineNode>
     <LineNode>
@@ -2705,12 +2705,12 @@ The traffic volume is estimated, signal times are fictional.</infoText>
         <Y>5464</Y>
       </position>
       <inSlope>
-        <X>-97</X>
-        <Y>-19</Y>
+        <X>-106.39617211109513</X>
+        <Y>-26.232407540653334</Y>
       </inSlope>
       <outSlope>
-        <X>97</X>
-        <Y>19</Y>
+        <X>106.39617211109513</X>
+        <Y>26.232407540653334</Y>
       </outSlope>
     </LineNode>
     <LineNode>
@@ -2733,16 +2733,16 @@ The traffic volume is estimated, signal times are fictional.</infoText>
       <hashcode>185</hashcode>
       <stopSign>false</stopSign>
       <position>
-        <X>1792</X>
-        <Y>5438</Y>
+        <X>1622</X>
+        <Y>5450</Y>
       </position>
       <inSlope>
-        <X>-117</X>
-        <Y>11</Y>
+        <X>-207.59813628421665</X>
+        <Y>31.548048922539309</Y>
       </inSlope>
       <outSlope>
-        <X>117</X>
-        <Y>-11</Y>
+        <X>207.59813628421665</X>
+        <Y>-31.548048922539309</Y>
       </outSlope>
     </LineNode>
     <LineNode>
@@ -2753,12 +2753,12 @@ The traffic volume is estimated, signal times are fictional.</infoText>
         <Y>5431</Y>
       </position>
       <inSlope>
-        <X>-110</X>
-        <Y>-22</Y>
+        <X>-91</X>
+        <Y>-21</Y>
       </inSlope>
       <outSlope>
-        <X>110</X>
-        <Y>22</Y>
+        <X>91</X>
+        <Y>21</Y>
       </outSlope>
     </LineNode>
     <LineNode>
@@ -5497,6 +5497,262 @@ The traffic volume is estimated, signal times are fictional.</infoText>
         <Y>-26</Y>
       </outSlope>
     </LineNode>
+    <LineNode>
+      <hashcode>359</hashcode>
+      <stopSign>false</stopSign>
+      <position>
+        <X>2693</X>
+        <Y>-173</Y>
+      </position>
+      <inSlope>
+        <X>-10</X>
+        <Y>-60</Y>
+      </inSlope>
+      <outSlope>
+        <X>10</X>
+        <Y>60</Y>
+      </outSlope>
+    </LineNode>
+    <LineNode>
+      <hashcode>360</hashcode>
+      <stopSign>false</stopSign>
+      <position>
+        <X>2718.9076999861636</X>
+        <Y>-177.55972383231057</Y>
+      </position>
+      <inSlope>
+        <X>-10.034346872421068</X>
+        <Y>-60.2060812345264</Y>
+      </inSlope>
+      <outSlope>
+        <X>10.034346872421068</X>
+        <Y>60.2060812345264</Y>
+      </outSlope>
+    </LineNode>
+    <LineNode>
+      <hashcode>361</hashcode>
+      <stopSign>false</stopSign>
+      <position>
+        <X>4591</X>
+        <Y>1538</Y>
+      </position>
+      <inSlope>
+        <X>35</X>
+        <Y>-42</Y>
+      </inSlope>
+      <outSlope>
+        <X>-35</X>
+        <Y>42</Y>
+      </outSlope>
+    </LineNode>
+    <LineNode>
+      <hashcode>362</hashcode>
+      <stopSign>false</stopSign>
+      <position>
+        <X>4613.818893822302</X>
+        <Y>1558.2063872259864</Y>
+      </position>
+      <inSlope>
+        <X>34.928809421985321</X>
+        <Y>-41.914571306382385</Y>
+      </inSlope>
+      <outSlope>
+        <X>-34.928809421985321</X>
+        <Y>41.914571306382385</Y>
+      </outSlope>
+    </LineNode>
+    <LineNode>
+      <hashcode>363</hashcode>
+      <stopSign>false</stopSign>
+      <position>
+        <X>7485</X>
+        <Y>5561</Y>
+      </position>
+      <inSlope>
+        <X>90</X>
+        <Y>29</Y>
+      </inSlope>
+      <outSlope>
+        <X>-90</X>
+        <Y>-29</Y>
+      </outSlope>
+    </LineNode>
+    <LineNode>
+      <hashcode>364</hashcode>
+      <stopSign>false</stopSign>
+      <position>
+        <X>7495.2869509472939</X>
+        <Y>5533.3020101774882</Y>
+      </position>
+      <inSlope>
+        <X>88.597585880877546</X>
+        <Y>28.548111006060541</Y>
+      </inSlope>
+      <outSlope>
+        <X>-88.597585880877546</X>
+        <Y>-28.548111006060541</Y>
+      </outSlope>
+    </LineNode>
+    <LineNode>
+      <hashcode>365</hashcode>
+      <stopSign>false</stopSign>
+      <position>
+        <X>7470.65831280002</X>
+        <Y>5587.9502506158651</Y>
+      </position>
+      <inSlope>
+        <X>91.443087115202857</X>
+        <Y>29.464994737120918</Y>
+      </inSlope>
+      <outSlope>
+        <X>-91.443087115202857</X>
+        <Y>-29.464994737120918</Y>
+      </outSlope>
+    </LineNode>
+    <LineNode>
+      <hashcode>366</hashcode>
+      <stopSign>false</stopSign>
+      <position>
+        <X>932</X>
+        <Y>316</Y>
+      </position>
+      <inSlope>
+        <X>-56</X>
+        <Y>-37</Y>
+      </inSlope>
+      <outSlope>
+        <X>56</X>
+        <Y>37</Y>
+      </outSlope>
+    </LineNode>
+    <LineNode>
+      <hashcode>367</hashcode>
+      <stopSign>false</stopSign>
+      <position>
+        <X>945.97161531291579</X>
+        <Y>291.96265477329291</Y>
+      </position>
+      <inSlope>
+        <X>-57.489679116517806</X>
+        <Y>-37.984252273413546</Y>
+      </inSlope>
+      <outSlope>
+        <X>57.489679116517806</X>
+        <Y>37.984252273413546</Y>
+      </outSlope>
+    </LineNode>
+    <LineNode>
+      <hashcode>368</hashcode>
+      <stopSign>false</stopSign>
+      <position>
+        <X>966.153519106792</X>
+        <Y>269.12210400815763</Y>
+      </position>
+      <inSlope>
+        <X>-59.141487995276194</X>
+        <Y>-39.075625996878912</Y>
+      </inSlope>
+      <outSlope>
+        <X>59.141487995276194</X>
+        <Y>39.075625996878912</Y>
+      </outSlope>
+    </LineNode>
+    <LineNode>
+      <hashcode>369</hashcode>
+      <stopSign>false</stopSign>
+      <position>
+        <X>401</X>
+        <Y>5685</Y>
+      </position>
+      <inSlope>
+        <X>-75</X>
+        <Y>7</Y>
+      </inSlope>
+      <outSlope>
+        <X>75</X>
+        <Y>-7</Y>
+      </outSlope>
+    </LineNode>
+    <LineNode>
+      <hashcode>370</hashcode>
+      <stopSign>false</stopSign>
+      <position>
+        <X>399.28320273365227</X>
+        <Y>5657.8881463719972</Y>
+      </position>
+      <inSlope>
+        <X>-74.27830885990879</X>
+        <Y>6.9326421602581538</Y>
+      </inSlope>
+      <outSlope>
+        <X>74.27830885990879</X>
+        <Y>-6.9326421602581538</Y>
+      </outSlope>
+    </LineNode>
+    <LineNode>
+      <hashcode>371</hashcode>
+      <stopSign>false</stopSign>
+      <position>
+        <X>399.80116299165866</X>
+        <Y>5625.8767153328963</Y>
+      </position>
+      <inSlope>
+        <X>-73.437193970028972</X>
+        <Y>6.8541381038693707</Y>
+      </inSlope>
+      <outSlope>
+        <X>73.437193970028972</X>
+        <Y>-6.8541381038693707</Y>
+      </outSlope>
+    </LineNode>
+    <LineNode>
+      <hashcode>372</hashcode>
+      <stopSign>false</stopSign>
+      <position>
+        <X>7036</X>
+        <Y>6506</Y>
+      </position>
+      <inSlope>
+        <X>58</X>
+        <Y>16</Y>
+      </inSlope>
+      <outSlope>
+        <X>-58</X>
+        <Y>-16</Y>
+      </outSlope>
+    </LineNode>
+    <LineNode>
+      <hashcode>373</hashcode>
+      <stopSign>false</stopSign>
+      <position>
+        <X>7026.3817335385338</X>
+        <Y>6532.542210726996</Y>
+      </position>
+      <inSlope>
+        <X>58.817006381798187</X>
+        <Y>16.225381070840879</Y>
+      </inSlope>
+      <outSlope>
+        <X>-58.817006381798187</X>
+        <Y>-16.225381070840879</Y>
+      </outSlope>
+    </LineNode>
+    <LineNode>
+      <hashcode>374</hashcode>
+      <stopSign>false</stopSign>
+      <position>
+        <X>7044.4619721327654</X>
+        <Y>6476.51449461813</Y>
+      </position>
+      <inSlope>
+        <X>57.115680699453272</X>
+        <Y>15.75604984812504</Y>
+      </inSlope>
+      <outSlope>
+        <X>-57.115680699453272</X>
+        <Y>-15.75604984812504</Y>
+      </outSlope>
+    </LineNode>
     <NetworkLayer>
       <_nodeHashes>
         <int>2</int>
@@ -5839,6 +6095,22 @@ The traffic volume is estimated, signal times are fictional.</infoText>
         <int>356</int>
         <int>357</int>
         <int>358</int>
+        <int>359</int>
+        <int>360</int>
+        <int>361</int>
+        <int>362</int>
+        <int>363</int>
+        <int>364</int>
+        <int>365</int>
+        <int>366</int>
+        <int>367</int>
+        <int>368</int>
+        <int>369</int>
+        <int>370</int>
+        <int>371</int>
+        <int>372</int>
+        <int>373</int>
+        <int>374</int>
       </_nodeHashes>
       <title>Layer 1</title>
       <visible>true</visible>
@@ -6477,7 +6749,7 @@ The traffic volume is estimated, signal times are fictional.</infoText>
       <carsAllowed>true</carsAllowed>
       <busAllowed>false</busAllowed>
       <tramAllowed>false</tramAllowed>
-      <enableOutgoingLineChange>true</enableOutgoingLineChange>
+      <enableOutgoingLineChange>false</enableOutgoingLineChange>
       <enableIncomingLineChange>true</enableIncomingLineChange>
       <targetVelocity>14</targetVelocity>
     </NodeConnection>
@@ -7694,7 +7966,7 @@ The traffic volume is estimated, signal times are fictional.</infoText>
     <NodeConnection>
       <startNodeHash>162</startNodeHash>
       <endNodeHash>177</endNodeHash>
-      <priority>5</priority>
+      <priority>6</priority>
       <carsAllowed>true</carsAllowed>
       <busAllowed>false</busAllowed>
       <tramAllowed>false</tramAllowed>
@@ -8299,7 +8571,7 @@ The traffic volume is estimated, signal times are fictional.</infoText>
     <NodeConnection>
       <startNodeHash>177</startNodeHash>
       <endNodeHash>213</endNodeHash>
-      <priority>5</priority>
+      <priority>6</priority>
       <carsAllowed>true</carsAllowed>
       <busAllowed>false</busAllowed>
       <tramAllowed>false</tramAllowed>
@@ -8310,7 +8582,7 @@ The traffic volume is estimated, signal times are fictional.</infoText>
     <NodeConnection>
       <startNodeHash>177</startNodeHash>
       <endNodeHash>209</endNodeHash>
-      <priority>5</priority>
+      <priority>6</priority>
       <carsAllowed>true</carsAllowed>
       <busAllowed>false</busAllowed>
       <tramAllowed>false</tramAllowed>
@@ -8321,7 +8593,7 @@ The traffic volume is estimated, signal times are fictional.</infoText>
     <NodeConnection>
       <startNodeHash>177</startNodeHash>
       <endNodeHash>205</endNodeHash>
-      <priority>5</priority>
+      <priority>6</priority>
       <carsAllowed>true</carsAllowed>
       <busAllowed>false</busAllowed>
       <tramAllowed>false</tramAllowed>
@@ -9036,7 +9308,7 @@ The traffic volume is estimated, signal times are fictional.</infoText>
     <NodeConnection>
       <startNodeHash>289</startNodeHash>
       <endNodeHash>260</endNodeHash>
-      <priority>4</priority>
+      <priority>3</priority>
       <carsAllowed>true</carsAllowed>
       <busAllowed>false</busAllowed>
       <tramAllowed>false</tramAllowed>
@@ -9102,7 +9374,7 @@ The traffic volume is estimated, signal times are fictional.</infoText>
     <NodeConnection>
       <startNodeHash>294</startNodeHash>
       <endNodeHash>262</endNodeHash>
-      <priority>4</priority>
+      <priority>3</priority>
       <carsAllowed>true</carsAllowed>
       <busAllowed>false</busAllowed>
       <tramAllowed>false</tramAllowed>
@@ -9146,7 +9418,7 @@ The traffic volume is estimated, signal times are fictional.</infoText>
     <NodeConnection>
       <startNodeHash>297</startNodeHash>
       <endNodeHash>264</endNodeHash>
-      <priority>4</priority>
+      <priority>3</priority>
       <carsAllowed>true</carsAllowed>
       <busAllowed>false</busAllowed>
       <tramAllowed>false</tramAllowed>
@@ -9157,7 +9429,7 @@ The traffic volume is estimated, signal times are fictional.</infoText>
     <NodeConnection>
       <startNodeHash>297</startNodeHash>
       <endNodeHash>263</endNodeHash>
-      <priority>4</priority>
+      <priority>3</priority>
       <carsAllowed>true</carsAllowed>
       <busAllowed>false</busAllowed>
       <tramAllowed>false</tramAllowed>
@@ -10045,6 +10317,182 @@ The traffic volume is estimated, signal times are fictional.</infoText>
       <enableIncomingLineChange>false</enableIncomingLineChange>
       <targetVelocity>14</targetVelocity>
     </NodeConnection>
+    <NodeConnection>
+      <startNodeHash>359</startNodeHash>
+      <endNodeHash>286</endNodeHash>
+      <priority>5</priority>
+      <carsAllowed>true</carsAllowed>
+      <busAllowed>false</busAllowed>
+      <tramAllowed>false</tramAllowed>
+      <enableOutgoingLineChange>true</enableOutgoingLineChange>
+      <enableIncomingLineChange>true</enableIncomingLineChange>
+      <targetVelocity>14</targetVelocity>
+    </NodeConnection>
+    <NodeConnection>
+      <startNodeHash>360</startNodeHash>
+      <endNodeHash>290</endNodeHash>
+      <priority>5</priority>
+      <carsAllowed>true</carsAllowed>
+      <busAllowed>false</busAllowed>
+      <tramAllowed>false</tramAllowed>
+      <enableOutgoingLineChange>true</enableOutgoingLineChange>
+      <enableIncomingLineChange>true</enableIncomingLineChange>
+      <targetVelocity>14</targetVelocity>
+    </NodeConnection>
+    <NodeConnection>
+      <startNodeHash>361</startNodeHash>
+      <endNodeHash>310</endNodeHash>
+      <priority>5</priority>
+      <carsAllowed>true</carsAllowed>
+      <busAllowed>false</busAllowed>
+      <tramAllowed>false</tramAllowed>
+      <enableOutgoingLineChange>true</enableOutgoingLineChange>
+      <enableIncomingLineChange>true</enableIncomingLineChange>
+      <targetVelocity>14</targetVelocity>
+    </NodeConnection>
+    <NodeConnection>
+      <startNodeHash>362</startNodeHash>
+      <endNodeHash>313</endNodeHash>
+      <priority>5</priority>
+      <carsAllowed>true</carsAllowed>
+      <busAllowed>false</busAllowed>
+      <tramAllowed>false</tramAllowed>
+      <enableOutgoingLineChange>true</enableOutgoingLineChange>
+      <enableIncomingLineChange>true</enableIncomingLineChange>
+      <targetVelocity>14</targetVelocity>
+    </NodeConnection>
+    <NodeConnection>
+      <startNodeHash>363</startNodeHash>
+      <endNodeHash>47</endNodeHash>
+      <priority>5</priority>
+      <carsAllowed>true</carsAllowed>
+      <busAllowed>false</busAllowed>
+      <tramAllowed>false</tramAllowed>
+      <enableOutgoingLineChange>true</enableOutgoingLineChange>
+      <enableIncomingLineChange>true</enableIncomingLineChange>
+      <targetVelocity>14</targetVelocity>
+    </NodeConnection>
+    <NodeConnection>
+      <startNodeHash>364</startNodeHash>
+      <endNodeHash>49</endNodeHash>
+      <priority>5</priority>
+      <carsAllowed>true</carsAllowed>
+      <busAllowed>false</busAllowed>
+      <tramAllowed>false</tramAllowed>
+      <enableOutgoingLineChange>true</enableOutgoingLineChange>
+      <enableIncomingLineChange>true</enableIncomingLineChange>
+      <targetVelocity>14</targetVelocity>
+    </NodeConnection>
+    <NodeConnection>
+      <startNodeHash>365</startNodeHash>
+      <endNodeHash>66</endNodeHash>
+      <priority>5</priority>
+      <carsAllowed>true</carsAllowed>
+      <busAllowed>false</busAllowed>
+      <tramAllowed>false</tramAllowed>
+      <enableOutgoingLineChange>true</enableOutgoingLineChange>
+      <enableIncomingLineChange>true</enableIncomingLineChange>
+      <targetVelocity>14</targetVelocity>
+    </NodeConnection>
+    <NodeConnection>
+      <startNodeHash>366</startNodeHash>
+      <endNodeHash>247</endNodeHash>
+      <priority>5</priority>
+      <carsAllowed>true</carsAllowed>
+      <busAllowed>false</busAllowed>
+      <tramAllowed>false</tramAllowed>
+      <enableOutgoingLineChange>true</enableOutgoingLineChange>
+      <enableIncomingLineChange>true</enableIncomingLineChange>
+      <targetVelocity>14</targetVelocity>
+    </NodeConnection>
+    <NodeConnection>
+      <startNodeHash>367</startNodeHash>
+      <endNodeHash>251</endNodeHash>
+      <priority>5</priority>
+      <carsAllowed>true</carsAllowed>
+      <busAllowed>false</busAllowed>
+      <tramAllowed>false</tramAllowed>
+      <enableOutgoingLineChange>true</enableOutgoingLineChange>
+      <enableIncomingLineChange>true</enableIncomingLineChange>
+      <targetVelocity>14</targetVelocity>
+    </NodeConnection>
+    <NodeConnection>
+      <startNodeHash>368</startNodeHash>
+      <endNodeHash>255</endNodeHash>
+      <priority>5</priority>
+      <carsAllowed>true</carsAllowed>
+      <busAllowed>false</busAllowed>
+      <tramAllowed>false</tramAllowed>
+      <enableOutgoingLineChange>true</enableOutgoingLineChange>
+      <enableIncomingLineChange>true</enableIncomingLineChange>
+      <targetVelocity>14</targetVelocity>
+    </NodeConnection>
+    <NodeConnection>
+      <startNodeHash>369</startNodeHash>
+      <endNodeHash>178</endNodeHash>
+      <priority>5</priority>
+      <carsAllowed>true</carsAllowed>
+      <busAllowed>false</busAllowed>
+      <tramAllowed>false</tramAllowed>
+      <enableOutgoingLineChange>true</enableOutgoingLineChange>
+      <enableIncomingLineChange>true</enableIncomingLineChange>
+      <targetVelocity>14</targetVelocity>
+    </NodeConnection>
+    <NodeConnection>
+      <startNodeHash>370</startNodeHash>
+      <endNodeHash>181</endNodeHash>
+      <priority>5</priority>
+      <carsAllowed>true</carsAllowed>
+      <busAllowed>false</busAllowed>
+      <tramAllowed>false</tramAllowed>
+      <enableOutgoingLineChange>true</enableOutgoingLineChange>
+      <enableIncomingLineChange>true</enableIncomingLineChange>
+      <targetVelocity>14</targetVelocity>
+    </NodeConnection>
+    <NodeConnection>
+      <startNodeHash>371</startNodeHash>
+      <endNodeHash>184</endNodeHash>
+      <priority>5</priority>
+      <carsAllowed>true</carsAllowed>
+      <busAllowed>false</busAllowed>
+      <tramAllowed>false</tramAllowed>
+      <enableOutgoingLineChange>true</enableOutgoingLineChange>
+      <enableIncomingLineChange>true</enableIncomingLineChange>
+      <targetVelocity>14</targetVelocity>
+    </NodeConnection>
+    <NodeConnection>
+      <startNodeHash>372</startNodeHash>
+      <endNodeHash>73</endNodeHash>
+      <priority>5</priority>
+      <carsAllowed>true</carsAllowed>
+      <busAllowed>false</busAllowed>
+      <tramAllowed>false</tramAllowed>
+      <enableOutgoingLineChange>true</enableOutgoingLineChange>
+      <enableIncomingLineChange>true</enableIncomingLineChange>
+      <targetVelocity>14</targetVelocity>
+    </NodeConnection>
+    <NodeConnection>
+      <startNodeHash>373</startNodeHash>
+      <endNodeHash>87</endNodeHash>
+      <priority>5</priority>
+      <carsAllowed>true</carsAllowed>
+      <busAllowed>false</busAllowed>
+      <tramAllowed>false</tramAllowed>
+      <enableOutgoingLineChange>true</enableOutgoingLineChange>
+      <enableIncomingLineChange>true</enableIncomingLineChange>
+      <targetVelocity>14</targetVelocity>
+    </NodeConnection>
+    <NodeConnection>
+      <startNodeHash>374</startNodeHash>
+      <endNodeHash>152</endNodeHash>
+      <priority>5</priority>
+      <carsAllowed>true</carsAllowed>
+      <busAllowed>false</busAllowed>
+      <tramAllowed>false</tramAllowed>
+      <enableOutgoingLineChange>true</enableOutgoingLineChange>
+      <enableIncomingLineChange>true</enableIncomingLineChange>
+      <targetVelocity>14</targetVelocity>
+    </NodeConnection>
   </Layout>
   <TrafficLights cycleTime="50">
     <TimelineGroup>
@@ -10190,7 +10638,7 @@ The traffic volume is estimated, signal times are fictional.</infoText>
           <events>
             <TimelineEvent>
               <eventTime>0</eventTime>
-              <eventLength>10</eventLength>
+              <eventLength>11</eventLength>
               <argbColor>-16744448</argbColor>
             </TimelineEvent>
           </events>
@@ -10446,8 +10894,8 @@ The traffic volume is estimated, signal times are fictional.</infoText>
         <TimelineEntry p5:type="TrafficLight" xmlns:p5="http://www.w3.org/2001/XMLSchema-instance">
           <events>
             <TimelineEvent>
-              <eventTime>21</eventTime>
-              <eventLength>8</eventLength>
+              <eventTime>13</eventTime>
+              <eventLength>16</eventLength>
               <argbColor>-16744448</argbColor>
             </TimelineEvent>
           </events>
@@ -10747,38 +11195,41 @@ The traffic volume is estimated, signal times are fictional.</infoText>
       <BunchOfNodes>
         <hashcode>12</hashcode>
         <nodeHashes>
-          <int>286</int>
+          <int>359</int>
+          <int>360</int>
         </nodeHashes>
-        <title>Bunch 1</title>
+        <title>Rothenbaumchaussee</title>
       </BunchOfNodes>
       <BunchOfNodes>
         <hashcode>14</hashcode>
         <nodeHashes>
-          <int>310</int>
+          <int>361</int>
+          <int>362</int>
         </nodeHashes>
-        <title>Bunch 2</title>
+        <title>Mittelweg</title>
       </BunchOfNodes>
       <BunchOfNodes>
         <hashcode>15</hashcode>
         <nodeHashes>
           <int>136</int>
         </nodeHashes>
-        <title>Bunch 3</title>
+        <title>Alsterufer</title>
       </BunchOfNodes>
       <BunchOfNodes>
         <hashcode>16</hashcode>
         <nodeHashes>
-          <int>47</int>
-          <int>66</int>
+          <int>363</int>
+          <int>364</int>
+          <int>365</int>
         </nodeHashes>
-        <title>Bunch 4</title>
+        <title>Kennedybrücke</title>
       </BunchOfNodes>
       <BunchOfNodes>
         <hashcode>17</hashcode>
         <nodeHashes>
-          <int>152</int>
+          <int>374</int>
         </nodeHashes>
-        <title>Bunch 5</title>
+        <title>Lombardsbrücke rechts</title>
       </BunchOfNodes>
       <BunchOfNodes>
         <hashcode>18</hashcode>
@@ -10786,58 +11237,16 @@ The traffic volume is estimated, signal times are fictional.</infoText>
           <int>217</int>
           <int>221</int>
         </nodeHashes>
-        <title>Bunch 6</title>
-      </BunchOfNodes>
-      <BunchOfNodes>
-        <hashcode>20</hashcode>
-        <nodeHashes>
-          <int>49</int>
-        </nodeHashes>
-        <title>Bunch 7</title>
-      </BunchOfNodes>
-      <BunchOfNodes>
-        <hashcode>21</hashcode>
-        <nodeHashes>
-          <int>255</int>
-        </nodeHashes>
-        <title>Bunch 8</title>
-      </BunchOfNodes>
-      <BunchOfNodes>
-        <hashcode>23</hashcode>
-        <nodeHashes>
-          <int>290</int>
-        </nodeHashes>
-        <title>Bunch 9</title>
+        <title>Dammtorstraße</title>
       </BunchOfNodes>
       <BunchOfNodes>
         <hashcode>25</hashcode>
         <nodeHashes>
-          <int>247</int>
+          <int>366</int>
+          <int>367</int>
+          <int>368</int>
         </nodeHashes>
-        <title>Bunch 10</title>
-      </BunchOfNodes>
-      <BunchOfNodes>
-        <hashcode>26</hashcode>
-        <nodeHashes>
-          <int>251</int>
-          <int>255</int>
-        </nodeHashes>
-        <title>Bunch 11</title>
-      </BunchOfNodes>
-      <BunchOfNodes>
-        <hashcode>28</hashcode>
-        <nodeHashes>
-          <int>286</int>
-          <int>290</int>
-        </nodeHashes>
-        <title>Bunch 12</title>
-      </BunchOfNodes>
-      <BunchOfNodes>
-        <hashcode>29</hashcode>
-        <nodeHashes>
-          <int>313</int>
-        </nodeHashes>
-        <title>Bunch 13</title>
+        <title>Edmund-Siemens-Allee</title>
       </BunchOfNodes>
       <BunchOfNodes>
         <hashcode>30</hashcode>
@@ -10845,59 +11254,37 @@ The traffic volume is estimated, signal times are fictional.</infoText>
           <int>181</int>
           <int>184</int>
         </nodeHashes>
-        <title>Bunch 14</title>
+        <title>Gorch-Fock-Wall</title>
       </BunchOfNodes>
       <BunchOfNodes>
         <hashcode>32</hashcode>
         <nodeHashes>
           <int>128</int>
         </nodeHashes>
-        <title>Bunch 15</title>
-      </BunchOfNodes>
-      <BunchOfNodes>
-        <hashcode>33</hashcode>
-        <nodeHashes>
-          <int>178</int>
-          <int>181</int>
-        </nodeHashes>
-        <title>Bunch 16</title>
-      </BunchOfNodes>
-      <BunchOfNodes>
-        <hashcode>35</hashcode>
-        <nodeHashes>
-          <int>310</int>
-          <int>313</int>
-        </nodeHashes>
-        <title>Bunch 17</title>
+        <title>Neuer Jungfangstieg</title>
       </BunchOfNodes>
       <BunchOfNodes>
         <hashcode>36</hashcode>
         <nodeHashes>
-          <int>87</int>
+          <int>372</int>
+          <int>373</int>
+          <int>374</int>
         </nodeHashes>
-        <title>Bunch 18</title>
-      </BunchOfNodes>
-      <BunchOfNodes>
-        <hashcode>38</hashcode>
-        <nodeHashes>
-          <int>73</int>
-          <int>87</int>
-        </nodeHashes>
-        <title>Bunch 19</title>
+        <title>Lombardsbrücke</title>
       </BunchOfNodes>
       <BunchOfNodes>
         <hashcode>39</hashcode>
         <nodeHashes>
           <int>326</int>
         </nodeHashes>
-        <title>Bunch 20</title>
+        <title>Bus: Edmund-Siemens-Allee</title>
       </BunchOfNodes>
       <BunchOfNodes>
         <hashcode>41</hashcode>
         <nodeHashes>
           <int>340</int>
         </nodeHashes>
-        <title>Bunch 21</title>
+        <title>Bus: Dammtorstraße</title>
       </BunchOfNodes>
     </StartPoints>
     <DestinationPoints>
@@ -10908,28 +11295,28 @@ The traffic volume is estimated, signal times are fictional.</infoText>
           <int>246</int>
           <int>357</int>
         </nodeHashes>
-        <title>Bunch 1</title>
+        <title>Edmund-Siemens-Allee</title>
       </BunchOfNodes>
       <BunchOfNodes>
         <hashcode>19</hashcode>
         <nodeHashes>
           <int>235</int>
         </nodeHashes>
-        <title>Bunch 2</title>
+        <title>Rothenbaumchaussee</title>
       </BunchOfNodes>
       <BunchOfNodes>
         <hashcode>22</hashcode>
         <nodeHashes>
           <int>305</int>
         </nodeHashes>
-        <title>Bunch 3</title>
+        <title>Mittelweg</title>
       </BunchOfNodes>
       <BunchOfNodes>
         <hashcode>24</hashcode>
         <nodeHashes>
           <int>60</int>
         </nodeHashes>
-        <title>Bunch 4</title>
+        <title>Alsterufer</title>
       </BunchOfNodes>
       <BunchOfNodes>
         <hashcode>27</hashcode>
@@ -10937,7 +11324,7 @@ The traffic volume is estimated, signal times are fictional.</infoText>
           <int>36</int>
           <int>45</int>
         </nodeHashes>
-        <title>Bunch 5</title>
+        <title>Kennedybrücke</title>
       </BunchOfNodes>
       <BunchOfNodes>
         <hashcode>31</hashcode>
@@ -10945,14 +11332,14 @@ The traffic volume is estimated, signal times are fictional.</infoText>
           <int>153</int>
           <int>154</int>
         </nodeHashes>
-        <title>Bunch 6</title>
+        <title>Lombardsbrücke</title>
       </BunchOfNodes>
       <BunchOfNodes>
         <hashcode>34</hashcode>
         <nodeHashes>
           <int>212</int>
         </nodeHashes>
-        <title>Bunch 7</title>
+        <title>Dammtorstraße</title>
       </BunchOfNodes>
       <BunchOfNodes>
         <hashcode>37</hashcode>
@@ -10960,14 +11347,28 @@ The traffic volume is estimated, signal times are fictional.</infoText>
           <int>172</int>
           <int>176</int>
         </nodeHashes>
-        <title>Bunch 8</title>
+        <title>Gorch-Fock-Wall</title>
       </BunchOfNodes>
       <BunchOfNodes>
         <hashcode>40</hashcode>
         <nodeHashes>
           <int>339</int>
         </nodeHashes>
-        <title>Bunch 9</title>
+        <title>Bus: Dammtorstraße</title>
+      </BunchOfNodes>
+      <BunchOfNodes>
+        <hashcode>41</hashcode>
+        <nodeHashes>
+          <int>16</int>
+        </nodeHashes>
+        <title>Neuer Jungfangstieg</title>
+      </BunchOfNodes>
+      <BunchOfNodes>
+        <hashcode>42</hashcode>
+        <nodeHashes>
+          <int>357</int>
+        </nodeHashes>
+        <title>Bus: Edmund-Siemens-Allee</title>
       </BunchOfNodes>
     </DestinationPoints>
     <TrafficVolume>
@@ -11035,14 +11436,6 @@ The traffic volume is estimated, signal times are fictional.</infoText>
       <trafficVolumeTrams>0</trafficVolumeTrams>
     </TrafficVolume>
     <TrafficVolume>
-      <startHash>20</startHash>
-      <destinationHash>19</destinationHash>
-      <trafficVolumeCars>9</trafficVolumeCars>
-      <trafficVolumeTrucks>0</trafficVolumeTrucks>
-      <trafficVolumeBusses>0</trafficVolumeBusses>
-      <trafficVolumeTrams>0</trafficVolumeTrams>
-    </TrafficVolume>
-    <TrafficVolume>
       <startHash>17</startHash>
       <destinationHash>19</destinationHash>
       <trafficVolumeCars>368</trafficVolumeCars>
@@ -11053,30 +11446,6 @@ The traffic volume is estimated, signal times are fictional.</infoText>
     <TrafficVolume>
       <startHash>18</startHash>
       <destinationHash>19</destinationHash>
-      <trafficVolumeCars>138</trafficVolumeCars>
-      <trafficVolumeTrucks>12</trafficVolumeTrucks>
-      <trafficVolumeBusses>0</trafficVolumeBusses>
-      <trafficVolumeTrams>0</trafficVolumeTrams>
-    </TrafficVolume>
-    <TrafficVolume>
-      <startHash>21</startHash>
-      <destinationHash>22</destinationHash>
-      <trafficVolumeCars>138</trafficVolumeCars>
-      <trafficVolumeTrucks>12</trafficVolumeTrucks>
-      <trafficVolumeBusses>0</trafficVolumeBusses>
-      <trafficVolumeTrams>0</trafficVolumeTrams>
-    </TrafficVolume>
-    <TrafficVolume>
-      <startHash>23</startHash>
-      <destinationHash>22</destinationHash>
-      <trafficVolumeCars>101</trafficVolumeCars>
-      <trafficVolumeTrucks>8</trafficVolumeTrucks>
-      <trafficVolumeBusses>0</trafficVolumeBusses>
-      <trafficVolumeTrams>0</trafficVolumeTrams>
-    </TrafficVolume>
-    <TrafficVolume>
-      <startHash>20</startHash>
-      <destinationHash>22</destinationHash>
       <trafficVolumeCars>138</trafficVolumeCars>
       <trafficVolumeTrucks>12</trafficVolumeTrucks>
       <trafficVolumeBusses>0</trafficVolumeBusses>
@@ -11095,14 +11464,6 @@ The traffic volume is estimated, signal times are fictional.</infoText>
       <destinationHash>22</destinationHash>
       <trafficVolumeCars>73</trafficVolumeCars>
       <trafficVolumeTrucks>6</trafficVolumeTrucks>
-      <trafficVolumeBusses>0</trafficVolumeBusses>
-      <trafficVolumeTrams>0</trafficVolumeTrams>
-    </TrafficVolume>
-    <TrafficVolume>
-      <startHash>20</startHash>
-      <destinationHash>24</destinationHash>
-      <trafficVolumeCars>18</trafficVolumeCars>
-      <trafficVolumeTrucks>1</trafficVolumeTrucks>
       <trafficVolumeBusses>0</trafficVolumeBusses>
       <trafficVolumeTrams>0</trafficVolumeTrams>
     </TrafficVolume>
@@ -11127,38 +11488,6 @@ The traffic volume is estimated, signal times are fictional.</infoText>
       <destinationHash>24</destinationHash>
       <trafficVolumeCars>18</trafficVolumeCars>
       <trafficVolumeTrucks>1</trafficVolumeTrucks>
-      <trafficVolumeBusses>0</trafficVolumeBusses>
-      <trafficVolumeTrams>0</trafficVolumeTrams>
-    </TrafficVolume>
-    <TrafficVolume>
-      <startHash>23</startHash>
-      <destinationHash>24</destinationHash>
-      <trafficVolumeCars>9</trafficVolumeCars>
-      <trafficVolumeTrucks>0</trafficVolumeTrucks>
-      <trafficVolumeBusses>0</trafficVolumeBusses>
-      <trafficVolumeTrams>0</trafficVolumeTrams>
-    </TrafficVolume>
-    <TrafficVolume>
-      <startHash>26</startHash>
-      <destinationHash>27</destinationHash>
-      <trafficVolumeCars>920</trafficVolumeCars>
-      <trafficVolumeTrucks>80</trafficVolumeTrucks>
-      <trafficVolumeBusses>0</trafficVolumeBusses>
-      <trafficVolumeTrams>0</trafficVolumeTrams>
-    </TrafficVolume>
-    <TrafficVolume>
-      <startHash>28</startHash>
-      <destinationHash>27</destinationHash>
-      <trafficVolumeCars>460</trafficVolumeCars>
-      <trafficVolumeTrucks>40</trafficVolumeTrucks>
-      <trafficVolumeBusses>0</trafficVolumeBusses>
-      <trafficVolumeTrams>0</trafficVolumeTrams>
-    </TrafficVolume>
-    <TrafficVolume>
-      <startHash>29</startHash>
-      <destinationHash>27</destinationHash>
-      <trafficVolumeCars>138</trafficVolumeCars>
-      <trafficVolumeTrucks>12</trafficVolumeTrucks>
       <trafficVolumeBusses>0</trafficVolumeBusses>
       <trafficVolumeTrams>0</trafficVolumeTrams>
     </TrafficVolume>
@@ -11203,18 +11532,10 @@ The traffic volume is estimated, signal times are fictional.</infoText>
       <trafficVolumeTrams>0</trafficVolumeTrams>
     </TrafficVolume>
     <TrafficVolume>
-      <startHash>29</startHash>
-      <destinationHash>31</destinationHash>
-      <trafficVolumeCars>92</trafficVolumeCars>
-      <trafficVolumeTrucks>8</trafficVolumeTrucks>
-      <trafficVolumeBusses>0</trafficVolumeBusses>
-      <trafficVolumeTrams>0</trafficVolumeTrams>
-    </TrafficVolume>
-    <TrafficVolume>
       <startHash>32</startHash>
       <destinationHash>31</destinationHash>
-      <trafficVolumeCars>92</trafficVolumeCars>
-      <trafficVolumeTrucks>8</trafficVolumeTrucks>
+      <trafficVolumeCars>45</trafficVolumeCars>
+      <trafficVolumeTrucks>5</trafficVolumeTrucks>
       <trafficVolumeBusses>0</trafficVolumeBusses>
       <trafficVolumeTrams>0</trafficVolumeTrams>
     </TrafficVolume>
@@ -11223,14 +11544,6 @@ The traffic volume is estimated, signal times are fictional.</infoText>
       <destinationHash>31</destinationHash>
       <trafficVolumeCars>230</trafficVolumeCars>
       <trafficVolumeTrucks>20</trafficVolumeTrucks>
-      <trafficVolumeBusses>0</trafficVolumeBusses>
-      <trafficVolumeTrams>0</trafficVolumeTrams>
-    </TrafficVolume>
-    <TrafficVolume>
-      <startHash>33</startHash>
-      <destinationHash>31</destinationHash>
-      <trafficVolumeCars>736</trafficVolumeCars>
-      <trafficVolumeTrucks>64</trafficVolumeTrucks>
       <trafficVolumeBusses>0</trafficVolumeBusses>
       <trafficVolumeTrams>0</trafficVolumeTrams>
     </TrafficVolume>
@@ -11251,26 +11564,10 @@ The traffic volume is estimated, signal times are fictional.</infoText>
       <trafficVolumeTrams>0</trafficVolumeTrams>
     </TrafficVolume>
     <TrafficVolume>
-      <startHash>35</startHash>
-      <destinationHash>34</destinationHash>
-      <trafficVolumeCars>138</trafficVolumeCars>
-      <trafficVolumeTrucks>12</trafficVolumeTrucks>
-      <trafficVolumeBusses>0</trafficVolumeBusses>
-      <trafficVolumeTrams>0</trafficVolumeTrams>
-    </TrafficVolume>
-    <TrafficVolume>
       <startHash>36</startHash>
       <destinationHash>34</destinationHash>
       <trafficVolumeCars>276</trafficVolumeCars>
       <trafficVolumeTrucks>24</trafficVolumeTrucks>
-      <trafficVolumeBusses>0</trafficVolumeBusses>
-      <trafficVolumeTrams>0</trafficVolumeTrams>
-    </TrafficVolume>
-    <TrafficVolume>
-      <startHash>33</startHash>
-      <destinationHash>34</destinationHash>
-      <trafficVolumeCars>184</trafficVolumeCars>
-      <trafficVolumeTrucks>16</trafficVolumeTrucks>
       <trafficVolumeBusses>0</trafficVolumeBusses>
       <trafficVolumeTrams>0</trafficVolumeTrams>
     </TrafficVolume>
@@ -11307,14 +11604,6 @@ The traffic volume is estimated, signal times are fictional.</infoText>
       <trafficVolumeTrams>0</trafficVolumeTrams>
     </TrafficVolume>
     <TrafficVolume>
-      <startHash>38</startHash>
-      <destinationHash>37</destinationHash>
-      <trafficVolumeCars>690</trafficVolumeCars>
-      <trafficVolumeTrucks>60</trafficVolumeTrucks>
-      <trafficVolumeBusses>0</trafficVolumeBusses>
-      <trafficVolumeTrams>0</trafficVolumeTrams>
-    </TrafficVolume>
-    <TrafficVolume>
       <startHash>39</startHash>
       <destinationHash>40</destinationHash>
       <trafficVolumeCars>0</trafficVolumeCars>
@@ -11336,6 +11625,478 @@ The traffic volume is estimated, signal times are fictional.</infoText>
       <trafficVolumeCars>46</trafficVolumeCars>
       <trafficVolumeTrucks>4</trafficVolumeTrucks>
       <trafficVolumeBusses>0</trafficVolumeBusses>
+      <trafficVolumeTrams>0</trafficVolumeTrams>
+    </TrafficVolume>
+    <TrafficVolume>
+      <startHash>25</startHash>
+      <destinationHash>40</destinationHash>
+      <trafficVolumeCars>0</trafficVolumeCars>
+      <trafficVolumeTrucks>0</trafficVolumeTrucks>
+      <trafficVolumeBusses>0</trafficVolumeBusses>
+      <trafficVolumeTrams>0</trafficVolumeTrams>
+    </TrafficVolume>
+    <TrafficVolume>
+      <startHash>30</startHash>
+      <destinationHash>40</destinationHash>
+      <trafficVolumeCars>0</trafficVolumeCars>
+      <trafficVolumeTrucks>0</trafficVolumeTrucks>
+      <trafficVolumeBusses>0</trafficVolumeBusses>
+      <trafficVolumeTrams>0</trafficVolumeTrams>
+    </TrafficVolume>
+    <TrafficVolume>
+      <startHash>25</startHash>
+      <destinationHash>13</destinationHash>
+      <trafficVolumeCars>0</trafficVolumeCars>
+      <trafficVolumeTrucks>0</trafficVolumeTrucks>
+      <trafficVolumeBusses>0</trafficVolumeBusses>
+      <trafficVolumeTrams>0</trafficVolumeTrams>
+    </TrafficVolume>
+    <TrafficVolume>
+      <startHash>12</startHash>
+      <destinationHash>19</destinationHash>
+      <trafficVolumeCars>0</trafficVolumeCars>
+      <trafficVolumeTrucks>0</trafficVolumeTrucks>
+      <trafficVolumeBusses>0</trafficVolumeBusses>
+      <trafficVolumeTrams>0</trafficVolumeTrams>
+    </TrafficVolume>
+    <TrafficVolume>
+      <startHash>12</startHash>
+      <destinationHash>22</destinationHash>
+      <trafficVolumeCars>90</trafficVolumeCars>
+      <trafficVolumeTrucks>10</trafficVolumeTrucks>
+      <trafficVolumeBusses>0</trafficVolumeBusses>
+      <trafficVolumeTrams>0</trafficVolumeTrams>
+    </TrafficVolume>
+    <TrafficVolume>
+      <startHash>12</startHash>
+      <destinationHash>24</destinationHash>
+      <trafficVolumeCars>10</trafficVolumeCars>
+      <trafficVolumeTrucks>0</trafficVolumeTrucks>
+      <trafficVolumeBusses>0</trafficVolumeBusses>
+      <trafficVolumeTrams>0</trafficVolumeTrams>
+    </TrafficVolume>
+    <TrafficVolume>
+      <startHash>12</startHash>
+      <destinationHash>27</destinationHash>
+      <trafficVolumeCars>400</trafficVolumeCars>
+      <trafficVolumeTrucks>50</trafficVolumeTrucks>
+      <trafficVolumeBusses>0</trafficVolumeBusses>
+      <trafficVolumeTrams>0</trafficVolumeTrams>
+    </TrafficVolume>
+    <TrafficVolume>
+      <startHash>12</startHash>
+      <destinationHash>40</destinationHash>
+      <trafficVolumeCars>0</trafficVolumeCars>
+      <trafficVolumeTrucks>0</trafficVolumeTrucks>
+      <trafficVolumeBusses>0</trafficVolumeBusses>
+      <trafficVolumeTrams>0</trafficVolumeTrams>
+    </TrafficVolume>
+    <TrafficVolume>
+      <startHash>14</startHash>
+      <destinationHash>22</destinationHash>
+      <trafficVolumeCars>0</trafficVolumeCars>
+      <trafficVolumeTrucks>0</trafficVolumeTrucks>
+      <trafficVolumeBusses>0</trafficVolumeBusses>
+      <trafficVolumeTrams>0</trafficVolumeTrams>
+    </TrafficVolume>
+    <TrafficVolume>
+      <startHash>14</startHash>
+      <destinationHash>24</destinationHash>
+      <trafficVolumeCars>0</trafficVolumeCars>
+      <trafficVolumeTrucks>0</trafficVolumeTrucks>
+      <trafficVolumeBusses>0</trafficVolumeBusses>
+      <trafficVolumeTrams>0</trafficVolumeTrams>
+    </TrafficVolume>
+    <TrafficVolume>
+      <startHash>14</startHash>
+      <destinationHash>27</destinationHash>
+      <trafficVolumeCars>72</trafficVolumeCars>
+      <trafficVolumeTrucks>8</trafficVolumeTrucks>
+      <trafficVolumeBusses>0</trafficVolumeBusses>
+      <trafficVolumeTrams>0</trafficVolumeTrams>
+    </TrafficVolume>
+    <TrafficVolume>
+      <startHash>14</startHash>
+      <destinationHash>31</destinationHash>
+      <trafficVolumeCars>72</trafficVolumeCars>
+      <trafficVolumeTrucks>8</trafficVolumeTrucks>
+      <trafficVolumeBusses>0</trafficVolumeBusses>
+      <trafficVolumeTrams>0</trafficVolumeTrams>
+    </TrafficVolume>
+    <TrafficVolume>
+      <startHash>14</startHash>
+      <destinationHash>34</destinationHash>
+      <trafficVolumeCars>135</trafficVolumeCars>
+      <trafficVolumeTrucks>15</trafficVolumeTrucks>
+      <trafficVolumeBusses>0</trafficVolumeBusses>
+      <trafficVolumeTrams>0</trafficVolumeTrams>
+    </TrafficVolume>
+    <TrafficVolume>
+      <startHash>14</startHash>
+      <destinationHash>40</destinationHash>
+      <trafficVolumeCars>0</trafficVolumeCars>
+      <trafficVolumeTrucks>0</trafficVolumeTrucks>
+      <trafficVolumeBusses>0</trafficVolumeBusses>
+      <trafficVolumeTrams>0</trafficVolumeTrams>
+    </TrafficVolume>
+    <TrafficVolume>
+      <startHash>14</startHash>
+      <destinationHash>41</destinationHash>
+      <trafficVolumeCars>0</trafficVolumeCars>
+      <trafficVolumeTrucks>0</trafficVolumeTrucks>
+      <trafficVolumeBusses>0</trafficVolumeBusses>
+      <trafficVolumeTrams>0</trafficVolumeTrams>
+    </TrafficVolume>
+    <TrafficVolume>
+      <startHash>16</startHash>
+      <destinationHash>37</destinationHash>
+      <trafficVolumeCars>0</trafficVolumeCars>
+      <trafficVolumeTrucks>0</trafficVolumeTrucks>
+      <trafficVolumeBusses>0</trafficVolumeBusses>
+      <trafficVolumeTrams>0</trafficVolumeTrams>
+    </TrafficVolume>
+    <TrafficVolume>
+      <startHash>17</startHash>
+      <destinationHash>37</destinationHash>
+      <trafficVolumeCars>0</trafficVolumeCars>
+      <trafficVolumeTrucks>0</trafficVolumeTrucks>
+      <trafficVolumeBusses>0</trafficVolumeBusses>
+      <trafficVolumeTrams>0</trafficVolumeTrams>
+    </TrafficVolume>
+    <TrafficVolume>
+      <startHash>18</startHash>
+      <destinationHash>37</destinationHash>
+      <trafficVolumeCars>0</trafficVolumeCars>
+      <trafficVolumeTrucks>0</trafficVolumeTrucks>
+      <trafficVolumeBusses>0</trafficVolumeBusses>
+      <trafficVolumeTrams>0</trafficVolumeTrams>
+    </TrafficVolume>
+    <TrafficVolume>
+      <startHash>30</startHash>
+      <destinationHash>37</destinationHash>
+      <trafficVolumeCars>0</trafficVolumeCars>
+      <trafficVolumeTrucks>0</trafficVolumeTrucks>
+      <trafficVolumeBusses>0</trafficVolumeBusses>
+      <trafficVolumeTrams>0</trafficVolumeTrams>
+    </TrafficVolume>
+    <TrafficVolume>
+      <startHash>16</startHash>
+      <destinationHash>27</destinationHash>
+      <trafficVolumeCars>0</trafficVolumeCars>
+      <trafficVolumeTrucks>0</trafficVolumeTrucks>
+      <trafficVolumeBusses>0</trafficVolumeBusses>
+      <trafficVolumeTrams>0</trafficVolumeTrams>
+    </TrafficVolume>
+    <TrafficVolume>
+      <startHash>18</startHash>
+      <destinationHash>34</destinationHash>
+      <trafficVolumeCars>0</trafficVolumeCars>
+      <trafficVolumeTrucks>0</trafficVolumeTrucks>
+      <trafficVolumeBusses>0</trafficVolumeBusses>
+      <trafficVolumeTrams>0</trafficVolumeTrams>
+    </TrafficVolume>
+    <TrafficVolume>
+      <startHash>16</startHash>
+      <destinationHash>34</destinationHash>
+      <trafficVolumeCars>0</trafficVolumeCars>
+      <trafficVolumeTrucks>0</trafficVolumeTrucks>
+      <trafficVolumeBusses>0</trafficVolumeBusses>
+      <trafficVolumeTrams>0</trafficVolumeTrams>
+    </TrafficVolume>
+    <TrafficVolume>
+      <startHash>16</startHash>
+      <destinationHash>19</destinationHash>
+      <trafficVolumeCars>10</trafficVolumeCars>
+      <trafficVolumeTrucks>0</trafficVolumeTrucks>
+      <trafficVolumeBusses>0</trafficVolumeBusses>
+      <trafficVolumeTrams>0</trafficVolumeTrams>
+    </TrafficVolume>
+    <TrafficVolume>
+      <startHash>16</startHash>
+      <destinationHash>22</destinationHash>
+      <trafficVolumeCars>138</trafficVolumeCars>
+      <trafficVolumeTrucks>12</trafficVolumeTrucks>
+      <trafficVolumeBusses>0</trafficVolumeBusses>
+      <trafficVolumeTrams>0</trafficVolumeTrams>
+    </TrafficVolume>
+    <TrafficVolume>
+      <startHash>16</startHash>
+      <destinationHash>24</destinationHash>
+      <trafficVolumeCars>18</trafficVolumeCars>
+      <trafficVolumeTrucks>2</trafficVolumeTrucks>
+      <trafficVolumeBusses>0</trafficVolumeBusses>
+      <trafficVolumeTrams>0</trafficVolumeTrams>
+    </TrafficVolume>
+    <TrafficVolume>
+      <startHash>18</startHash>
+      <destinationHash>41</destinationHash>
+      <trafficVolumeCars>0</trafficVolumeCars>
+      <trafficVolumeTrucks>0</trafficVolumeTrucks>
+      <trafficVolumeBusses>0</trafficVolumeBusses>
+      <trafficVolumeTrams>0</trafficVolumeTrams>
+    </TrafficVolume>
+    <TrafficVolume>
+      <startHash>25</startHash>
+      <destinationHash>41</destinationHash>
+      <trafficVolumeCars>0</trafficVolumeCars>
+      <trafficVolumeTrucks>0</trafficVolumeTrucks>
+      <trafficVolumeBusses>0</trafficVolumeBusses>
+      <trafficVolumeTrams>0</trafficVolumeTrams>
+    </TrafficVolume>
+    <TrafficVolume>
+      <startHash>25</startHash>
+      <destinationHash>19</destinationHash>
+      <trafficVolumeCars>0</trafficVolumeCars>
+      <trafficVolumeTrucks>0</trafficVolumeTrucks>
+      <trafficVolumeBusses>0</trafficVolumeBusses>
+      <trafficVolumeTrams>0</trafficVolumeTrams>
+    </TrafficVolume>
+    <TrafficVolume>
+      <startHash>25</startHash>
+      <destinationHash>22</destinationHash>
+      <trafficVolumeCars>90</trafficVolumeCars>
+      <trafficVolumeTrucks>10</trafficVolumeTrucks>
+      <trafficVolumeBusses>0</trafficVolumeBusses>
+      <trafficVolumeTrams>0</trafficVolumeTrams>
+    </TrafficVolume>
+    <TrafficVolume>
+      <startHash>25</startHash>
+      <destinationHash>27</destinationHash>
+      <trafficVolumeCars>920</trafficVolumeCars>
+      <trafficVolumeTrucks>80</trafficVolumeTrucks>
+      <trafficVolumeBusses>0</trafficVolumeBusses>
+      <trafficVolumeTrams>0</trafficVolumeTrams>
+    </TrafficVolume>
+    <TrafficVolume>
+      <startHash>12</startHash>
+      <destinationHash>41</destinationHash>
+      <trafficVolumeCars>10</trafficVolumeCars>
+      <trafficVolumeTrucks>0</trafficVolumeTrucks>
+      <trafficVolumeBusses>0</trafficVolumeBusses>
+      <trafficVolumeTrams>0</trafficVolumeTrams>
+    </TrafficVolume>
+    <TrafficVolume>
+      <startHash>30</startHash>
+      <destinationHash>13</destinationHash>
+      <trafficVolumeCars>0</trafficVolumeCars>
+      <trafficVolumeTrucks>0</trafficVolumeTrucks>
+      <trafficVolumeBusses>0</trafficVolumeBusses>
+      <trafficVolumeTrams>0</trafficVolumeTrams>
+    </TrafficVolume>
+    <TrafficVolume>
+      <startHash>30</startHash>
+      <destinationHash>41</destinationHash>
+      <trafficVolumeCars>0</trafficVolumeCars>
+      <trafficVolumeTrucks>0</trafficVolumeTrucks>
+      <trafficVolumeBusses>0</trafficVolumeBusses>
+      <trafficVolumeTrams>0</trafficVolumeTrams>
+    </TrafficVolume>
+    <TrafficVolume>
+      <startHash>30</startHash>
+      <destinationHash>34</destinationHash>
+      <trafficVolumeCars>135</trafficVolumeCars>
+      <trafficVolumeTrucks>15</trafficVolumeTrucks>
+      <trafficVolumeBusses>0</trafficVolumeBusses>
+      <trafficVolumeTrams>0</trafficVolumeTrams>
+    </TrafficVolume>
+    <TrafficVolume>
+      <startHash>30</startHash>
+      <destinationHash>31</destinationHash>
+      <trafficVolumeCars>640</trafficVolumeCars>
+      <trafficVolumeTrucks>60</trafficVolumeTrucks>
+      <trafficVolumeBusses>0</trafficVolumeBusses>
+      <trafficVolumeTrams>0</trafficVolumeTrams>
+    </TrafficVolume>
+    <TrafficVolume>
+      <startHash>30</startHash>
+      <destinationHash>22</destinationHash>
+      <trafficVolumeCars>0</trafficVolumeCars>
+      <trafficVolumeTrucks>0</trafficVolumeTrucks>
+      <trafficVolumeBusses>0</trafficVolumeBusses>
+      <trafficVolumeTrams>0</trafficVolumeTrams>
+    </TrafficVolume>
+    <TrafficVolume>
+      <startHash>30</startHash>
+      <destinationHash>19</destinationHash>
+      <trafficVolumeCars>0</trafficVolumeCars>
+      <trafficVolumeTrucks>0</trafficVolumeTrucks>
+      <trafficVolumeBusses>0</trafficVolumeBusses>
+      <trafficVolumeTrams>0</trafficVolumeTrams>
+    </TrafficVolume>
+    <TrafficVolume>
+      <startHash>32</startHash>
+      <destinationHash>13</destinationHash>
+      <trafficVolumeCars>0</trafficVolumeCars>
+      <trafficVolumeTrucks>0</trafficVolumeTrucks>
+      <trafficVolumeBusses>0</trafficVolumeBusses>
+      <trafficVolumeTrams>0</trafficVolumeTrams>
+    </TrafficVolume>
+    <TrafficVolume>
+      <startHash>36</startHash>
+      <destinationHash>13</destinationHash>
+      <trafficVolumeCars>0</trafficVolumeCars>
+      <trafficVolumeTrucks>0</trafficVolumeTrucks>
+      <trafficVolumeBusses>0</trafficVolumeBusses>
+      <trafficVolumeTrams>0</trafficVolumeTrams>
+    </TrafficVolume>
+    <TrafficVolume>
+      <startHash>39</startHash>
+      <destinationHash>13</destinationHash>
+      <trafficVolumeCars>0</trafficVolumeCars>
+      <trafficVolumeTrucks>0</trafficVolumeTrucks>
+      <trafficVolumeBusses>0</trafficVolumeBusses>
+      <trafficVolumeTrams>0</trafficVolumeTrams>
+    </TrafficVolume>
+    <TrafficVolume>
+      <startHash>32</startHash>
+      <destinationHash>41</destinationHash>
+      <trafficVolumeCars>0</trafficVolumeCars>
+      <trafficVolumeTrucks>0</trafficVolumeTrucks>
+      <trafficVolumeBusses>0</trafficVolumeBusses>
+      <trafficVolumeTrams>0</trafficVolumeTrams>
+    </TrafficVolume>
+    <TrafficVolume>
+      <startHash>32</startHash>
+      <destinationHash>40</destinationHash>
+      <trafficVolumeCars>0</trafficVolumeCars>
+      <trafficVolumeTrucks>0</trafficVolumeTrucks>
+      <trafficVolumeBusses>0</trafficVolumeBusses>
+      <trafficVolumeTrams>0</trafficVolumeTrams>
+    </TrafficVolume>
+    <TrafficVolume>
+      <startHash>32</startHash>
+      <destinationHash>37</destinationHash>
+      <trafficVolumeCars>0</trafficVolumeCars>
+      <trafficVolumeTrucks>0</trafficVolumeTrucks>
+      <trafficVolumeBusses>0</trafficVolumeBusses>
+      <trafficVolumeTrams>0</trafficVolumeTrams>
+    </TrafficVolume>
+    <TrafficVolume>
+      <startHash>32</startHash>
+      <destinationHash>34</destinationHash>
+      <trafficVolumeCars>0</trafficVolumeCars>
+      <trafficVolumeTrucks>0</trafficVolumeTrucks>
+      <trafficVolumeBusses>0</trafficVolumeBusses>
+      <trafficVolumeTrams>0</trafficVolumeTrams>
+    </TrafficVolume>
+    <TrafficVolume>
+      <startHash>32</startHash>
+      <destinationHash>27</destinationHash>
+      <trafficVolumeCars>0</trafficVolumeCars>
+      <trafficVolumeTrucks>0</trafficVolumeTrucks>
+      <trafficVolumeBusses>0</trafficVolumeBusses>
+      <trafficVolumeTrams>0</trafficVolumeTrams>
+    </TrafficVolume>
+    <TrafficVolume>
+      <startHash>36</startHash>
+      <destinationHash>31</destinationHash>
+      <trafficVolumeCars>0</trafficVolumeCars>
+      <trafficVolumeTrucks>0</trafficVolumeTrucks>
+      <trafficVolumeBusses>0</trafficVolumeBusses>
+      <trafficVolumeTrams>0</trafficVolumeTrams>
+    </TrafficVolume>
+    <TrafficVolume>
+      <startHash>39</startHash>
+      <destinationHash>31</destinationHash>
+      <trafficVolumeCars>0</trafficVolumeCars>
+      <trafficVolumeTrucks>0</trafficVolumeTrucks>
+      <trafficVolumeBusses>0</trafficVolumeBusses>
+      <trafficVolumeTrams>0</trafficVolumeTrams>
+    </TrafficVolume>
+    <TrafficVolume>
+      <startHash>41</startHash>
+      <destinationHash>31</destinationHash>
+      <trafficVolumeCars>0</trafficVolumeCars>
+      <trafficVolumeTrucks>0</trafficVolumeTrucks>
+      <trafficVolumeBusses>0</trafficVolumeBusses>
+      <trafficVolumeTrams>0</trafficVolumeTrams>
+    </TrafficVolume>
+    <TrafficVolume>
+      <startHash>36</startHash>
+      <destinationHash>41</destinationHash>
+      <trafficVolumeCars>15</trafficVolumeCars>
+      <trafficVolumeTrucks>0</trafficVolumeTrucks>
+      <trafficVolumeBusses>0</trafficVolumeBusses>
+      <trafficVolumeTrams>0</trafficVolumeTrams>
+    </TrafficVolume>
+    <TrafficVolume>
+      <startHash>36</startHash>
+      <destinationHash>40</destinationHash>
+      <trafficVolumeCars>0</trafficVolumeCars>
+      <trafficVolumeTrucks>0</trafficVolumeTrucks>
+      <trafficVolumeBusses>0</trafficVolumeBusses>
+      <trafficVolumeTrams>0</trafficVolumeTrams>
+    </TrafficVolume>
+    <TrafficVolume>
+      <startHash>36</startHash>
+      <destinationHash>37</destinationHash>
+      <trafficVolumeCars>690</trafficVolumeCars>
+      <trafficVolumeTrucks>60</trafficVolumeTrucks>
+      <trafficVolumeBusses>0</trafficVolumeBusses>
+      <trafficVolumeTrams>0</trafficVolumeTrams>
+    </TrafficVolume>
+    <TrafficVolume>
+      <startHash>36</startHash>
+      <destinationHash>27</destinationHash>
+      <trafficVolumeCars>0</trafficVolumeCars>
+      <trafficVolumeTrucks>0</trafficVolumeTrucks>
+      <trafficVolumeBusses>0</trafficVolumeBusses>
+      <trafficVolumeTrams>0</trafficVolumeTrams>
+    </TrafficVolume>
+    <TrafficVolume>
+      <startHash>36</startHash>
+      <destinationHash>24</destinationHash>
+      <trafficVolumeCars>0</trafficVolumeCars>
+      <trafficVolumeTrucks>0</trafficVolumeTrucks>
+      <trafficVolumeBusses>0</trafficVolumeBusses>
+      <trafficVolumeTrams>0</trafficVolumeTrams>
+    </TrafficVolume>
+    <TrafficVolume>
+      <startHash>36</startHash>
+      <destinationHash>22</destinationHash>
+      <trafficVolumeCars>0</trafficVolumeCars>
+      <trafficVolumeTrucks>0</trafficVolumeTrucks>
+      <trafficVolumeBusses>0</trafficVolumeBusses>
+      <trafficVolumeTrams>0</trafficVolumeTrams>
+    </TrafficVolume>
+    <TrafficVolume>
+      <startHash>36</startHash>
+      <destinationHash>19</destinationHash>
+      <trafficVolumeCars>0</trafficVolumeCars>
+      <trafficVolumeTrucks>0</trafficVolumeTrucks>
+      <trafficVolumeBusses>0</trafficVolumeBusses>
+      <trafficVolumeTrams>0</trafficVolumeTrams>
+    </TrafficVolume>
+    <TrafficVolume>
+      <startHash>39</startHash>
+      <destinationHash>37</destinationHash>
+      <trafficVolumeCars>0</trafficVolumeCars>
+      <trafficVolumeTrucks>0</trafficVolumeTrucks>
+      <trafficVolumeBusses>0</trafficVolumeBusses>
+      <trafficVolumeTrams>0</trafficVolumeTrams>
+    </TrafficVolume>
+    <TrafficVolume>
+      <startHash>41</startHash>
+      <destinationHash>40</destinationHash>
+      <trafficVolumeCars>0</trafficVolumeCars>
+      <trafficVolumeTrucks>0</trafficVolumeTrucks>
+      <trafficVolumeBusses>0</trafficVolumeBusses>
+      <trafficVolumeTrams>0</trafficVolumeTrams>
+    </TrafficVolume>
+    <TrafficVolume>
+      <startHash>39</startHash>
+      <destinationHash>41</destinationHash>
+      <trafficVolumeCars>0</trafficVolumeCars>
+      <trafficVolumeTrucks>0</trafficVolumeTrucks>
+      <trafficVolumeBusses>0</trafficVolumeBusses>
+      <trafficVolumeTrams>0</trafficVolumeTrams>
+    </TrafficVolume>
+    <TrafficVolume>
+      <startHash>41</startHash>
+      <destinationHash>42</destinationHash>
+      <trafficVolumeCars>0</trafficVolumeCars>
+      <trafficVolumeTrucks>0</trafficVolumeTrucks>
+      <trafficVolumeBusses>25</trafficVolumeBusses>
       <trafficVolumeTrams>0</trafficVolumeTrams>
     </TrafficVolume>
   </TrafficVolumes>

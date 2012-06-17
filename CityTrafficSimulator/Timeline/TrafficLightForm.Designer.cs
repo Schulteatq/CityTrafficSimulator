@@ -34,6 +34,7 @@
 			this.statusStrip1 = new System.Windows.Forms.StatusStrip();
 			this.statusLabel = new System.Windows.Forms.ToolStripStatusLabel();
 			this.splitContainer1 = new System.Windows.Forms.SplitContainer();
+			this.timelineControl = new CityTrafficSimulator.TimelineControl();
 			this.groupBox1 = new System.Windows.Forms.GroupBox();
 			this.cycleTimeSpinEdit = new System.Windows.Forms.NumericUpDown();
 			this.label5 = new System.Windows.Forms.Label();
@@ -51,7 +52,6 @@
 			this.groupTitleEdit = new System.Windows.Forms.TextBox();
 			this.removeGroupButton = new System.Windows.Forms.Button();
 			this.addGroupButton = new System.Windows.Forms.Button();
-			this.timelineControl = new CityTrafficSimulator.TimelineControl();
 			this.statusStrip1.SuspendLayout();
 			this.splitContainer1.Panel1.SuspendLayout();
 			this.splitContainer1.Panel2.SuspendLayout();
@@ -76,7 +76,7 @@
 			// statusLabel
 			// 
 			this.statusLabel.Name = "statusLabel";
-			this.statusLabel.Size = new System.Drawing.Size(9, 17);
+			this.statusLabel.Size = new System.Drawing.Size(10, 17);
 			this.statusLabel.Text = " ";
 			// 
 			// splitContainer1
@@ -100,6 +100,23 @@
 			this.splitContainer1.Size = new System.Drawing.Size(890, 281);
 			this.splitContainer1.SplitterDistance = 600;
 			this.splitContainer1.TabIndex = 1;
+			// 
+			// timelineControl
+			// 
+			this.timelineControl.Location = new System.Drawing.Point(0, 0);
+			this.timelineControl.Name = "timelineControl";
+			this.timelineControl.selectedEntry = null;
+			this.timelineControl.selectedGroup = null;
+			this.timelineControl.Size = new System.Drawing.Size(435, 147);
+			this.timelineControl.snapSize = 0.5;
+			this.timelineControl.steuerung = null;
+			this.timelineControl.TabIndex = 0;
+			this.timelineControl.Text = "timelineControl";
+			this.timelineControl.zoom = 10;
+			this.timelineControl.MouseMove += new System.Windows.Forms.MouseEventHandler(this.timelineControl_MouseMove);
+			this.timelineControl.KeyUp += new System.Windows.Forms.KeyEventHandler(this.timelineControl_KeyUp);
+			this.timelineControl.EventChanged += new CityTrafficSimulator.TimelineControl.EventChangedEventHandler(this.timelineControl_EventChanged);
+			this.timelineControl.KeyDown += new System.Windows.Forms.KeyEventHandler(this.timelineControl_KeyDown);
 			// 
 			// groupBox1
 			// 
@@ -261,6 +278,7 @@
 			this.groupsGroupBox.TabIndex = 0;
 			this.groupsGroupBox.TabStop = false;
 			this.groupsGroupBox.Text = "Signal Groups";
+			this.groupsGroupBox.SizeChanged += new System.EventHandler(this.groupsGroupBox_SizeChanged);
 			// 
 			// label1
 			// 
@@ -298,23 +316,6 @@
 			this.addGroupButton.Text = "Create Group";
 			this.addGroupButton.UseVisualStyleBackColor = true;
 			this.addGroupButton.Click += new System.EventHandler(this.addGroupButton_Click);
-			// 
-			// timelineControl
-			// 
-			this.timelineControl.Location = new System.Drawing.Point(0, 0);
-			this.timelineControl.Name = "timelineControl";
-			this.timelineControl.selectedEntry = null;
-			this.timelineControl.selectedGroup = null;
-			this.timelineControl.Size = new System.Drawing.Size(435, 147);
-			this.timelineControl.snapSize = 0.5;
-			this.timelineControl.steuerung = null;
-			this.timelineControl.TabIndex = 0;
-			this.timelineControl.Text = "timelineControl";
-			this.timelineControl.zoom = 10;
-			this.timelineControl.MouseMove += new System.Windows.Forms.MouseEventHandler(this.timelineControl_MouseMove);
-			this.timelineControl.KeyUp += new System.Windows.Forms.KeyEventHandler(this.timelineControl_KeyUp);
-			this.timelineControl.EventChanged += new CityTrafficSimulator.TimelineControl.EventChangedEventHandler(this.timelineControl_EventChanged);
-			this.timelineControl.KeyDown += new System.Windows.Forms.KeyEventHandler(this.timelineControl_KeyDown);
 			// 
 			// TrafficLightForm
 			// 

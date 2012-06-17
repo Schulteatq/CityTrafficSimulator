@@ -294,5 +294,10 @@ namespace CityTrafficSimulator.Timeline
 
 		#endregion
 
+		private void groupsGroupBox_SizeChanged(object sender, EventArgs e)
+			{
+			splitContainer1.SplitterDistance = splitContainer1.ClientSize.Width - groupsGroupBox.Width - 32;
+			}
+
 		}
 	}

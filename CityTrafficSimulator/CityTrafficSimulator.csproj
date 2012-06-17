@@ -72,6 +72,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="MagicLibrary, Version=1.7.0.0, Culture=neutral, PublicKeyToken=3a6eb82f876a49bc">
+      <SpecificVersion>False</SpecificVersion>
       <HintPath>bin\Debug\MagicLibrary.dll</HintPath>
     </Reference>
     <Reference Include="System" />
@@ -113,6 +114,7 @@
     <Compile Include="Timeline\TrafficLightTreeView.Designer.cs">
       <DependentUpon>TrafficLightTreeView.cs</DependentUpon>
     </Compile>
+    <Compile Include="Tools\AlgorithmicGeometry.cs" />
     <Compile Include="Tools\Colormap.cs">
       <SubType>Component</SubType>
     </Compile>
@@ -203,7 +205,6 @@
       <DependentUpon>Resources.resx</DependentUpon>
       <DesignTime>True</DesignTime>
     </Compile>
-    <None Include="CityTrafficSimulator_TemporaryKey.pfx" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>

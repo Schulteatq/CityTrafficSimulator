@@ -156,22 +156,25 @@ namespace CityTrafficSimulator.Verkehr
 
 			lbDestinationNodes.Size = new System.Drawing.Size(totalWidth / 2 - spacer - spacer, totalHeight - 96);
 			lbDestinationNodes.Location = new System.Drawing.Point(totalWidth - spacer - lbDestinationNodes.Width, 26);
-
 			label2.Location = new System.Drawing.Point(lbDestinationNodes.Location.X, 9);
 
-			lblStartTitle.Location = new System.Drawing.Point(lbStartNodes.Size.Width + lbStartNodes.Location.X - 200 , lbStartNodes.Size.Height + 32 + 3);
-			editStartNodeTitle.Location = new System.Drawing.Point(lbStartNodes.Size.Width + lbStartNodes.Location.X - 166, lbStartNodes.Size.Height + 32);
-			btnSetStartTitle.Location = new System.Drawing.Point(lbStartNodes.Size.Width + lbStartNodes.Location.X - 40, lbStartNodes.Size.Height + 32 - 1);
-			btnAddStartNode.Location = new System.Drawing.Point(lbStartNodes.Size.Width + lbStartNodes.Location.X - 65 - 65 - 60, lbStartNodes.Size.Height + 56);
-			btnUpdateStartNodes.Location = new System.Drawing.Point(lbStartNodes.Size.Width + lbStartNodes.Location.X - 65 - 60, lbStartNodes.Size.Height + 56);
-			btnRemoveStartNode.Location = new System.Drawing.Point(lbStartNodes.Size.Width + lbStartNodes.Location.X - 60, lbStartNodes.Size.Height + 56);
+			int row1Y = lbStartNodes.Location.Y + lbStartNodes.Height + spacer;
+			btnSetStartTitle.Location = new System.Drawing.Point(lbStartNodes.Size.Width + lbStartNodes.Location.X - btnSetStartTitle.Width, row1Y);
+			editStartNodeTitle.Location = new System.Drawing.Point(btnSetStartTitle.Location.X - spacer - editStartNodeTitle.Width, row1Y);
+			lblStartTitle.Location = new System.Drawing.Point(editStartNodeTitle.Location.X - spacer - lblStartTitle.Width, row1Y);
 
-			lblDestinationTitle.Location = new System.Drawing.Point(lbDestinationNodes.Size.Width + lbDestinationNodes.Location.X - 200, lbDestinationNodes.Size.Height + 32 + 3);
-			editDestinationNodeTitle.Location = new System.Drawing.Point(lbDestinationNodes.Size.Width + lbDestinationNodes.Location.X - 166, lbDestinationNodes.Size.Height + 32);
-			btnSetDestinationTitle.Location = new System.Drawing.Point(lbDestinationNodes.Size.Width + lbDestinationNodes.Location.X - 40, lbDestinationNodes.Size.Height + 32 - 1);
-			btnAddDestinationNode.Location = new System.Drawing.Point(lbDestinationNodes.Size.Width + lbDestinationNodes.Location.X - 65 - 65 - 60, lbDestinationNodes.Size.Height + 56);
-			btnUpdateDestinationNodes.Location = new System.Drawing.Point(lbDestinationNodes.Size.Width + lbDestinationNodes.Location.X - 65 - 60, lbDestinationNodes.Size.Height + 56);
-			btnRemoveDestinationNode.Location = new System.Drawing.Point(lbDestinationNodes.Size.Width + lbDestinationNodes.Location.X - 60, lbDestinationNodes.Size.Height + 56);
+			btnSetDestinationTitle.Location = new System.Drawing.Point(lbDestinationNodes.Size.Width + lbDestinationNodes.Location.X - btnSetDestinationTitle.Width, row1Y);
+			editDestinationNodeTitle.Location = new System.Drawing.Point(btnSetDestinationTitle.Location.X - spacer - editDestinationNodeTitle.Width, row1Y);
+			lblDestinationTitle.Location = new System.Drawing.Point(editDestinationNodeTitle.Location.X - spacer - lblDestinationTitle.Width, row1Y);
+
+			int row2Y = btnSetStartTitle.Location.Y + btnSetStartTitle.Height + spacer;
+			btnRemoveStartNode.Location = new System.Drawing.Point(lbStartNodes.Size.Width + lbStartNodes.Location.X - btnRemoveStartNode.Width, row2Y);
+			btnUpdateStartNodes.Location = new System.Drawing.Point(btnRemoveStartNode.Location.X - spacer - btnUpdateStartNodes.Width, row2Y);
+			btnAddStartNode.Location = new System.Drawing.Point(btnUpdateStartNodes.Location.X - spacer - btnAddStartNode.Width, row2Y);
+
+			btnRemoveDestinationNode.Location = new System.Drawing.Point(lbDestinationNodes.Size.Width + lbDestinationNodes.Location.X - btnRemoveDestinationNode.Width, row2Y);
+			btnUpdateDestinationNodes.Location = new System.Drawing.Point(btnRemoveDestinationNode.Location.X - spacer - btnUpdateDestinationNodes.Width, row2Y);
+			btnAddDestinationNode.Location = new System.Drawing.Point(btnUpdateDestinationNodes.Location.X - spacer - btnAddDestinationNode.Width, row2Y);
 			}
 
 		/// <summary>
@@ -387,6 +390,21 @@ namespace CityTrafficSimulator.Verkehr
 			ignoreUpdateEvent = true;
 			m_steuerung.tramTargetVelocity = (double)spinTrucksTargetVelocity.Value;
 			ignoreUpdateEvent = false;
+			}
+
+		private void btnRemoveDestinationNode_SizeChanged(object sender, EventArgs e)
+			{
+
+			}
+
+		private void TrafficVolumeForm_Load(object sender, EventArgs e)
+			{
+
+			}
+
+		private void groupBox1_SizeChanged(object sender, EventArgs e)
+			{
+			splitContainer1.SplitterDistance = splitContainer1.ClientSize.Width - groupBox1.Width - 32;
 			}
 		}
 	}

@@ -46,6 +46,7 @@
 			this.btnRemoveDestinationNode = new System.Windows.Forms.Button();
 			this.btnAddDestinationNode = new System.Windows.Forms.Button();
 			this.groupBox3 = new System.Windows.Forms.GroupBox();
+			this.lblNumStops = new System.Windows.Forms.Label();
 			this.lblNumVehicles = new System.Windows.Forms.Label();
 			this.lblTravelTime = new System.Windows.Forms.Label();
 			this.lblVelocity = new System.Windows.Forms.Label();
@@ -70,7 +71,6 @@
 			this.spinTramVolume = new System.Windows.Forms.NumericUpDown();
 			this.spinBusVolume = new System.Windows.Forms.NumericUpDown();
 			this.spinCarsVolume = new System.Windows.Forms.NumericUpDown();
-			this.lblNumStops = new System.Windows.Forms.Label();
 			this.splitContainer1.Panel1.SuspendLayout();
 			this.splitContainer1.Panel2.SuspendLayout();
 			this.splitContainer1.SuspendLayout();
@@ -262,6 +262,7 @@
 			this.btnRemoveDestinationNode.Text = "Remove";
 			this.btnRemoveDestinationNode.UseVisualStyleBackColor = true;
 			this.btnRemoveDestinationNode.Click += new System.EventHandler(this.btnRemoveDestinationNode_Click);
+			this.btnRemoveDestinationNode.SizeChanged += new System.EventHandler(this.btnRemoveDestinationNode_SizeChanged);
 			// 
 			// btnAddDestinationNode
 			// 
@@ -286,6 +287,15 @@
 			this.groupBox3.TabIndex = 23;
 			this.groupBox3.TabStop = false;
 			this.groupBox3.Text = "Statistics";
+			// 
+			// lblNumStops
+			// 
+			this.lblNumStops.AutoSize = true;
+			this.lblNumStops.Location = new System.Drawing.Point(6, 125);
+			this.lblNumStops.Name = "lblNumStops";
+			this.lblNumStops.Size = new System.Drawing.Size(141, 13);
+			this.lblNumStops.TabIndex = 4;
+			this.lblNumStops.Text = "Average Number of Stops: 0";
 			// 
 			// lblNumVehicles
 			// 
@@ -519,6 +529,7 @@
 			this.groupBox1.TabIndex = 0;
 			this.groupBox1.TabStop = false;
 			this.groupBox1.Text = "Per-Route Traffic Volume:";
+			this.groupBox1.SizeChanged += new System.EventHandler(this.groupBox1_SizeChanged);
 			// 
 			// label6
 			// 
@@ -608,15 +619,6 @@
 			this.spinCarsVolume.TabIndex = 21;
 			this.spinCarsVolume.ValueChanged += new System.EventHandler(this.spinCarsVolume_ValueChanged);
 			// 
-			// lblNumStops
-			// 
-			this.lblNumStops.AutoSize = true;
-			this.lblNumStops.Location = new System.Drawing.Point(6, 125);
-			this.lblNumStops.Name = "lblNumStops";
-			this.lblNumStops.Size = new System.Drawing.Size(141, 13);
-			this.lblNumStops.TabIndex = 4;
-			this.lblNumStops.Text = "Average Number of Stops: 0";
-			// 
 			// TrafficVolumeForm
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -626,6 +628,7 @@
 			this.Controls.Add(this.splitContainer1);
 			this.Name = "TrafficVolumeForm";
 			this.Text = "Traffic Volume Editor";
+			this.Load += new System.EventHandler(this.TrafficVolumeForm_Load);
 			this.splitContainer1.Panel1.ResumeLayout(false);
 			this.splitContainer1.Panel1.PerformLayout();
 			this.splitContainer1.Panel2.ResumeLayout(false);
