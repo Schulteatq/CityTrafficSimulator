@@ -22,26 +22,29 @@ namespace CityTrafficSimulator.Tools
 			{
 			GraphicsPath toReturn = new GraphicsPath();
 
-			// build and close convex hull
+			// build convex hull
 			LinkedList<Vector2> convexHull = AlgorithmicGeometry.convexHull(input);
-			if (convexHull.Count < 2)
+			if (convexHull.Count == 0)
+				{
 				return toReturn;
+				}				
+			else if (convexHull.Count == 1)
+				{
+				toReturn.AddEllipse((float)(convexHull.First.Value.X - radius), (float)(convexHull.First.Value.Y - radius), (float)(2 * radius), (float)(2 * radius));
+				return toReturn;
+				}
+
+			// add the first two points again for easier building of the GraphicsPath
 			convexHull.AddLast(convexHull.First.Value);
 			convexHull.AddLast(convexHull.First.Next.Value);
 
-			// find center of convex hull
-			Vector2 center = new Vector2(0, 0);
-			foreach (Vector2 v in convexHull)
-				center += v;
-			center *= 1.0 / convexHull.Count;
-
 			// build GraphicsPath
-			LinkedListNode<Vector2> current = convexHull.First;
-			while (current.Next.Next != null)
+			LinkedListNode<Vector2> curNode = convexHull.First;
+			while (curNode.Next.Next != null)
 				{
 				// compute orthogonal vectors to point-to-point directions
-				Vector2 ortho = (current.Next.Value - current.Value).RotatedClockwise.Normalized * radius;
-				Vector2 nextOrtho = (current.Next.Next.Value - current.Next.Value).RotatedClockwise.Normalized * radius;
+				Vector2 ortho = (curNode.Next.Value - curNode.Value).RotatedClockwise.Normalized * radius;
+				Vector2 nextOrtho = (curNode.Next.Next.Value - curNode.Next.Value).RotatedClockwise.Normalized * radius;
 
 				// compute angles for rounded corners
 				float start = (float)(Math.Atan2(ortho.Y, ortho.X) * 180 / Math.PI);
@@ -50,10 +53,10 @@ namespace CityTrafficSimulator.Tools
 				if (sweep < 0)
 					sweep += 360;
 
-				toReturn.AddLine(current.Value + ortho, current.Next.Value + ortho);
-				toReturn.AddArc((float)(current.Next.Value.X - radius), (float)(current.Next.Value.Y - radius), (float)(2 * radius), (float)(2 * radius), start, sweep);
+				toReturn.AddLine(curNode.Value + ortho, curNode.Next.Value + ortho);
+				toReturn.AddArc((float)(curNode.Next.Value.X - radius), (float)(curNode.Next.Value.Y - radius), (float)(2 * radius), (float)(2 * radius), start, sweep);
 
-				current = current.Next;
+				curNode = curNode.Next;
 				}
 
 			return toReturn;
@@ -66,6 +69,7 @@ namespace CityTrafficSimulator.Tools
 		/// <returns>List of the vertices of the convex hull of <paramref name="input"/>.</returns>
 		public static LinkedList<Vector2> convexHull(List<Vector2> input)
 			{
+			// perform copy of input list to work on
 			List<Vector2> points = new List<Vector2>(input);
 
 			// make sure point list is well defined
@@ -73,9 +77,7 @@ namespace CityTrafficSimulator.Tools
 			if (points.Count < 3)
 				{
 				foreach (Vector2 p in points)
-					{
 					toReturn.AddLast(p);
-					}
 				return toReturn;
 				}
 
@@ -88,34 +90,33 @@ namespace CityTrafficSimulator.Tools
 				}
 
 			// sort points in toReturn by polar angle around yMin
-			points.Sort(delegate(Vector2 a, Vector2 b) 
+			points.Sort(delegate(Vector2 left, Vector2 right) 
 				{
-					if (a == b)
-						return 0;
-					if (a == yMin)
-						return -1;
-					if (b == yMin)
-						return 1;
-
-					double o = orientation(yMin, a, b);
-					if (o > 0)
-						return -1;
-					else if (o == 0)
-						return (a.Y >= yMin.Y && a.X <= b.Y) ? -1 : 1;						
+				if (left == right)
+					return 0;
+				if (left == yMin)
+					return -1;
+				if (right == yMin)
 					return 1;
+
+				double o = orientation(yMin, left, right);
+				if (o > 0)
+					return -1;
+				else if (o == 0)
+					return (left.Y >= yMin.Y && left.X <= right.Y) ? -1 : 1;						
+				return 1;
 				});
 
-			// transfer into linked list
+			// add first three points and start Graham's scan
 			toReturn.AddLast(points[0]);
 			toReturn.AddLast(points[1]);
 			toReturn.AddLast(points[2]);
 
+			// do Graham's scan
 			for (int i = 3; i < points.Count; ++i)
 				{
-				while (toReturn.Count > 1 && !leftTurn(toReturn.Last.Previous.Value, toReturn.Last.Value, points[i]))
-					{
+				while (!leftTurn(toReturn.Last.Previous.Value, toReturn.Last.Value, points[i]))
 					toReturn.RemoveLast();
-					}
 				toReturn.AddLast(points[i]);
 				}
 
@@ -128,7 +129,7 @@ namespace CityTrafficSimulator.Tools
 		/// <param name="a">First point</param>
 		/// <param name="b">Second point</param>
 		/// <param name="c">Third point</param>
-		/// <returns>Left turn: < 0, collinear: = 0, right turn: > 0</returns>
+		/// <returns>Left turn: &lt; 0, collinear: = 0, right turn: &gt; 0</returns>
 		public static double orientation(Vector2 a, Vector2 b, Vector2 c)
 			{
 			return a.X * b.Y + a.Y * c.X + b.X * c.Y - c.X * b.Y - c.Y * a.X - b.X * a.Y;
@@ -141,7 +142,7 @@ namespace CityTrafficSimulator.Tools
 		/// <param name="b">Second point</param>
 		/// <param name="c">Third point</param>
 		/// <returns>True, when a, b, c are collinear.</returns>
-		public static bool colinear(Vector2 a, Vector2 b, Vector2 c)
+		public static bool collinear(Vector2 a, Vector2 b, Vector2 c)
 			{
 			return (orientation(a, b, c) == 0);
 			}

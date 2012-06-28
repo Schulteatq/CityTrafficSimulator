@@ -764,7 +764,7 @@ namespace CityTrafficSimulator
 								double time = GetTimeAtControlPosition(e.Location, true);
 
 								// Event hinzufügen, welches die Ampel umschaltet
-								m_selectedEntry.AddEvent(new TimelineEvent(time, (m_selectedEntry.GetTimeOfNextEvent(time) - time) / 2, Color.Green, tl.SwitchToGreen, tl.SwitchToRed));
+								m_selectedEntry.AddEvent(new TimelineEvent(time, (m_selectedEntry.GetTimeOfNextEvent(time) - time) / 2, Color.Green, tl.SwitchToGreen, tl.SwitchToRed), true);
 
 								Invalidate();
 								}

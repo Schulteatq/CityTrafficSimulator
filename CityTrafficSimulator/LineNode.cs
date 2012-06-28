@@ -49,7 +49,7 @@ namespace CityTrafficSimulator
 				_stopSignEdgeOffsets = new PointF[8];
 				for (int i = 0; i < 8; ++i)
 					{
-					_stopSignEdgeOffsets[i] = new PointF((float)(10 * Math.Sin((2 * i + 1) * Math.PI / 8.0)), (float)(10 * Math.Cos((2 * i + 1) * Math.PI / 8.0)));
+					_stopSignEdgeOffsets[i] = new PointF((float)(12 * Math.Sin((2 * i + 1) * Math.PI / 8.0)), (float)(12 * Math.Cos((2 * i + 1) * Math.PI / 8.0)));
 					}
 				}
 			}
@@ -93,7 +93,7 @@ namespace CityTrafficSimulator
 		/// </summary>
         public RectangleF positionRect
             {
-            get { return new RectangleF((float)position.X - 4, (float)position.Y - 4, 8, 8); }
+            get { return new RectangleF((float)position.X - 6, (float)position.Y - 6, 12, 12); }
             }
 
         
@@ -422,15 +422,8 @@ namespace CityTrafficSimulator
 		/// </summary>
 		public void PrepareForSave()
             {
-			// TODO: ist das hier wirklich nötig? macht das nicht die NodeSteuerung?
-            foreach (NodeConnection nc in _nextConnections)
-                nc.PrepareForSave();
-            foreach (NodeConnection nc in _prevConnections)
-                nc.PrepareForSave();
-
 			if (tLight != null)
 				tLight.PrepareForSave();
-
 			}
 
 		/// <summary>
@@ -593,6 +586,18 @@ namespace CityTrafficSimulator
 		/// <param name="g">Die Zeichenfläche auf der gezeichnet werden soll</param>
 		public void Draw(Graphics g)
 			{
+			if (tLight != null)
+				{
+				switch (tLight.trafficLightState)
+					{
+					case TrafficLight.State.GREEN:
+						g.FillRectangle(greenBrush, positionRect);
+						break;
+					case TrafficLight.State.RED:
+						g.FillRectangle(redBrush, positionRect);
+						break;
+					}
+				}
 			if (_stopSign)
 				{
 				PointF[] poly = new PointF[8];
@@ -601,22 +606,12 @@ namespace CityTrafficSimulator
 					poly[i] = new PointF((float)(_position.X + _stopSignEdgeOffsets[i].X), (float)(_position.Y + _stopSignEdgeOffsets[i].Y));
 					}
 				g.FillPolygon(redBrush, poly);
+				g.DrawPolygon(blackPen, poly);
 				}
-
-			// Node malen
-			g.DrawRectangle(blackPen, positionRect.X, positionRect.Y, positionRect.Width, positionRect.Height);
-
-			if (tLight != null)
+			else
 				{
-				switch (tLight.trafficLightState)
-					{
-				case TrafficLight.State.GREEN:
-					g.FillRectangle(greenBrush, positionRect);
-					break;
-				case TrafficLight.State.RED:
-					g.FillRectangle(redBrush, positionRect);
-					break;
-					}
+				// Node malen
+				g.DrawRectangle(blackPen, positionRect.X, positionRect.Y, positionRect.Width, positionRect.Height);
 				}
 			}
 

@@ -28,7 +28,7 @@ using System.Xml;
 using System.Xml.Serialization;
 
 using CityTrafficSimulator.Vehicle;
-using CityTrafficSimulator.Tools.ObserverPattern;
+using CityTrafficSimulator.Tools;
 
 namespace CityTrafficSimulator
 	{
@@ -1041,12 +1041,14 @@ namespace CityTrafficSimulator
 					}
 				}
 
-			if (options.renderLineNodes)
+			foreach (LineNode ln in nodes)
 				{
-				foreach (LineNode ln in nodes)
+				if (ln.tLight != null || ln.stopSign || options.renderLineNodes)
 					{
 					if (ln.isVisible && (!options.performClipping || ln.positionRect.IntersectsWith(options.clippingRect)))
+						{
 						ln.Draw(g);
+						}						
 					}
 				}
 
@@ -1562,6 +1564,10 @@ namespace CityTrafficSimulator
 			foreach (LineNode ln in nodes)
 				{
 				ln.PrepareForSave();
+				}
+			foreach (NodeConnection nc in connections)
+				{
+				nc.PrepareForSave();
 				}
 			}
 

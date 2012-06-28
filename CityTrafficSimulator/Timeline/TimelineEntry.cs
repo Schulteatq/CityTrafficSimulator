@@ -142,7 +142,7 @@ namespace CityTrafficSimulator.Timeline
 		/// fügt dem TimelineEntry ein fertiges TimelineEvent an der richtigen Stelle hinzu
 		/// </summary>
 		/// <param name="eventToAdd">TimelineEvent welches eingefügt werden soll</param>
-		public void AddEvent(TimelineEvent eventToAdd)
+		public void AddEvent(TimelineEvent eventToAdd, bool addBlockingEntries)
 			{
 			if (events.Count != 0)
 				{
@@ -172,6 +172,21 @@ namespace CityTrafficSimulator.Timeline
 				{
 				events.AddFirst(eventToAdd);
 				}
+
+			// add blocking entries
+			if (addBlockingEntries)
+				{
+				List<Pair<TimelineEntry, double>> interimTimes = parentGroup.GetInterimTimes(this);
+				if (interimTimes != null)
+					{
+					foreach (Pair<TimelineEntry, double> p in interimTimes)
+						{
+						double startTime = eventToAdd.eventTime + (Math.Floor(p.Right * 2) / 2);
+						p.Left.AddEvent(new TimelineEvent(startTime, eventToAdd.eventLength + 1, Color.DarkGray, delegate() { }, eventToAdd.eventEndAction), false);
+						}
+					}
+				}
+
 			OnEntryChanged(new EntryChangedEventArgs(this));
 			}
 

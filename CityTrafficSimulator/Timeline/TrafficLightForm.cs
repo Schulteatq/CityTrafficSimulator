@@ -299,5 +299,13 @@ namespace CityTrafficSimulator.Timeline
 			splitContainer1.SplitterDistance = splitContainer1.ClientSize.Width - groupsGroupBox.Width - 32;
 			}
 
+		private void button1_Click(object sender, EventArgs e)
+			{
+			if (timelineControl.selectedGroup != null)
+				{
+				timelineControl.selectedGroup.UpdateConflictPoints();
+				}
+			}
+
 		}
 	}

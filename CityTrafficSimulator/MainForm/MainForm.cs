@@ -1323,7 +1323,8 @@ namespace CityTrafficSimulator
 
 		void DaGrid_MouseWheel(object sender, MouseEventArgs e)
 			{
-			zoomComboBox.SelectedIndex = Math2.Clamp(zoomComboBox.SelectedIndex + (e.Delta / 120), 0, zoomComboBox.Items.Count - 1);
+			if ((Control.ModifierKeys & Keys.Control) == Keys.Control)
+				zoomComboBox.SelectedIndex = Math2.Clamp(zoomComboBox.SelectedIndex + (e.Delta / 120), 0, zoomComboBox.Items.Count - 1);
 			}
 
 		void DaGrid_KeyDown(object sender, KeyEventArgs e)
@@ -1657,40 +1658,54 @@ namespace CityTrafficSimulator
 	
 				if (selectedLineNodes.Count >= 1)
 					{
-					foreach (LineNode ln in selectedLineNodes)
+					if (cbRenderLineNodes.Checked)
 						{
-						foreach (GraphicsPath gp in ln.nodeGraphics)
+						foreach (LineNode ln in selectedLineNodes)
 							{
-							e.Graphics.DrawPath(BlackPen, gp);
+							foreach (GraphicsPath gp in ln.nodeGraphics)
+								{
+								e.Graphics.DrawPath(BlackPen, gp);
+								}
+
+							RectangleF foo = ln.positionRect;
+							foo.Inflate(2, 2);
+							e.Graphics.FillEllipse(new SolidBrush(Color.Black), foo);
 							}
 
-						RectangleF foo = ln.positionRect;
-						foo.Inflate(2, 2);
-						e.Graphics.FillEllipse(new SolidBrush(Color.Black), foo);
+						RectangleF foo2 = m_selectedLineNodes[0].positionRect;
+						foo2.Inflate(4, 4);
+						e.Graphics.DrawEllipse(BlackPen, foo2);
 						}
-
-					RectangleF foo2 = m_selectedLineNodes[0].positionRect;
-					foo2.Inflate(4, 4);
-					e.Graphics.DrawEllipse(BlackPen, foo2);
 
 					List<Vector2> points = new List<Vector2>(selectedLineNodes.Count);
 					foreach (LineNode ln in selectedLineNodes)
 						{
 						points.Add(ln.position);
 						}
-					try
-						{
-						// build convex hull
-						GraphicsPath hullPath = AlgorithmicGeometry.roundedConvexHullPath(points, 16);
+					// build convex hull
+					GraphicsPath hullPath = AlgorithmicGeometry.roundedConvexHullPath(points, 16);
 
-						e.Graphics.FillPath(new SolidBrush(Color.FromArgb(64, Color.Gold)), hullPath);
-						e.Graphics.DrawPath(new Pen(Color.Gold, 3), hullPath);
-						}
-					catch (System.Exception ex)
-						{
-						MessageBox.Show(ex.Message);
-						}
+					using (SolidBrush tmp = new SolidBrush(Color.FromArgb(64, Color.Gold)))
+						e.Graphics.FillPath(tmp, hullPath);
+					using (Pen tmp = new Pen(Color.Gold, 3))
+						e.Graphics.DrawPath(tmp, hullPath);
+					}
 
+				if (trafficLightForm.selectedEntry != null)
+					{
+					List<Pair<SpecificIntersection, double>> foo = trafficLightForm.selectedEntry.parentGroup.GetConflictPoints(trafficLightForm.selectedEntry);
+					if (foo != null)
+						{
+						using (Pen bar = new Pen(Color.Blue, 2))
+							{
+							foreach (Pair<SpecificIntersection, double> p in foo)
+								{
+								List<Vector2> l = new List<Vector2>();
+								l.Add(p.Left.intersection.aPosition);
+								e.Graphics.DrawPath(bar, AlgorithmicGeometry.roundedConvexHullPath(l, 8));
+								}
+							}
+						}
 					}
 
 				// selektierte NodeConnection malen
@@ -1733,6 +1748,8 @@ namespace CityTrafficSimulator
 							new Point(daGridRubberband.X + daGridRubberband.Width, daGridRubberband.Y + daGridRubberband.Height),
 							new Point(daGridRubberband.X, daGridRubberband.Y + daGridRubberband.Height)
 						};
+					using (SolidBrush tmp = new SolidBrush(Color.FromArgb(32, Color.Black)))
+						e.Graphics.FillPolygon(tmp, points);
 					e.Graphics.DrawPolygon(BlackPen, points);
 					}
 
@@ -2010,6 +2027,9 @@ namespace CityTrafficSimulator
 			{
 			if (backgroundImage != null)
 				{
+				if (resampledBackgroundImage != null)
+					resampledBackgroundImage.Dispose();
+				resampledBackgroundImage = null;
 				resampledBackgroundImage = ResizeBitmap(
 					backgroundImage,
 					(int)Math.Round(backgroundImage.Width * zoomMultipliers[zoomComboBox.SelectedIndex, 0] * ((float)backgroundImageScalingSpinEdit.Value / 100)),

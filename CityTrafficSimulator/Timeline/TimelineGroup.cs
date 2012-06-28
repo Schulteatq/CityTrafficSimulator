@@ -77,6 +77,11 @@ namespace CityTrafficSimulator.Timeline
 			}
 
 
+		private List<Pair<SpecificIntersection, double>>[] _conflictPoints;
+		private List<Pair<SpecificIntersection, double>>[,] _conflictPointMatrix;
+
+		private double[,] _interimTimes;
+
 		#endregion
 
 
@@ -120,6 +125,148 @@ namespace CityTrafficSimulator.Timeline
 			{
 			return _title;
 			}
+
+		#region Conflict Points / Interim Times
+
+		/// <summary>
+		/// Updates _conflictPoints array
+		/// </summary>
+		public void UpdateConflictPoints()
+			{
+			_conflictPointMatrix = new List<Pair<SpecificIntersection, double>>[_entries.Count, _entries.Count];
+			_interimTimes = new double[_entries.Count, _entries.Count];
+
+			// calculate bounds of intersection
+			double minX, maxX, minY, maxY;
+			minX = minY = Double.PositiveInfinity;
+			maxX = maxY = Double.NegativeInfinity;
+			foreach (TimelineEntry te in _entries)
+				{
+				TrafficLight tl = te as TrafficLight;
+				if (tl != null)
+					{
+					foreach (LineNode ln in tl.assignedNodes)
+						{
+						minX = Math.Min(minX, Math.Min(ln.position.X, Math.Min(ln.inSlopeAbs.X, ln.outSlopeAbs.X)));
+						maxX = Math.Max(maxX, Math.Max(ln.position.X, Math.Max(ln.inSlopeAbs.X, ln.outSlopeAbs.X)));
+						minY = Math.Min(minY, Math.Min(ln.position.Y, Math.Min(ln.inSlopeAbs.Y, ln.outSlopeAbs.Y)));
+						maxY = Math.Max(maxY, Math.Max(ln.position.Y, Math.Max(ln.inSlopeAbs.Y, ln.outSlopeAbs.Y)));
+						}
+					}
+				}
+			RectangleF bounds = new RectangleF((float)minX, (float)minY, (float)(maxX - minX), (float)(maxY - minY));
+
+			// Gather all intersections from each entry to each entry within bounds
+			_conflictPoints = new List<Pair<SpecificIntersection, double>>[_entries.Count];
+			for (int i = 0; i < _entries.Count; i++)
+				{
+				_conflictPoints[i] = new List<Pair<SpecificIntersection, double>>();
+
+				// initialize working stack
+				Stack<Pair<NodeConnection, double>> connectionsToLook = new Stack<Pair<NodeConnection, double>>();
+				TrafficLight tl = _entries[i] as TrafficLight;
+				if (tl != null)
+					{
+					foreach (LineNode ln in tl.assignedNodes)
+						{
+						foreach (NodeConnection nc in ln.nextConnections)
+							{
+							connectionsToLook.Push(new Pair<NodeConnection, double>(nc, 0));
+							}
+						}
+					}
+
+				// work down stack
+				double maxDistance = bounds.Width + bounds.Height;
+				while (connectionsToLook.Count > 0)
+					{
+					// get NodeConnection-Distance pair
+					Pair<NodeConnection, double> p = connectionsToLook.Pop();
+
+					// add intersections
+					foreach (Intersection inter in p.Left.intersections)
+						{
+						_conflictPoints[i].Add(new Pair<SpecificIntersection, double>(new SpecificIntersection(p.Left, inter), p.Right + inter.GetMyArcPosition(p.Left)));
+						}
+
+					// add next connections if within bounds
+					double distance = p.Right + p.Left.lineSegment.length;
+					if (distance < maxDistance && bounds.Contains(p.Left.endNode.position))
+						{
+						foreach (NodeConnection nc in p.Left.endNode.nextConnections)
+							{
+							connectionsToLook.Push(new Pair<NodeConnection, double>(nc, distance));
+							}
+						}
+					}
+				}
+
+			// now build conflictPoints array
+			for (int from = 0; from < _entries.Count; from++)
+				{
+				for (int to = 0; to < _entries.Count; to++)
+					{
+					_conflictPointMatrix[from, to] = new List<Pair<SpecificIntersection, double>>();
+					_interimTimes[from, to] = -1;
+
+					if (from == to)
+						continue;
+
+					foreach (Pair<SpecificIntersection, double> pFrom in _conflictPoints[from])
+						{
+						foreach (Pair<SpecificIntersection, double> pTo in _conflictPoints[to])
+							{
+							if (pFrom.Left.intersection == pTo.Left.intersection)
+								{
+								_conflictPointMatrix[from, to].Add(pFrom);
+								_interimTimes[from, to] = pFrom.Right / (10 * pFrom.Left.nodeConnection.targetVelocity);
+								}
+							}
+						}
+					}
+				}
+			}
+
+		public List<Pair<SpecificIntersection, double>> GetConflictPoints(TimelineEntry te)
+			{
+			if (_conflictPoints == null)
+				return null;
+
+			for (int i = 0; i < _entries.Count; i++)
+				{
+				if (_entries[i] == te)
+					return _conflictPoints[i];
+				}
+			return null;
+			}
+
+		public List<Pair<TimelineEntry, double>> GetInterimTimes(TimelineEntry te)
+			{
+			if (_interimTimes == null)
+				return null;
+
+			for (int from = 0; from < _entries.Count; from++)
+				{
+				if (_entries[from] == te)
+					{
+					List<Pair<TimelineEntry, double>> toReturn = new List<Pair<TimelineEntry, double>>();
+
+					for (int to = 0; to < _entries.Count; to++)
+						{
+						if (_interimTimes[from, to] != -1)
+							{
+							toReturn.Add(new Pair<TimelineEntry, double>(_entries[to], _interimTimes[from, to]));
+							}
+						}
+
+					return toReturn;
+					}
+				}
+
+			return null;
+			}
+
+		#endregion
 
 		#endregion
 
