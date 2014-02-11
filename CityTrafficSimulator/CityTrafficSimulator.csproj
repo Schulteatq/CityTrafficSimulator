@@ -181,9 +181,9 @@
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
       <SubType>Designer</SubType>
     </EmbeddedResource>
-    <EmbeddedResource Include="RechenkästchenControl.resx">
+    <EmbeddedResource Include="RechenkaestchenControl.resx">
       <SubType>Designer</SubType>
-      <DependentUpon>RechenkästchenControl.cs</DependentUpon>
+      <DependentUpon>RechenkaestchenControl.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Timeline\TimelineControl.resx">
       <DependentUpon>TimelineControl.cs</DependentUpon>
@@ -215,11 +215,11 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
-    <Compile Include="RechenkästchenControl.cs">
+    <Compile Include="RechenkaestchenControl.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="RechenkästchenControl.Designer.cs">
-      <DependentUpon>RechenkästchenControl.cs</DependentUpon>
+    <Compile Include="RechenkaestchenControl.Designer.cs">
+      <DependentUpon>RechenkaestchenControl.cs</DependentUpon>
     </Compile>
     <Compile Include="Tools\Pair.cs" />
     <Compile Include="Tools\PriorityQueue.cs" />
