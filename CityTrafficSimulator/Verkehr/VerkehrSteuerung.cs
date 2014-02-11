@@ -837,7 +837,15 @@ namespace CityTrafficSimulator.Verkehr
 				NodeConnection nc = start.nextConnections[foo];
 
 				e.vehicleToSpawn.state = new IVehicle.State(nc, 0);
-				e.vehicleToSpawn.physics = new IVehicle.Physics(nc.targetVelocity, nc.targetVelocity, 0);
+				if (e.vehicleToSpawn.GetType() == typeof(Car))
+					e.vehicleToSpawn.physics = new IVehicle.Physics(carTargetVelocity + ((GlobalRandom.Instance.NextDouble() - 0.5) * 4), Math.Min(nc.targetVelocity, carTargetVelocity), 0);
+				else if (e.vehicleToSpawn.GetType() == typeof(Truck))
+					e.vehicleToSpawn.physics = new IVehicle.Physics(truckTargetVelocity + ((GlobalRandom.Instance.NextDouble() - 0.5) * 4), Math.Min(nc.targetVelocity, truckTargetVelocity), 0);
+				else if (e.vehicleToSpawn.GetType() == typeof(Tram))
+					e.vehicleToSpawn.physics = new IVehicle.Physics(tramTargetVelocity + ((GlobalRandom.Instance.NextDouble() - 0.5) * 4), Math.Min(nc.targetVelocity, tramTargetVelocity), 0);
+				else if (e.vehicleToSpawn.GetType() == typeof(Bus))
+					e.vehicleToSpawn.physics = new IVehicle.Physics(busTargetVelocity + ((GlobalRandom.Instance.NextDouble() - 0.5) * 4), Math.Min(nc.targetVelocity, busTargetVelocity), 0);
+
 				if (start.nextConnections[foo].AddVehicle(e.vehicleToSpawn))
 					{
 					e.vehicleToSpawn.targetNodes = e.tv.destinationNodes.nodes;

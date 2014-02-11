@@ -122,7 +122,7 @@ namespace CityTrafficSimulator
 			this.labelVersion.Name = "labelVersion";
 			this.labelVersion.Size = new System.Drawing.Size(349, 17);
 			this.labelVersion.TabIndex = 0;
-			this.labelVersion.Text = "Version 0.7";
+			this.labelVersion.Text = "Version 0.7-1";
 			this.labelVersion.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
 			// 
 			// labelCopyright
@@ -134,7 +134,7 @@ namespace CityTrafficSimulator
 			this.labelCopyright.Name = "labelCopyright";
 			this.labelCopyright.Size = new System.Drawing.Size(349, 17);
 			this.labelCopyright.TabIndex = 21;
-			this.labelCopyright.Text = "Copyright 2005-2012, Christian Schulte zu Berge";
+			this.labelCopyright.Text = "Copyright 2005-2014, Christian Schulte zu Berge";
 			this.labelCopyright.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
 			// 
 			// labelCompanyName
