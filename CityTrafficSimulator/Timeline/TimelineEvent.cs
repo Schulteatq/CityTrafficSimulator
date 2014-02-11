@@ -52,7 +52,7 @@ namespace CityTrafficSimulator.Timeline
 		public double eventTime
 			{
 			get { return _eventTime; }
-			set { _eventTime = value; }
+			set { _eventTime = value; InvokeEventTimesChanged(new EventTimesChangedEventArgs(this)); }
 			}
 
 		/// <summary>
@@ -65,9 +65,17 @@ namespace CityTrafficSimulator.Timeline
 		public double eventLength
 			{
 			get { return _eventLength; }
-			set { _eventLength = value; }
+			set { _eventLength = value; InvokeEventTimesChanged(new EventTimesChangedEventArgs(this)); }
 			}
 
+		/// <summary>
+		/// End time of this event
+		/// </summary>
+		public double eventEndTime
+			{
+			get { return _eventTime + _eventLength; }
+			set { eventLength = value - _eventTime; }
+			}
 
 		/// <summary>
 		/// Befehl der ausgeführt werden soll, wenn das TimelineEvent eintritt
@@ -149,6 +157,56 @@ namespace CityTrafficSimulator.Timeline
 
 		#endregion
 
+		#region Events
+
+		#region EventTimesChanged event
+
+		/// <summary>
+		/// EventArgs for a EventTimesChanged event
+		/// </summary>
+		public class EventTimesChangedEventArgs : EventArgs
+			{
+			/// <summary>
+			/// Creates new EventTimesChangedEventArgs
+			/// </summary>
+			public EventTimesChangedEventArgs(TimelineEvent te)
+				{
+				_changedEvent = te;
+				}
+
+			/// <summary>
+			/// Event that changed its times
+			/// </summary>
+			public TimelineEvent _changedEvent;
+			}
+
+		/// <summary>
+		/// Delegate for the EventTimesChanged-EventHandler, which is called when the eventTime or eventLength has changed.
+		/// </summary>
+		/// <param name="sender">Sneder of the event</param>
+		/// <param name="e">Event parameter</param>
+		public delegate void EventTimesChangedEventHandler(object sender, EventTimesChangedEventArgs e);
+
+		/// <summary>
+		/// The EventTimesChanged event occurs when the eventTime or eventLength has changed.
+		/// </summary>
+		public event EventTimesChangedEventHandler EventTimesChanged;
+
+		/// <summary>
+		/// Helper method to initiate the EventTimesChanged event
+		/// </summary>
+		/// <param name="e">Event parameters</param>
+		protected void InvokeEventTimesChanged(EventTimesChangedEventArgs e)
+			{
+			if (EventTimesChanged != null)
+				{
+				EventTimesChanged(this, e);
+				}
+			}
+
+		#endregion
+		
+		#endregion
 
 		#region ISavable Member
 

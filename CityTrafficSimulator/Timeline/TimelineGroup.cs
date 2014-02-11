@@ -193,9 +193,12 @@ namespace CityTrafficSimulator.Timeline
 					double distance = p.Right + p.Left.lineSegment.length;
 					if (distance < maxDistance && bounds.Contains(p.Left.endNode.position))
 						{
-						foreach (NodeConnection nc in p.Left.endNode.nextConnections)
+						if (p.Left.endNode.tLight == null || !_entries.Contains(p.Left.endNode.tLight))
 							{
-							connectionsToLook.Push(new Pair<NodeConnection, double>(nc, distance));
+							foreach (NodeConnection nc in p.Left.endNode.nextConnections)
+								{
+								connectionsToLook.Push(new Pair<NodeConnection, double>(nc, distance));
+								}
 							}
 						}
 					}
@@ -227,6 +230,12 @@ namespace CityTrafficSimulator.Timeline
 				}
 			}
 
+		/// <summary>
+		/// Returns a list with all computed conflict points between <paramref name="te"/> and all other entries in this timeline group.
+		/// Each pair in the list describes a conflict point and its distance to <paramref name="te"/>.
+		/// </summary>
+		/// <param name="te">The TimelineEntry</param>
+		/// <returns>A list with all computed conflict points between <paramref name="te"/> and all other entries in this timeline group.</returns>
 		public List<Pair<SpecificIntersection, double>> GetConflictPoints(TimelineEntry te)
 			{
 			if (_conflictPoints == null)
@@ -239,6 +248,7 @@ namespace CityTrafficSimulator.Timeline
 				}
 			return null;
 			}
+
 
 		public List<Pair<TimelineEntry, double>> GetInterimTimes(TimelineEntry te)
 			{

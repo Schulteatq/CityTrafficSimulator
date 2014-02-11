@@ -142,7 +142,9 @@ namespace CityTrafficSimulator.Timeline
 		/// fügt dem TimelineEntry ein fertiges TimelineEvent an der richtigen Stelle hinzu
 		/// </summary>
 		/// <param name="eventToAdd">TimelineEvent welches eingefügt werden soll</param>
-		public void AddEvent(TimelineEvent eventToAdd, bool addBlockingEntries)
+		/// <param name="addBlockingEntries">Flag whether to add TimelineBlockingEvents to all other signals in this signal group which have interim times with each other.</param>
+		/// <param name="adjustSurroundingEvents">Flag whether to adjust the times of the surrounding events to not overlap the created event. Will delete completely overlapped events.</param>
+		public void AddEvent(TimelineEvent eventToAdd, bool addBlockingEntries, bool adjustSurroundingEvents)
 			{
 			if (events.Count != 0)
 				{
@@ -160,12 +162,21 @@ namespace CityTrafficSimulator.Timeline
 					{
 					if (eventToAdd.eventTime + eventToAdd.eventLength > ln.Value.eventTime)
 						{
-						Exception e = new Exception("TimelineEvents überlappen sich");
-						//e.Data.Add("eventToAdd", eventToAdd);
-						//e.Data.Add("overlappingEvent", ln);
-						throw e;
+						if (adjustSurroundingEvents)
+							{
+							events.AddBefore(ln, eventToAdd);
+							AdjustSurroundingEvents(eventToAdd); 
+							}
+						else
+							{
+							Exception e = new Exception("TimelineEvents überlappen sich");
+							throw e;
+							}
 						}
-					events.AddBefore(ln, eventToAdd);
+					else
+						{
+						events.AddBefore(ln, eventToAdd);
+						}
 					}				
 				}
 			else
@@ -182,11 +193,13 @@ namespace CityTrafficSimulator.Timeline
 					foreach (Pair<TimelineEntry, double> p in interimTimes)
 						{
 						double startTime = eventToAdd.eventTime + (Math.Floor(p.Right * 2) / 2);
-						p.Left.AddEvent(new TimelineEvent(startTime, eventToAdd.eventLength + 1, Color.DarkGray, delegate() { }, eventToAdd.eventEndAction), false);
+ 						TimelineEvent blockingEvent = new TimelineBlockingEvent(eventToAdd, p.Right, 1, 2);
+						p.Left.AddEvent(blockingEvent, false, true);
 						}
 					}
 				}
 
+			eventToAdd.EventTimesChanged += new TimelineEvent.EventTimesChangedEventHandler(events_EventTimesChanged);
 			OnEntryChanged(new EntryChangedEventArgs(this));
 			}
 
@@ -196,10 +209,17 @@ namespace CityTrafficSimulator.Timeline
 		/// <param name="eventToRemove">zu entfernendes TimelineEvent</param>
 		public void RemoveEvent(TimelineEvent eventToRemove)
 			{
-			_events.Remove(eventToRemove);
+			if (_events.Remove(eventToRemove))
+				eventToRemove.EventTimesChanged -= events_EventTimesChanged;
+
 			OnEntryChanged(new EntryChangedEventArgs(this));
 			}
 
+
+		void events_EventTimesChanged(object sender, TimelineEvent.EventTimesChangedEventArgs e)
+			{
+			AdjustSurroundingEvents(e._changedEvent);
+			}
 
 
 		/// <summary>
@@ -320,6 +340,83 @@ namespace CityTrafficSimulator.Timeline
 			OnEntryChanged(new EntryChangedEventArgs(this));
 			}
 
+		/// <summary>
+		/// To be called when the times of <paramref name="changedEvent"/> have changed: 
+		/// Readjusts start/ending times of all surrounding events. Deleted surrounding events, if necessary!
+		/// </summary>
+		/// <param name="changedEvent">TimelineEvent of this entry that has changed its time parameters.</param>
+		public void AdjustSurroundingEvents(TimelineEvent changedEvent)
+			{
+			double startTime = changedEvent.eventTime;
+			double endTime = changedEvent.eventEndTime;
+
+			LinkedListNode<TimelineEvent> lln = GetListNode(changedEvent);
+			if (lln != null)
+				{
+				// adjust previous events:
+				LinkedListNode<TimelineEvent> pLln = lln.Previous;
+				while (pLln != null)
+					{
+					TimelineEvent e = pLln.Value;
+
+					// if the previous event starts after changedEvent, delete it
+					if (e.eventTime >= startTime)
+						{
+						LinkedListNode<TimelineEvent> toRemove = pLln;
+						pLln = pLln.Previous;
+						_events.Remove(toRemove);
+						}
+
+					// else if the previous event ends after changedEvent, shorten it and we're done here
+					else if (e.eventEndTime > startTime)
+						{
+						e.eventEndTime = startTime;
+						break;
+						}
+
+					// else we're done here
+					else
+						{
+						break;
+						}
+					}
+
+				// adjust following events
+				LinkedListNode<TimelineEvent> nLln = lln.Next;
+				while (nLln != null)
+					{
+					TimelineEvent e = nLln.Value;
+
+					// if the following event ends before changedEvent ends, delete it
+					if (e.eventEndTime <= endTime)
+						{
+						LinkedListNode<TimelineEvent> toRemove = nLln;
+						nLln = nLln.Next;
+						_events.Remove(toRemove);
+						}
+
+					// else if the following event starts before changedEvent ends, shorten it and we're done here
+					else if (e.eventTime < endTime)
+						{
+						e.eventLength -= endTime - e.eventTime;
+						e.eventTime = endTime;
+						break;
+						}
+
+					// else we're done here
+					else
+						{
+						break;
+						}
+					}
+				}
+			else
+				{
+				throw new Exception("TimelineEvent not found. Must be from this TimelineEntry!");
+				}
+
+			OnEntryChanged(new EntryChangedEventArgs(this));
+			}
 
 		/// <summary>
 		/// Gibt den LinkedListNode zurück, der e enthält
