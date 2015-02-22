@@ -274,7 +274,7 @@ namespace CityTrafficSimulator.Verkehr
 			BunchOfNodes bon = lbDestinationNodes.SelectedItem as BunchOfNodes;
 			if (bon != null)
 				{
-				m_steuerung.RemoveStartPoint(bon);
+				m_steuerung.RemoveDestinationPoint(bon);
 				}
 			}
 
